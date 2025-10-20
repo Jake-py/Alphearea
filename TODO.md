@@ -1,0 +1,3 @@
+- Delete old Vite files: src/, public/, vite.config.js, package.json, package-lock.json, eslint.config.js, README.md, .gitignore in front-end/
+- Replace front-end/index.html with new index.html from Alphearea_первая_версия
+- Create front-end/style.css with content from Alphearea_первая_версия/style.css

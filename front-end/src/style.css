@@ -1,0 +1,237 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f4;
+    transition: all 0.5s ease;
+}
+
+/* ===== NEON ALPHAREA TITLE ===== */
+.neon-title {
+    display: inline-block; /* важно для React */
+    font-size: 2.5em;
+    font-weight: bold;
+    background: linear-gradient(45deg, #dda0dd, #ffffff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-shadow:
+        0 0 5px rgba(241, 138, 241, 0.8),
+        0 0 10px rgba(180, 38, 180, 0.8),
+        0 0 15px rgba(196, 32, 196, 0.904),
+        0 0 20px rgb(203, 10, 241),
+        0 0 25px rgba(255, 255, 255, 0.8),
+        0 0 30px rgba(255, 255, 255, 0.8),
+        0 0 35px rgba(255, 255, 255, 0.8),
+        0 0 40px rgba(255, 255, 255, 0.8);
+    animation: neon-glow 1.5s ease-in-out infinite alternate;
+}
+
+@keyframes neon-glow {
+    0% {
+        text-shadow:
+            0 0 5px rgba(221, 160, 221, 0.5),
+            0 0 10px rgba(221, 160, 221, 0.5),
+            0 0 15px rgba(170, 26, 226, 0.767),
+            0 0 20px rgba(218, 31, 193, 0.712),
+            0 0 25px rgba(238, 9, 200, 0.5),
+            0 0 30px rgba(255, 255, 255, 0.5),
+            0 0 35px rgba(255, 255, 255, 0.5),
+            0 0 40px rgba(255, 255, 255, 0.5);
+    }
+    50% {
+        text-shadow:
+            0 0 5px rgba(255, 255, 255, 0.8),
+            0 0 10px rgba(255, 255, 255, 0.8),
+            0 0 15px rgba(255, 255, 255, 0.8),
+            0 0 20px rgba(255, 255, 255, 0.8),
+            0 0 25px rgba(255, 255, 255, 0.8),
+            0 0 30px rgba(255, 255, 255, 0.8),
+            0 0 35px rgba(255, 255, 255, 0.8),
+            0 0 40px rgba(255, 255, 255, 0.8);
+    }
+    100% {
+        text-shadow:
+            0 0 5px rgba(221, 160, 221, 0.8),
+            0 0 10px rgba(221, 160, 221, 0.8),
+            0 0 15px rgba(221, 160, 221, 0.8),
+            0 0 20px rgba(255, 0, 234, 0.993),
+            0 0 25px rgba(178, 20, 199, 0.8),
+            0 0 30px rgba(255, 255, 255, 0.8),
+            0 0 35px rgba(255, 255, 255, 0.8),
+            0 0 40px rgba(255, 255, 255, 0.8);
+    }
+}
+
+/* ===== LOGIN ===== */
+#login-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    max-width: 400px;
+    margin: 0 auto;
+    transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+#login-form {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+input {
+    margin-bottom: 10px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+button {
+    padding: 10px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+/* ===== HEADER ===== */
+header {
+    background-color: #333;
+    color: white;
+    padding: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+nav ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+}
+
+nav li {
+    margin-left: 20px;
+}
+
+nav a {
+    color: white;
+    text-decoration: none;
+}
+
+/* ===== CONTENT ===== */
+.content {
+    display: flex;
+    height: calc(100vh - 60px);
+}
+
+/* ===== SIDEBAR ===== */
+.sidebar {
+    width: 270px;
+    background-color: #eee;
+    padding: 20px;
+    border-right: 1px solid #ccc;
+    overflow-y: auto;
+}
+
+.sidebar h3 {
+    margin-top: 0;
+}
+
+.sidebar ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.sidebar li {
+    padding: 8px 10px;
+    cursor: pointer;
+    border-radius: 5px;
+    transition: background-color 0.2s ease;
+}
+
+.sidebar li:hover {
+    background-color: #ddd;
+}
+
+/* ===== SUBMENU (2 уровень) ===== */
+.sub-menu {
+    background-color: #f9f9f9;
+    border-left: 3px solid #007bff;
+    margin: 8px 0 8px 10px;
+    padding: 5px 10px;
+    border-radius: 6px;
+    box-shadow: inset 0 0 3px rgba(0, 0, 0, 0.05);
+    transition: max-height 0.4s ease, opacity 0.4s ease;
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
+}
+
+.sub-menu.show {
+    max-height: 400px;
+    opacity: 1;
+}
+
+.sub-menu li {
+    background-color: #fff;
+    margin: 4px 0;
+    border-radius: 4px;
+    padding: 6px 10px;
+    transition: background-color 0.2s ease;
+}
+
+.sub-menu li:hover {
+    background-color: #e6f0ff;
+}
+
+/* ===== SUB-SUBMENU (3 уровень) ===== */
+.sub-sub-menu {
+    background-color: #fafafa;
+    border-left: 2px dashed #007bff;
+    margin: 6px 0 6px 15px;
+    padding: 5px 10px;
+    border-radius: 5px;
+    transition: max-height 0.3s ease, opacity 0.3s ease;
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
+}
+
+.sub-sub-menu.show {
+    max-height: 300px;
+    opacity: 1;
+}
+
+.sub-sub-menu li {
+    padding-left: 5px;
+    font-size: 0.95em;
+    color: #333;
+    background-color: #fff;
+    border-radius: 4px;
+    margin: 4px 0;
+    transition: background-color 0.2s ease;
+}
+
+.sub-sub-menu li:hover {
+    background-color: #dfefff;
+}
+
+/* ===== MAIN ===== */
+main {
+    flex: 1;
+    padding: 20px;
+}
