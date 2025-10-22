@@ -1,4 +1,5 @@
 import React from 'react'
+import { Link } from 'react-router-dom'
 import './style.css'
 import NeonTitle from './NeonTitle.jsx'
 
@@ -8,8 +9,8 @@ function Header() {
       <NeonTitle />
       <nav>
         <ul>
-          <li><a href="#">О сайте</a></li>
-          <li><a href="#">Настройки профиля</a></li>
+          <li><Link to="/about">О сайте</Link></li>
+          <li><Link to="/settings">Настройки профиля</Link></li>
           <li><a href="#">Настройка ИИ</a></li>
         </ul>
       </nav>
