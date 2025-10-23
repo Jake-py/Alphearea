@@ -1,9 +1,10 @@
+// src/Main.jsx
 function Main() {
   return (
-    <main>
+    <div className="main-page">
       <h2>Добро пожаловать в Alphearea!</h2>
       <p>Выберите инструмент для учебы слева.</p>
-    </main>
+    </div>
   )
 }
 
