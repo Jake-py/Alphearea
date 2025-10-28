@@ -1,13 +1,11 @@
-# TODO: Add AI Assistant to Alphearea
+# TODO: Optimize Site and Add Mobile Version
 
-## Steps to Complete
+## Optimization
+- [x] Use React.lazy() and Suspense for lazy loading heavy components in App.jsx (e.g., SmartMaterialViewer, page components like EnglishGrammar, Korean, etc.)
 
-- [x] Create back-end/package.json for Node.js backend
-- [x] Create back-end/server.js to handle Ollama API interactions
-- [x] Create src/components/ChatPanel.jsx for the chat interface
-- [x] Edit src/Header.jsx to add button for opening chat panel
-- [x] Edit src/App.jsx to integrate ChatPanel with toggle state
-- [x] Edit src/style.css to style the chat panel with brighter background colors
-- [x] Install backend dependencies (npm install in back-end/)
-- [x] Run backend server (npm start in back-end/)
-- [x] Test chat functionality with Ollama
+## Mobile Version
+- [x] Add responsive CSS media queries to style.css for screens max-width 768px (adjust layout to column, padding, font sizes, hide/show elements)
+
+## Testing and Deployment
+- [x] Build the project and test locally
+- [x] Deploy to GitHub Pages if changes are good
