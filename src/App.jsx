@@ -41,12 +41,7 @@ function App() {
   const [error, setError] = useState('')
   const [isChatOpen, setIsChatOpen] = useState(false)
 
-  useEffect(() => {
-    // Redirect mobile users to mobile version
-    if (/Mobi|Android/i.test(navigator.userAgent)) {
-      window.location.href = '/mobile';
-    }
-  }, [])
+
 
   const handleLogin = (e) => {
     e.preventDefault()
