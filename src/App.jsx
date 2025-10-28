@@ -20,6 +20,8 @@ import EnglishDictionaryBasic from './EnglishDictionaryBasic.jsx'
 import EnglishDictionaryIdioms from './EnglishDictionaryIdioms.jsx'
 import EnglishDictionaryPhrasalVerbs from './EnglishDictionaryPhrasalVerbs.jsx'
 import EnglishDialogues from './EnglishDialogues.jsx'
+import EnglishMaterials from './pages/EnglishMaterials.jsx'
+import SmartMaterialViewer from './components/SmartMaterialViewer.jsx'
 import KoreanGrammar from './KoreanGrammar.jsx'
 import KoreanCourses from './KoreanCourses.jsx'
 import KoreanDialogues from './KoreanDialogues.jsx'
@@ -93,6 +95,7 @@ function App() {
             <Route path="/english/dictionary/idioms" element={<EnglishDictionaryIdioms />} />
             <Route path="/english/dictionary/phrasal-verbs" element={<EnglishDictionaryPhrasalVerbs />} />
             <Route path="/english/dialogues" element={<EnglishDialogues />} />
+            <Route path="/english/materials" element={<EnglishMaterials />} />
             <Route path="/korean" element={<Korean />} />
             <Route path="/korean/grammar" element={<KoreanGrammar />} />
             <Route path="/korean/courses" element={<KoreanCourses />} />

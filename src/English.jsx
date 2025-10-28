@@ -33,6 +33,11 @@ function English() {
             <Link to="/english/courses/advanced" className="sub-block">Продвинутый</Link>
           </div>
         </div>
+        <div className="block">
+          <h3>Материалы</h3>
+          <p>Файлы и документы для изучения</p>
+          <Link to="/english/materials" className="block-link">Перейти</Link>
+        </div>
       </div>
     </main>
   )
