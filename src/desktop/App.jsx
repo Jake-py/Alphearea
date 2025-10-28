@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import './style.css'
 import Header from './Header.jsx'
@@ -40,6 +40,13 @@ function App() {
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [isChatOpen, setIsChatOpen] = useState(false)
+
+  useEffect(() => {
+    // Redirect mobile users to mobile version
+    if (/Mobi|Android/i.test(navigator.userAgent)) {
+      window.location.href = '/mobile';
+    }
+  }, [])
 
   const handleLogin = (e) => {
     e.preventDefault()

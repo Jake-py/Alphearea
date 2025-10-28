@@ -1,11 +1,18 @@
-# TODO: Optimize Site and Add Mobile Version
+# TODO: Create Separate Mobile Version
 
-## Optimization
-- [x] Use React.lazy() and Suspense for lazy loading heavy components in App.jsx (e.g., SmartMaterialViewer, page components like EnglishGrammar, Korean, etc.)
+## Split Codebase
+- [ ] Create src/desktop/ and move all current src/ files there
+- [ ] Create src/shared/ for common utilities (utils/, API calls, etc.)
+- [ ] Create src/mobile/ for mobile-specific components
 
 ## Mobile Version
-- [x] Add responsive CSS media queries to style.css for screens max-width 768px (adjust layout to column, padding, font sizes, hide/show elements)
+- [ ] Build simplified mobile interface with quick access to courses, dictionaries, chat
+- [ ] Use big buttons, short lists, minimal navigation
+- [ ] Add /mobile route in router
+
+## Redirect
+- [ ] Add user-agent detection in App.jsx to redirect mobile users to /mobile
 
 ## Testing and Deployment
-- [x] Build the project and test locally
-- [x] Deploy to GitHub Pages if changes are good
+- [ ] Test desktop and mobile versions
+- [ ] Deploy to GitHub Pages
