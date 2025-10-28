@@ -23,9 +23,19 @@ function ChatPanel({ isOpen, onClose }) {
         body: JSON.stringify({ message: input }),
       });
 
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Server error');
+      }
+
       const data = await response.json();
-      const aiMessage = { text: data.response, sender: 'ai' };
-      setMessages(prev => [...prev, aiMessage]);
+      console.log('AI response data:', data); // For debugging
+      if (data.response) {
+        const aiMessage = { text: data.response, sender: 'ai' };
+        setMessages(prev => [...prev, aiMessage]);
+      } else {
+        throw new Error('No response from AI');
+      }
     } catch (error) {
       console.error('Error sending message:', error);
       const errorMessage = { text: 'Sorry, I couldn\'t process your message.', sender: 'ai' };
