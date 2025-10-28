@@ -32,12 +32,14 @@ import PhilosophyWisdom from './PhilosophyWisdom.jsx'
 import PhilosophyBooks from './PhilosophyBooks.jsx'
 import PsychologyTheories from './PsychologyTheories.jsx'
 import PsychologyPractices from './PsychologyPractices.jsx'
+import ChatPanel from './components/ChatPanel.jsx'
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
+  const [isChatOpen, setIsChatOpen] = useState(false)
 
   const handleLogin = (e) => {
     e.preventDefault()
@@ -81,7 +83,7 @@ function App() {
   return (
     <Router>
       <div id="main-container">
-        <Header />
+        <Header onOpenChat={() => setIsChatOpen(true)} />
         <div className="content">
           <Sidebar />
           <Routes>
@@ -114,6 +116,7 @@ function App() {
             <Route path="/about" element={<About />} />
           </Routes>
         </div>
+        <ChatPanel isOpen={isChatOpen} onClose={() => setIsChatOpen(false)} />
       </div>
     </Router>
   )

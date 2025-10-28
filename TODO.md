@@ -1,10 +1,13 @@
-# TODO: Make Design More Lively with Animations
+# TODO: Add AI Assistant to Alphearea
 
 ## Steps to Complete
 
-- [x] Overhaul src/style.css with dark futuristic theme, vibrant gradients, glowing effects, and extensive animations (fade-ins, hover glows, sliding transitions, particle-like backgrounds)
-- [x] Add animations to sidebar items, buttons, inputs, and content areas
-- [x] Add subtle background animations to main container (moving gradients or floating elements)
-- [x] Enhance NeonTitle.jsx with more dynamic effects
-- [x] Test app functionality (login, routing, menu toggles)
-- [x] Run development server to verify visual changes
+- [x] Create back-end/package.json for Node.js backend
+- [x] Create back-end/server.js to handle Ollama API interactions
+- [x] Create src/components/ChatPanel.jsx for the chat interface
+- [x] Edit src/Header.jsx to add button for opening chat panel
+- [x] Edit src/App.jsx to integrate ChatPanel with toggle state
+- [x] Edit src/style.css to style the chat panel with brighter background colors
+- [x] Install backend dependencies (npm install in back-end/)
+- [x] Run backend server (npm start in back-end/)
+- [x] Test chat functionality with Ollama

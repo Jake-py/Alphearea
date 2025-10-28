@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import './style.css'
 import NeonTitle from './NeonTitle.jsx'
 
-function Header() {
+function Header({ onOpenChat }) {
   return (
     <header>
       <NeonTitle />
@@ -11,7 +11,7 @@ function Header() {
         <ul>
           <li><Link to="/about">О сайте</Link></li>
           <li><Link to="/settings">Настройки профиля</Link></li>
-          <li><a href="#">Настройка ИИ</a></li>
+          <li><button onClick={onOpenChat} className="ai-button">Ассистент ИИ</button></li>
         </ul>
       </nav>
     </header>
