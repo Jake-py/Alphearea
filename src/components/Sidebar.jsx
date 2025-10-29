@@ -44,6 +44,7 @@ function Sidebar({ isOpen }) {
               </ul>
             </li>
             <li><Link to="/english/dialogues" onClick={(e) => e.stopPropagation()}>Диалоги</Link></li>
+            <li><Link to="/english/materials" onClick={(e) => e.stopPropagation()}>Материалы <span className="arrow">▶</span></Link></li>
           </ul>
         </li>
 

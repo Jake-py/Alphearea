@@ -446,6 +446,17 @@ nav a:hover {
     color: #ffeaa7;
 }
 
+.arrow {
+    font-size: 0.8em;
+    color: #4ecdc4;
+    margin-left: 5px;
+    transition: transform 0.3s ease;
+}
+
+.sidebar li:hover .arrow {
+    transform: translateX(3px);
+}
+
 /* ===== MAIN ===== */
 main {
     flex: 1;
