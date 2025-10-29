@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 
-function Sidebar() {
+function Sidebar({ isOpen }) {
   const [openSubjects, setOpenSubjects] = useState({})
   const [openSubmenus, setOpenSubmenus] = useState({})
 
@@ -20,7 +20,7 @@ function Sidebar() {
   }
 
   return (
-    <aside className="sidebar">
+    <aside className={`sidebar ${isOpen ? 'open' : 'closed'}`}>
       <h3>Инструменты для учебы</h3>
       <ul>
         <li className="subject" data-subject="english" onClick={() => toggleSubject('english')}>

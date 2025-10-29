@@ -40,6 +40,7 @@ function App() {
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [isChatOpen, setIsChatOpen] = useState(false)
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true)
 
 
 
@@ -85,9 +86,9 @@ function App() {
   return (
     <Router>
       <div id="main-container">
-        <Header onOpenChat={() => setIsChatOpen(true)} />
+        <Header onOpenChat={() => setIsChatOpen(true)} onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
         <div className="content">
-          <Sidebar />
+          <Sidebar isOpen={isSidebarOpen} />
           <Routes>
             <Route path="/" element={<Main />} />
             <Route path="/english" element={<English />} />

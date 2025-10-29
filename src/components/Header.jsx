@@ -3,9 +3,10 @@ import { Link } from 'react-router-dom'
 import '../styles/style.css'
 import NeonTitle from './NeonTitle.jsx'
 
-function Header({ onOpenChat }) {
+function Header({ onOpenChat, onToggleSidebar }) {
   return (
     <header>
+      <button onClick={onToggleSidebar} className="sidebar-toggle">☰</button>
       <NeonTitle />
       <nav>
         <ul>
