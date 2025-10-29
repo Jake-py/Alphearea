@@ -68,7 +68,7 @@ app.post('/api/chat', async (req, res) => {
       prompt: contextPrompt,
       stream: false
     }, {
-      timeout: 30000 // 30 seconds timeout
+      timeout: 60000 // 60 seconds timeout
     });
 
     res.json({ response: response.data.response });
