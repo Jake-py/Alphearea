@@ -8,7 +8,7 @@ function AccountSettings() {
     currentPassword: '',
     newPassword: '',
     confirmPassword: '',
-    avatar: '/avatars/red_ice.png'
+    avatar: '/avatar_red.jpg'
   })
 
   const handleChange = (e) => {
@@ -28,6 +28,7 @@ function AccountSettings() {
     <main>
       <div className="account-settings">
         <h2>Настройка аккаунта</h2>
+        <p className="page-description">Информация и почта</p>
 
         <form onSubmit={handleSubmit} className="settings-form">
           {/* Avatar Section */}

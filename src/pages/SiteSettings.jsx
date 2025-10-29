@@ -4,6 +4,7 @@ import '../styles/settings.css'
 function SiteSettings() {
   const [siteSettings, setSiteSettings] = useState({
     theme: 'dark',
+    animations: true,
     language: 'ru',
     notifications: true,
     soundEffects: true,
@@ -31,13 +32,14 @@ function SiteSettings() {
     <main>
       <div className="site-settings">
         <h2>Настройка сайта</h2>
+        <p className="page-description">Тема сайта|Анимации сайта(убрать или оставить)|Язык</p>
 
         <form onSubmit={handleSubmit} className="settings-form">
           {/* Appearance */}
           <div className="form-section">
             <h3>Внешний вид</h3>
             <div className="form-group">
-              <label htmlFor="theme">Тема</label>
+              <label htmlFor="theme">Тема сайта</label>
               <select
                 id="theme"
                 name="theme"
@@ -49,6 +51,18 @@ function SiteSettings() {
                 <option value="light">Светлая</option>
                 <option value="auto">Автоматическая</option>
               </select>
+            </div>
+
+            <div className="checkbox-group">
+              <label className="checkbox-label">
+                <input
+                  type="checkbox"
+                  name="animations"
+                  checked={siteSettings.animations}
+                  onChange={handleChange}
+                />
+                Анимации сайта (убрать или оставить)
+              </label>
             </div>
 
             <div className="form-group">

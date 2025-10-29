@@ -1,18 +1,28 @@
-# TODO: Create Separate Mobile Version
+# TODO: Fix Alphearea Site Bugs and Optimize
 
-## Split Codebase
-- [ ] Create src/desktop/ and move all current src/ files there
-- [ ] Create src/shared/ for common utilities (utils/, API calls, etc.)
-- [ ] Create src/mobile/ for mobile-specific components
+## Current Issues
+- [ ] GitHub site empty (cache/dist issue)
+- [ ] Chat: Local works, but AI response not visible ("Sorry, I couldn't process your message.")
+- [ ] Site optimization needed
 
-## Mobile Version
-- [ ] Build simplified mobile interface with quick access to courses, dictionaries, chat
-- [ ] Use big buttons, short lists, minimal navigation
-- [ ] Add /mobile route in router
+## Chat Bug Investigation
+- [ ] Check Ollama response format in server.js
+- [ ] Debug response parsing in ChatPanel.jsx
+- [ ] Verify Ollama is running and accessible
 
-## Redirect
-- [ ] Add user-agent detection in App.jsx to redirect mobile users to /mobile
+## GitHub Deployment Fix
+- [ ] Ensure dist/ is built correctly
+- [ ] Push dist/ to gh-pages branch
+- [ ] Verify base path in vite.config.js
 
-## Testing and Deployment
-- [ ] Test desktop and mobile versions
-- [ ] Deploy to GitHub Pages
+## Optimization
+- [ ] Enable lazy loading for components
+- [ ] Implement code splitting
+- [ ] Optimize images and assets
+- [ ] Add service worker for caching
+- [ ] Minify and compress bundles
+
+## Testing
+- [ ] Test chat locally and on GitHub
+- [ ] Verify deployment
+- [ ] Performance testing

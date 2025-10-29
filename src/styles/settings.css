@@ -192,8 +192,16 @@
 .privacy-settings h2,
 .site-settings h2 {
   color: #00ffff;
-  margin-bottom: 30px;
+  margin-bottom: 10px;
   text-align: center;
+}
+
+.page-description {
+  color: #ccc;
+  text-align: center;
+  margin-bottom: 30px;
+  font-size: 0.9em;
+  opacity: 0.8;
 }
 
 /* Form Styles */

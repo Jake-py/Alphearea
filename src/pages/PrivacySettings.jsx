@@ -3,6 +3,10 @@ import '../styles/settings.css'
 
 function PrivacySettings() {
   const [privacySettings, setPrivacySettings] = useState({
+    login: 'red_ice',
+    password: '',
+    email: 'red_ice@alphearea.com',
+    phone: '',
     profileVisibility: 'public',
     showProgress: true,
     showAchievements: true,
@@ -29,8 +33,61 @@ function PrivacySettings() {
     <main>
       <div className="privacy-settings">
         <h2>Конфиденциальность</h2>
+        <p className="page-description">поля для ввода, и введенные к примеру Логин и пароли, почта, номер</p>
 
         <form onSubmit={handleSubmit} className="settings-form">
+          {/* Personal Information */}
+          <div className="form-section">
+            <h3>Личная информация</h3>
+            <div className="form-group">
+              <label htmlFor="login">Логин</label>
+              <input
+                type="text"
+                id="login"
+                name="login"
+                value={privacySettings.login}
+                onChange={handleChange}
+                className="form-input"
+              />
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="password">Пароль</label>
+              <input
+                type="password"
+                id="password"
+                name="password"
+                value={privacySettings.password}
+                onChange={handleChange}
+                className="form-input"
+              />
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="email">Почта</label>
+              <input
+                type="email"
+                id="email"
+                name="email"
+                value={privacySettings.email}
+                onChange={handleChange}
+                className="form-input"
+              />
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="phone">Номер телефона</label>
+              <input
+                type="tel"
+                id="phone"
+                name="phone"
+                value={privacySettings.phone}
+                onChange={handleChange}
+                className="form-input"
+              />
+            </div>
+          </div>
+
           {/* Profile Visibility */}
           <div className="form-section">
             <h3>Видимость профиля</h3>

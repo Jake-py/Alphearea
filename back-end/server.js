@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const axios = require('axios');
+const argon2 = require('argon2');
 const { siteInfo } = require('./config/siteInfo.js');
 
 const app = express();
@@ -91,6 +92,52 @@ app.get('/api/about', (req, res) => {
 
 app.get('/api/faq', (req, res) => {
   res.json({ answer: siteInfo.faq["Что за сайт Alphearea?"] });
+});
+
+// Password hashing endpoint using Argon2id
+app.post('/api/hash-password', async (req, res) => {
+  const { password } = req.body;
+
+  if (!password || typeof password !== 'string' || password.length < 8) {
+    return res.status(400).json({
+      error: 'Password must be a string with at least 8 characters'
+    });
+  }
+
+  try {
+    // Hash password using Argon2id with recommended parameters
+    const hash = await argon2.hash(password, {
+      type: argon2.argon2id,
+      memoryCost: 2 ** 16, // 64 MB
+      timeCost: 3, // 3 iterations
+      parallelism: 1, // 1 thread
+      hashLength: 32 // 32 bytes
+    });
+
+    res.json({ hash });
+  } catch (error) {
+    console.error('Error hashing password:', error);
+    res.status(500).json({ error: 'Failed to hash password' });
+  }
+});
+
+// Password verification endpoint
+app.post('/api/verify-password', async (req, res) => {
+  const { password, hash } = req.body;
+
+  if (!password || !hash) {
+    return res.status(400).json({
+      error: 'Both password and hash are required'
+    });
+  }
+
+  try {
+    const isValid = await argon2.verify(hash, password);
+    res.json({ valid: isValid });
+  } catch (error) {
+    console.error('Error verifying password:', error);
+    res.status(500).json({ error: 'Failed to verify password' });
+  }
 });
 
 app.listen(PORT, () => {

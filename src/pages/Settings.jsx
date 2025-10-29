@@ -6,7 +6,7 @@ function Settings() {
   const [user] = useState({
     username: 'red_ice',
     email: 'red_ice@alphearea.com',
-    avatar: '/avatars/red_ice.png',
+    avatar: '/avatar_red.jpg',
     joinDate: '2023-01-15',
     level: 15,
     xp: 2450,
