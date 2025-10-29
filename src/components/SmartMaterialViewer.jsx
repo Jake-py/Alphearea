@@ -4,7 +4,7 @@ function SmartMaterialViewer({ subject }) {
   const [materials, setMaterials] = useState([]);
 
   useEffect(() => {
-    fetch("/materials/materials.json")
+    fetch("/src/data/materials/materials.json")
       .then((res) => res.json())
       .then((data) => {
         const filtered = data.filter((m) => m.path.includes(`/materials/${subject}/`));

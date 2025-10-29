@@ -13,6 +13,12 @@
       "intermediate": {}
     },
     "dialogues": {
+      "module4.pdf": {
+        "path": "english/dialogues/module4.pdf",
+        "content": "[PDF content not parsed]",
+        "size": 4875792,
+        "modified": "2025-10-28T19:16:01.337Z"
+      },
       "travel.txt": {
         "path": "english/dialogues/travel.txt",
         "content": "Travel dialogue.\n",
@@ -72,7 +78,7 @@
   "materials.json": {
     "path": "materials.json",
     "content": "",
-    "size": 21914,
-    "modified": "2025-10-29T04:30:46.217Z"
+    "size": 22138,
+    "modified": "2025-10-29T05:58:00.979Z"
   }
 }

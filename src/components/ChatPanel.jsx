@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import './ChatPanel.css';
+import '../styles/ChatPanel.css';
 
 function ChatPanel({ isOpen, onClose }) {
   const [messages, setMessages] = useState([]);

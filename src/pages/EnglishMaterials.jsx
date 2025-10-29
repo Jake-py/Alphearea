@@ -4,7 +4,7 @@ function EnglishMaterials() {
   const [data, setData] = useState(null);
 
   useEffect(() => {
-    fetch("/materials/materials.json")
+    fetch("/src/data/materials/materials.json")
       .then((res) => res.json())
       .then(setData);
   }, []);
@@ -69,7 +69,7 @@ function EnglishMaterials() {
         <button
           onClick={async () => {
             try {
-              const response = await fetch('/materials/materials.json', { cache: 'no-cache' });
+              const response = await fetch('/src/data/materials/materials.json', { cache: 'no-cache' });
               if (response.ok) {
                 window.location.reload();
               } else {

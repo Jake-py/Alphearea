@@ -57,7 +57,7 @@ async function scanDirectory(dirPath, basePath = dirPath) {
 // Main function
 async function main() {
   const __dirname = path.dirname(new URL(import.meta.url).pathname);
-  const materialsDir = path.join(__dirname, '..', '..', 'materials');
+  const materialsDir = path.join(__dirname, '..', 'data', 'materials');
   const outputFile = path.join(materialsDir, 'materials.json');
 
   console.log('Scanning materials directory...');
