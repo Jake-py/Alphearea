@@ -14,7 +14,7 @@ const TESTS_DIR = path.join(__dirname, 'tests');
 
 // Hugging Face API configuration
 const HF_API_URL = "https://api-inference.huggingface.co/models/google/gemma-2b-it";
-const HF_HEADERS = {"Authorization": "Bearer YOUR_HF_TOKEN_HERE"};
+const HF_HEADERS = {"Authorization": "Bearer hf_XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"};
 
 // Simple rate limiting (in production, use a proper library like express-rate-limit)
 const requestCounts = new Map();
