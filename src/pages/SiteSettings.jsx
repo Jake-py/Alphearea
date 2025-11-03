@@ -1,38 +1,54 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import '../styles/settings.css'
 
 function SiteSettings() {
   const [siteSettings, setSiteSettings] = useState({
     theme: 'dark',
     animations: true,
-    language: 'ru',
     notifications: true,
     soundEffects: true,
     autoSave: true,
     compactMode: false,
     showTips: true,
-    fontSize: 'medium'
+    fontSize: 'medium',
+    sidebarPosition: 'left',
+    chatPosition: 'right'
   })
+
+  const [hasChanges, setHasChanges] = useState(false)
+  const [originalSettings, setOriginalSettings] = useState({})
+
+  useEffect(() => {
+    setOriginalSettings({...siteSettings})
+  }, [])
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target
-    setSiteSettings({
+    const newSettings = {
       ...siteSettings,
       [name]: type === 'checkbox' ? checked : value
-    })
+    }
+    setSiteSettings(newSettings)
+
+    // Check if settings have changed
+    const changed = JSON.stringify(newSettings) !== JSON.stringify(originalSettings)
+    setHasChanges(changed)
   }
 
   const handleSubmit = (e) => {
     e.preventDefault()
     // Handle form submission
     console.log('Site settings updated:', siteSettings)
+    setOriginalSettings({...siteSettings})
+    setHasChanges(false)
+    // Here you would typically save to backend/localStorage
   }
 
   return (
     <main>
       <div className="site-settings">
         <h2>Настройка сайта</h2>
-        <p className="page-description">Тема сайта|Анимации сайта(убрать или оставить)|Язык</p>
+        <p className="page-description">Персонализация интерфейса и поведения сайта</p>
 
         <form onSubmit={handleSubmit} className="settings-form">
           {/* Appearance */}
@@ -61,7 +77,7 @@ function SiteSettings() {
                   checked={siteSettings.animations}
                   onChange={handleChange}
                 />
-                Анимации сайта (убрать или оставить)
+                Отключить анимации
               </label>
             </div>
 
@@ -81,21 +97,36 @@ function SiteSettings() {
             </div>
           </div>
 
-          {/* Language */}
+
+
+          {/* Layout */}
           <div className="form-section">
-            <h3>Язык</h3>
+            <h3>Расположение элементов</h3>
             <div className="form-group">
-              <label htmlFor="language">Язык интерфейса</label>
+              <label htmlFor="sidebarPosition">Положение боковой панели</label>
               <select
-                id="language"
-                name="language"
-                value={siteSettings.language}
+                id="sidebarPosition"
+                name="sidebarPosition"
+                value={siteSettings.sidebarPosition}
                 onChange={handleChange}
                 className="form-select"
               >
-                <option value="ru">Русский</option>
-                <option value="en">English</option>
-                <option value="ko">한국어</option>
+                <option value="left">Слева</option>
+                <option value="right">Справа</option>
+              </select>
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="chatPosition">Положение чата</label>
+              <select
+                id="chatPosition"
+                name="chatPosition"
+                value={siteSettings.chatPosition}
+                onChange={handleChange}
+                className="form-select"
+              >
+                <option value="left">Слева</option>
+                <option value="right">Справа</option>
               </select>
             </div>
           </div>
@@ -182,7 +213,9 @@ function SiteSettings() {
             </div>
           </div>
 
-          <button type="submit" className="save-button">Сохранить настройки</button>
+          <button type="submit" className="save-button" disabled={!hasChanges}>
+            {hasChanges ? 'Сохранить настройки' : 'Настройки сохранены'}
+          </button>
         </form>
       </div>
     </main>

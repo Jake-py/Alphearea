@@ -1,0 +1,30 @@
+{
+  "id": "1762065482539",
+  "title": "essd",
+  "subject": "korean",
+  "questions": [
+    {
+      "question": "fdd",
+      "options": [
+        "dfdgdg",
+        "dggdgd",
+        "gd",
+        "gddggd"
+      ],
+      "correctAnswer": 0
+    },
+    {
+      "question": "fgd",
+      "options": [
+        "gdg",
+        "gd",
+        "gd",
+        "gd"
+      ],
+      "correctAnswer": 0
+    }
+  ],
+  "createdBy": "admin",
+  "createdAt": "2025-11-02T06:38:02.539Z",
+  "isBeta": false
+}

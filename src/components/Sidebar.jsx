@@ -86,7 +86,7 @@ function Sidebar({ isOpen }) {
       <hr />
       <h3>Режимы проверки знаний</h3>
       <ul>
-        <li>Пройти тест</li>
+        <li><Link to="/test-settings">Пройти тест</Link></li>
         <li>Ответить на вопросы</li>
         <li>И прочее</li>
       </ul>

@@ -1,17 +1,37 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import '../styles/settings.css'
 
 function Settings() {
-  const [user] = useState({
-    username: 'red_ice',
-    email: 'red_ice@alphearea.com',
-    avatar: '/avatar_red.jpg',
-    joinDate: '2023-01-15',
-    level: 15,
-    xp: 2450,
-    achievements: ['Первый урок', 'Неделя подряд', 'Мастер английского']
+  const [user, setUser] = useState({
+    username: '',
+    email: '',
+    avatar: '',
+    joinDate: '',
+    level: 1,
+    xp: 0,
+    achievements: []
   })
+
+  useEffect(() => {
+    const savedUser = localStorage.getItem('user')
+    const savedProfile = localStorage.getItem('profile')
+
+    if (savedUser && savedProfile) {
+      const userData = JSON.parse(savedUser)
+      const profileData = JSON.parse(savedProfile)
+
+      setUser({
+        username: userData.username,
+        email: userData.email,
+        avatar: profileData.avatar || '/default-avatar.png',
+        joinDate: userData.createdAt ? new Date(userData.createdAt).toISOString().split('T')[0] : '',
+        level: profileData.level || 1,
+        xp: profileData.xp || 0,
+        achievements: profileData.achievements || []
+      })
+    }
+  }, [])
 
   const [progress] = useState({
     english: 75,

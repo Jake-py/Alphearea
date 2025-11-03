@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import '../styles/style.css'
 import NeonTitle from './NeonTitle.jsx'
 
-function Header({ onOpenChat, onToggleSidebar }) {
+function Header({ onOpenChat, onToggleSidebar, onLogout }) {
   return (
     <header>
       <button onClick={onToggleSidebar} className="sidebar-toggle">☰</button>
@@ -12,6 +12,8 @@ function Header({ onOpenChat, onToggleSidebar }) {
         <ul>
           <li><Link to="/about">О сайте</Link></li>
           <li><Link to="/settings">Настройки профиля</Link></li>
+
+          <li><button onClick={onLogout} className="logout-button">Выйти</button></li>
           <li><button onClick={onOpenChat} className="ai-button">Ассистент ИИ</button></li>
         </ul>
       </nav>
