@@ -11,7 +11,7 @@ export default defineConfig({
       ext: '.gz'
     })
   ],
-  base: '/',        // для локальной разработки
+  base: process.env.NODE_ENV === 'production' ? '/Alphearea' : '/',        // для локальной разработки и GitHub Pages
   server: { historyApiFallback: true },
   build: {
     sourcemap: false, // отключаем eval для карт кода
