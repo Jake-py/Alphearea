@@ -15,20 +15,7 @@ export default defineConfig({
   server: { historyApiFallback: true },
   build: {
     sourcemap: false, // отключаем eval для карт кода
-    minify: 'terser',
-    terserOptions: {
-      compress: {
-        drop_console: true,
-        drop_debugger: true,
-        unsafe: false // отключаем unsafe optimizations которые могут использовать eval
-      },
-      mangle: {
-        safari10: true
-      },
-      format: {
-        comments: false
-      }
-    },
+    minify: 'esbuild', // используем esbuild вместо terser для избежания eval
     rollupOptions: {
       output: {
         manualChunks: {
