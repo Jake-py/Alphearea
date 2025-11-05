@@ -14,7 +14,8 @@ const TESTS_DIR = path.join(__dirname, 'tests');
 
 // Hugging Face API configuration
 const HF_API_URL = "https://api-inference.huggingface.co/models/google/gemma-2b-it";
-const HF_HEADERS = {"Authorization": "Bearer hf_XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"};
+const HF_API_KEY = process.env.HF_API_KEY;
+const HF_HEADERS = HF_API_KEY ? {"Authorization": `Bearer ${HF_API_KEY}`} : {};
 
 // Simple rate limiting (in production, use a proper library like express-rate-limit)
 const requestCounts = new Map();
@@ -78,6 +79,10 @@ app.post('/api/chat', async (req, res) => {
 
   if (!message || typeof message !== 'string' || message.trim().length === 0) {
     return res.status(400).json({ error: 'Message is required and must be a non-empty string' });
+  }
+
+  if (!HF_API_KEY) {
+    return res.status(500).json({ error: 'AI service not configured' });
   }
 
   // Build the full prompt

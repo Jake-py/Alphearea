@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { API_ENDPOINTS } from '../config/api.js'
 import '../styles/style.css'
 import '../styles/test-taking.css'
 import '../styles/smart-editor.css'
@@ -25,7 +26,10 @@ function TestSettings() {
     { value: 'korean', label: 'Корейский язык' },
     { value: 'russian', label: 'Русский язык' },
     { value: 'philosophy', label: 'Философия' },
-    { value: 'psychology', label: 'Психология' }
+    { value: 'psychology', label: 'Психология' },
+    { value: 'mathematics', label: 'Математика' },
+    { value: 'programming', label: 'Программирование' },
+    { value: 'electronics', label: 'Электроника' }
   ]
 
   const handleFileUpload = (e) => {
@@ -49,7 +53,7 @@ function TestSettings() {
     } else {
       // Standard parsing
       try {
-        const response = await fetch('http://localhost:3002/api/tests/parse', {
+        const response = await fetch(API_ENDPOINTS.testsParse, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -62,8 +66,8 @@ function TestSettings() {
 
         const data = await response.json()
         if (response.ok) {
-          console.log('Parsed questions:', data.questions)
-          alert(`Успешно разобрано ${data.questions.length} вопросов из файла`)
+          setParsedQuestions(data.questions || [])
+          alert(`Успешно разобрано ${data.questions?.length || 0} вопросов из файла`)
         } else {
           setError(data.error || 'Не удалось разобрать файл')
         }
@@ -76,7 +80,7 @@ function TestSettings() {
   const handleSmartEditorSave = (questions) => {
     setParsedQuestions(questions)
     setShowSmartEditor(false)
-    alert(`Тест сохранен! ${questions.length} вопросов с выбранными правильными ответами.`)
+    alert(`Тест сохранен! ${questions?.length || 0} вопросов с выбранными правильными ответами.`)
   }
 
   const handleSmartEditorClose = () => {
@@ -93,7 +97,7 @@ function TestSettings() {
     setError('')
 
     try {
-      const response = await fetch('http://localhost:3002/api/tests/generate', {
+      const response = await fetch(API_ENDPOINTS.testsGenerate, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -108,8 +112,8 @@ function TestSettings() {
 
       const data = await response.json()
       if (response.ok) {
-        console.log('Generated questions:', data.questions)
-        alert(`Успешно сгенерировано ${data.questions.length} вопросов с помощью ИИ`)
+        setParsedQuestions(data.questions || [])
+        alert(`Успешно сгенерировано ${data.questions?.length || 0} вопросов с помощью ИИ`)
       } else {
         setError(data.error || 'Не удалось сгенерировать тест')
       }
@@ -130,31 +134,31 @@ function TestSettings() {
 
       if (testMode === 'ai' && materialContent) {
         // Generate test using AI
-        const response = await fetch('http://localhost:3002/api/tests/generate', {
+        const response = await fetch(API_ENDPOINTS.testsGenerate, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          material: materialContent,
-          subject,
-          difficulty,
-          numQuestions: numTests
-        }),
-      })
+          },
+          body: JSON.stringify({
+            material: materialContent,
+            subject,
+            difficulty,
+            numQuestions: numTests
+          }),
+        })
 
-      const data = await response.json()
-      if (response.ok) {
-        testData = {
-          title: `Тест, сгенерированный ИИ - ${subject}`,
-          subject,
-          questions: data.questions,
-          createdAt: new Date().toISOString()
+        const data = await response.json()
+        if (response.ok) {
+          testData = {
+            title: `Тест, сгенерированный ИИ - ${subject}`,
+            subject,
+            questions: data.questions || [],
+            createdAt: new Date().toISOString()
+          }
+        } else {
+          throw new Error(data.error || 'Не удалось сгенерировать тест')
         }
-      } else {
-        throw new Error(data.error || 'Не удалось сгенерировать тест')
-      }
-    } else if ((testMode === 'standard' || testMode === 'editor') && parsedQuestions.length > 0) {
+      } else if ((testMode === 'standard' || testMode === 'editor') && parsedQuestions?.length > 0) {
       // Use parsed questions from smart editor
       testData = {
         title: `Разобранный тест - ${testFile?.name || 'файл'}`,
@@ -164,7 +168,7 @@ function TestSettings() {
       }
     } else if (testMode === 'standard' && testFile) {
       // Parse uploaded file
-      const response = await fetch('http://localhost:3002/api/tests/parse', {
+      const response = await fetch(API_ENDPOINTS.testsParse, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -180,7 +184,7 @@ function TestSettings() {
         testData = {
           title: `Разобранный тест - ${testFile.name}`,
           subject,
-          questions: data.questions,
+          questions: data.questions || [],
           createdAt: new Date().toISOString()
         }
       } else {

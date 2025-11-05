@@ -81,6 +81,40 @@ function Sidebar({ isOpen }) {
             <li><Link to="/psychology/practices" onClick={(e) => e.stopPropagation()}>Практики</Link></li>
           </ul>
         </li>
+
+        <li className="subject" data-subject="mathematics" onClick={() => toggleSubject('mathematics')}>
+          <Link to="/mathematics">Математика</Link>
+          <ul className={`sub-menu ${openSubjects.mathematics ? 'show' : ''}`}>
+            <li><Link to="/mathematics/basics" onClick={(e) => e.stopPropagation()}>Основы</Link></li>
+            <li><Link to="/mathematics/advanced" onClick={(e) => e.stopPropagation()}>Высшая математика</Link></li>
+            <li><Link to="/mathematics/applied" onClick={(e) => e.stopPropagation()}>Прикладная</Link></li>
+            <li><Link to="/mathematics/problems" onClick={(e) => e.stopPropagation()}>Задачи</Link></li>
+          </ul>
+        </li>
+
+        <li className="subject" data-subject="programming" onClick={() => toggleSubject('programming')}>
+          <Link to="/programming">Программирование</Link>
+          <ul className={`sub-menu ${openSubjects.programming ? 'show' : ''}`}>
+            <li><Link to="/programming/basics" onClick={(e) => e.stopPropagation()}>Основы</Link></li>
+            <li><Link to="/programming/web" onClick={(e) => e.stopPropagation()}>Веб-разработка</Link></li>
+            <li><Link to="/programming/languages" onClick={(e) => e.stopPropagation()}>Языки</Link></li>
+            <li><Link to="/programming/databases" onClick={(e) => e.stopPropagation()}>Базы данных</Link></li>
+            <li><Link to="/programming/mobile" onClick={(e) => e.stopPropagation()}>Мобильная разработка</Link></li>
+            <li><Link to="/programming/projects" onClick={(e) => e.stopPropagation()}>Проекты</Link></li>
+          </ul>
+        </li>
+
+        <li className="subject" data-subject="electronics" onClick={() => toggleSubject('electronics')}>
+          <Link to="/electronics">Электроника</Link>
+          <ul className={`sub-menu ${openSubjects.electronics ? 'show' : ''}`}>
+            <li><Link to="/electronics/basics" onClick={(e) => e.stopPropagation()}>Основы</Link></li>
+            <li><Link to="/electronics/components" onClick={(e) => e.stopPropagation()}>Компоненты</Link></li>
+            <li><Link to="/electronics/digital" onClick={(e) => e.stopPropagation()}>Цифровая</Link></li>
+            <li><Link to="/electronics/analog" onClick={(e) => e.stopPropagation()}>Аналоговая</Link></li>
+            <li><Link to="/electronics/circuits" onClick={(e) => e.stopPropagation()}>Схемы</Link></li>
+            <li><Link to="/electronics/microcontrollers" onClick={(e) => e.stopPropagation()}>Микроконтроллеры</Link></li>
+          </ul>
+        </li>
       </ul>
 
       <hr />

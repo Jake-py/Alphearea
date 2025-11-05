@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { API_ENDPOINTS } from '../config/api.js';
 import '../styles/ChatPanel.css';
 
 function ChatPanel({ isOpen, onClose }) {
@@ -15,7 +16,7 @@ function ChatPanel({ isOpen, onClose }) {
     setIsLoading(true);
 
     try {
-      const response = await fetch('http://localhost:3002/api/chat', {
+      const response = await fetch(API_ENDPOINTS.chat, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -29,19 +30,17 @@ function ChatPanel({ isOpen, onClose }) {
       }
 
       const data = await response.json();
-      console.log('AI response data:', data); // For debugging
-      if (data.response) {
+      if (response.ok) {
         const aiMessage = { text: data.response, sender: 'ai' };
         setMessages(prev => [...prev, aiMessage]);
       } else {
-        throw new Error('No response from AI');
+        setMessages(prev => [...prev, { text: 'Error: Unable to get response', sender: 'ai' }]);
       }
     } catch (error) {
-      console.error('Error sending message:', error);
-      const errorMessage = { text: 'Sorry, I couldn\'t process your message.', sender: 'ai' };
-      setMessages(prev => [...prev, errorMessage]);
+      setMessages(prev => [...prev, { text: 'Error: Network issue', sender: 'ai' }]);
     } finally {
       setIsLoading(false);
+      setInput('');
     }
   };
 

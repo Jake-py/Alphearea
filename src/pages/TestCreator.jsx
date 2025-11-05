@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { API_ENDPOINTS } from '../config/api.js'
 import '../styles/style.css'
 import '../styles/test-taking.css'
 
@@ -18,11 +19,11 @@ function TestCreator() {
 
   useEffect(() => {
     loadTests()
-  }, [])
+  }, [loadTests])
 
-  const loadTests = async () => {
+  const loadTests = useCallback(async () => {
     try {
-      const response = await fetch('http://localhost:3002/api/tests')
+      const response = await fetch(API_ENDPOINTS.tests)
       const data = await response.json()
       if (response.ok) {
         setTests(data.tests)
@@ -32,7 +33,7 @@ function TestCreator() {
     } catch (error) {
       setError('Ошибка сети. Попробуйте еще раз.')
     }
-  }
+  }, [])
 
   const handleCreateTest = async (e) => {
     e.preventDefault()
@@ -40,7 +41,7 @@ function TestCreator() {
     setError('')
 
     try {
-      const response = await fetch('http://localhost:3002/api/tests', {
+      const response = await fetch(API_ENDPOINTS.tests, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -70,7 +71,7 @@ function TestCreator() {
     if (!confirm('Вы уверены, что хотите удалить этот тест?')) return
 
     try {
-      const response = await fetch(`http://localhost:3002/api/tests/${testId}`, {
+      const response = await fetch(API_ENDPOINTS.test(testId), {
         method: 'DELETE',
       })
 
@@ -107,7 +108,7 @@ function TestCreator() {
     if (!confirm('Вы уверены, что хотите очистить все бета-записи тестов?')) return
 
     try {
-      const response = await fetch('http://localhost:3002/api/tests/cleanup', {
+      const response = await fetch(API_ENDPOINTS.testsCleanup, {
         method: 'POST',
       })
 

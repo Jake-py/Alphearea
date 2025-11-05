@@ -34,6 +34,9 @@ import PsychologyTheories from './pages/PsychologyTheories.jsx'
 import PsychologyPractices from './pages/PsychologyPractices.jsx'
 import TestSettings from './pages/TestSettings.jsx'
 import ChatPanel from './components/ChatPanel.jsx'
+import Mathematics from './pages/Mathematics.jsx'
+import Programming from './pages/Programming.jsx'
+import Electronics from './pages/Electronics.jsx'
 
 import AccountSettings from './pages/AccountSettings.jsx'
 import PrivacySettings from './pages/PrivacySettings.jsx'
@@ -41,6 +44,7 @@ import SiteSettings from './pages/SiteSettings.jsx'
 import TestTaking from './pages/TestTaking.jsx'
 import TestCreator from './pages/TestCreator.jsx'
 import SmartEditor from './pages/SmartEditor.jsx'
+import { API_ENDPOINTS } from './config/api.js'
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false)
@@ -84,8 +88,9 @@ function App() {
 
   const handleLogin = async (e) => {
     e.preventDefault()
+    setError('')
     try {
-      const response = await fetch('http://localhost:3002/api/login', {
+      const response = await fetch(API_ENDPOINTS.login, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -101,7 +106,7 @@ function App() {
         setError(data.error || 'Login failed')
       }
     } catch (error) {
-      setError('Network error. Please try again.')
+      setError('Network error. Please check your connection and try again.')
     }
   }
 
@@ -122,7 +127,7 @@ function App() {
   const handleRegistrationStep2 = async (e) => {
     e.preventDefault()
     try {
-      const response = await fetch('http://localhost:3002/api/register', {
+      const response = await fetch(API_ENDPOINTS.register, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -214,7 +219,7 @@ function App() {
     }
 
     try {
-      const response = await fetch('http://localhost:3002/api/reset-password', {
+      const response = await fetch(API_ENDPOINTS.resetPassword, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -549,6 +554,9 @@ function App() {
             <Route path="/psychology" element={<Psychology />} />
             <Route path="/psychology/theories" element={<PsychologyTheories />} />
             <Route path="/psychology/practices" element={<PsychologyPractices />} />
+            <Route path="/mathematics" element={<Mathematics />} />
+            <Route path="/programming" element={<Programming />} />
+            <Route path="/electronics" element={<Electronics />} />
             <Route path="/test-settings" element={<TestSettings />} />
             <Route path="/settings" element={<Settings />} />
             <Route path="/settings/account" element={<AccountSettings />} />

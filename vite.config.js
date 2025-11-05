@@ -11,7 +11,7 @@ export default defineConfig({
       ext: '.gz'
     })
   ],
-  base: '/Alphearea',        // путь к репозиторию на GitHub Pages
+  base: '/',        // для локальной разработки
   server: { historyApiFallback: true },
   build: {
     sourcemap: false, // отключаем eval для карт кода

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import '../styles/style.css'
 import '../styles/test-taking.css'
@@ -16,18 +16,14 @@ function TestTaking() {
   const [results, setResults] = useState(null)
   const [showResults, setShowResults] = useState(false)
 
-  useEffect(() => {
-    if (!originalTest || !settings) {
-      navigate('/test-settings')
-      return
-    }
+  const processTest = useCallback((testData, shuffleEnabled) => {
+    if (!testData) return null
 
-    // Prepare test data with shuffling if enabled
-    let processedTest = { ...originalTest }
+    let processedTest = { ...testData }
 
-    if (settings.shuffle) {
+    if (shuffleEnabled) {
       // Shuffle questions
-      const shuffledQuestions = [...originalTest.questions]
+      const shuffledQuestions = [...testData.questions]
       for (let i = shuffledQuestions.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
         [shuffledQuestions[i], shuffledQuestions[j]] = [shuffledQuestions[j], shuffledQuestions[i]];
@@ -53,6 +49,16 @@ function TestTaking() {
       processedTest.questions = shuffledQuestions
     }
 
+    return processedTest
+  }, [])
+
+  useEffect(() => {
+    if (!originalTest || !settings) {
+      navigate('/test-settings')
+      return
+    }
+
+    const processedTest = processTest(originalTest, settings.shuffle)
     setTest(processedTest)
 
     // Timer countdown
@@ -67,7 +73,7 @@ function TestTaking() {
     }, 1000)
 
     return () => clearInterval(timer)
-  }, [originalTest, settings, navigate])
+  }, [originalTest, settings, navigate, processTest, handleFinishTest])
 
   const formatTime = (seconds) => {
     const mins = Math.floor(seconds / 60)
@@ -94,7 +100,9 @@ function TestTaking() {
     }
   }
 
-  const handleFinishTest = () => {
+  const handleFinishTest = useCallback(() => {
+    if (!test) return
+    
     // Calculate results
     let correct = 0
     let total = test.questions.length
@@ -117,7 +125,7 @@ function TestTaking() {
     setResults(results)
     setIsFinished(true)
     setShowResults(true)
-  }
+  }, [test, answers, settings, timeLeft])
 
   const handleRestart = () => {
     navigate('/test-settings')

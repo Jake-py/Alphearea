@@ -10,7 +10,9 @@ function SmartMaterialViewer({ subject }) {
         const filtered = data.filter((m) => m.path.includes(`/materials/${subject}/`));
         setMaterials(filtered);
       })
-      .catch((err) => console.error("Ошибка загрузки материалов:", err));
+      .catch(() => {
+        // Error handled silently
+      });
   }, [subject]);
 
   return (

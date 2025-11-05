@@ -37,8 +37,6 @@ function SiteSettings() {
 
   const handleSubmit = (e) => {
     e.preventDefault()
-    // Handle form submission
-    console.log('Site settings updated:', siteSettings)
     setOriginalSettings({...siteSettings})
     setHasChanges(false)
     // Here you would typically save to backend/localStorage

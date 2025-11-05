@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import '../styles/style.css'
 import '../styles/test-taking.css'
 
@@ -10,7 +10,7 @@ function SmartEditor({ content, onSave, onClose }) {
     parseContent()
   }, [content])
 
-  const parseContent = () => {
+  const parseContent = useCallback(() => {
     setIsLoading(true)
     try {
       const lines = content.split('\n').map(line => line.trim()).filter(line => line)
@@ -56,12 +56,16 @@ function SmartEditor({ content, onSave, onClose }) {
 
       setParsedQuestions(questions)
     } catch (error) {
-      console.error('Error parsing content:', error)
+      // Error parsing content handled silently
       setParsedQuestions([])
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [content])
+
+  useEffect(() => {
+    parseContent()
+  }, [parseContent])
 
   const handleCorrectAnswerSelect = (questionId, optionIndex) => {
     setParsedQuestions(prev =>
