@@ -1,6 +1,173 @@
 import { useState, useEffect } from 'react'
 import '../styles/settings.css'
 
+// Progress Chart Component
+function ProgressChart({ subjects, customSubjects }) {
+  const allSubjects = [
+    ...Object.entries(subjects).map(([key, value]) => ({
+      name: key,
+      ...value,
+      isCustom: false
+    })),
+    ...(customSubjects || []).map(subject => ({
+      name: subject.name,
+      ...subject.progress,
+      isCustom: true,
+      id: subject.id
+    }))
+  ]
+
+  return (
+    <div className="progress-chart">
+      <h3>Прогресс по предметам</h3>
+      <div className="subjects-grid">
+        {allSubjects.map((subject) => (
+          <div key={subject.name} className="subject-card">
+            <div className="subject-header">
+              <h4>{subject.name}</h4>
+              <span className={`level-badge level-${subject.level}`}>
+                {subject.level}
+              </span>
+            </div>
+            <div className="progress-info">
+              <div className="xp-display">
+                <span className="xp-label">XP:</span>
+                <span className="xp-value">{subject.xp || 0}</span>
+              </div>
+              <div className="completed-display">
+                <span className="completed-label">Завершено:</span>
+                <span className="completed-value">{subject.completed?.length || 0}</span>
+              </div>
+            </div>
+            <div className="progress-bar">
+              <div
+                className="progress-fill"
+                style={{
+                  width: `${Math.min((subject.xp || 0) / 10, 100)}%`
+                }}
+              ></div>
+            </div>
+            {subject.isCustom && (
+              <button
+                className="remove-subject-btn"
+                onClick={() => {
+                  if (window.confirm(`Удалить предмет "${subject.name}"?`)) {
+                    // This will be handled by parent component
+                    window.dispatchEvent(new CustomEvent('removeSubject', { detail: subject.id }));
+                  }
+                }}
+              >
+                Удалить
+              </button>
+            )}
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+// Achievements Component
+function Achievements({ achievements }) {
+  const achievementIcons = {
+    level_up: '⬆️',
+    perfect_score: '🎯',
+    test_streak: '🔥'
+  }
+
+  const achievementNames = {
+    level_up: 'Повышение уровня',
+    perfect_score: 'Идеальный результат',
+    test_streak: 'Серия тестов'
+  }
+
+  return (
+    <div className="achievements-section">
+      <h3>Достижения</h3>
+      {achievements && achievements.length > 0 ? (
+        <div className="achievements-grid">
+          {achievements.map((achievement, index) => (
+            <div key={index} className="achievement-card">
+              <div className="achievement-icon">
+                {achievementIcons[achievement.type] || '🏆'}
+              </div>
+              <div className="achievement-info">
+                <h4>{achievementNames[achievement.type] || achievement.type}</h4>
+                {achievement.subject && (
+                  <p className="achievement-subject">{achievement.subject}</p>
+                )}
+                {achievement.level && (
+                  <p className="achievement-level">Уровень: {achievement.level}</p>
+                )}
+                {achievement.count && (
+                  <p className="achievement-count">Количество: {achievement.count}</p>
+                )}
+                <p className="achievement-date">
+                  {new Date(achievement.date).toLocaleDateString('ru-RU')}
+                </p>
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <p className="no-achievements">Достижений пока нет. Продолжайте учиться!</p>
+      )}
+    </div>
+  )
+}
+
+// History Component
+function History({ history }) {
+  const historyIcons = {
+    test: '📝',
+    material: '📖'
+  }
+
+  return (
+    <div className="history-section">
+      <h3>История действий</h3>
+      {history && history.length > 0 ? (
+        <div className="history-list">
+          {history.map((item, index) => (
+            <div key={index} className="history-item">
+              <div className="history-icon">
+                {historyIcons[item.type] || '📋'}
+              </div>
+              <div className="history-content">
+                <div className="history-header">
+                  <h4>{item.testTitle || item.materialId || item.type}</h4>
+                  <span className="history-date">
+                    {new Date(item.date).toLocaleDateString('ru-RU')}
+                  </span>
+                </div>
+                <div className="history-details">
+                  {item.type === 'test' && (
+                    <>
+                      <span className="subject-tag">{item.subject}</span>
+                      <span className="score-display">Результат: {item.score}%</span>
+                      <span className="time-display">
+                        Время: {Math.floor(item.timeSpent / 60)}:{(item.timeSpent % 60).toString().padStart(2, '0')}
+                      </span>
+                    </>
+                  )}
+                  {item.type === 'material' && (
+                    <>
+                      <span className="subject-tag">{item.subject}</span>
+                      <span className="action-display">{item.action === 'view' ? 'Просмотрено' : 'Завершено'}</span>
+                    </>
+                  )}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <p className="no-history">История действий пуста.</p>
+      )}
+    </div>
+  )
+}
+
 function AccountSettings() {
   const [formData, setFormData] = useState({
     username: '',
@@ -22,6 +189,10 @@ function AccountSettings() {
   const [profileData, setProfileData] = useState(null)
   const [message, setMessage] = useState('')
   const [error, setError] = useState('')
+  const [achievements, setAchievements] = useState([])
+  const [history, setHistory] = useState([])
+  const [newSubjectName, setNewSubjectName] = useState('')
+  const [activeTab, setActiveTab] = useState('profile')
 
   useEffect(() => {
     const savedUser = localStorage.getItem('user')
@@ -48,8 +219,107 @@ function AccountSettings() {
         twoFactorEnabled: profile.twoFactorEnabled || false,
         language: profile.language || 'ru'
       })
+
+      // Load achievements and history
+      loadAchievements(user.username)
+      loadHistory(user.username)
     }
   }, [])
+
+  const loadAchievements = async (username) => {
+    try {
+      const response = await fetch(`http://localhost:3002/api/achievements/${username}`)
+      if (response.ok) {
+        const data = await response.json()
+        setAchievements(data.achievements)
+      }
+    } catch (error) {
+      console.error('Failed to load achievements:', error)
+    }
+  }
+
+  const loadHistory = async (username) => {
+    try {
+      const response = await fetch(`http://localhost:3002/api/history/${username}`)
+      if (response.ok) {
+        const data = await response.json()
+        setHistory(data.history)
+      }
+    } catch (error) {
+      console.error('Failed to load history:', error)
+    }
+  }
+
+  const handleAddSubject = async () => {
+    if (!newSubjectName.trim()) {
+      setError('Введите название предмета')
+      return
+    }
+
+    try {
+      const response = await fetch('http://localhost:3002/api/progress/subject', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          username: userData.username,
+          subjectName: newSubjectName.trim(),
+          subjectType: 'custom'
+        }),
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.message || 'Failed to add subject')
+      }
+
+      setNewSubjectName('')
+      setMessage('Предмет добавлен успешно!')
+      // Reload profile data
+      const profileResponse = await fetch(`http://localhost:3002/api/profile/${userData.username}`)
+      if (profileResponse.ok) {
+        const profileData = await profileResponse.json()
+        setProfileData(profileData.profile)
+        localStorage.setItem('profile', JSON.stringify(profileData.profile))
+      }
+    } catch (error) {
+      setError('Ошибка при добавлении предмета: ' + error.message)
+    }
+  }
+
+  const handleRemoveSubject = async (subjectId) => {
+    try {
+      const response = await fetch(`http://localhost:3002/api/progress/subject/${subjectId}?username=${userData.username}`, {
+        method: 'DELETE',
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to remove subject')
+      }
+
+      setMessage('Предмет удален успешно!')
+      // Reload profile data
+      const profileResponse = await fetch(`http://localhost:3002/api/profile/${userData.username}`)
+      if (profileResponse.ok) {
+        const profileData = await profileResponse.json()
+        setProfileData(profileData.profile)
+        localStorage.setItem('profile', JSON.stringify(profileData.profile))
+      }
+    } catch (error) {
+      setError('Ошибка при удалении предмета: ' + error.message)
+    }
+  }
+
+  // Listen for remove subject events
+  useEffect(() => {
+    const handleRemoveSubjectEvent = (event) => {
+      handleRemoveSubject(event.detail)
+    }
+
+    window.addEventListener('removeSubject', handleRemoveSubjectEvent)
+    return () => window.removeEventListener('removeSubject', handleRemoveSubjectEvent)
+  }, [userData])
 
   const handleChange = (e) => {
     setFormData({
@@ -172,7 +442,36 @@ function AccountSettings() {
         <h2>Настройка аккаунта</h2>
         <p className="page-description">Информация и почта</p>
 
-        <form onSubmit={handleSubmit} className="settings-form">
+        {/* Tab Navigation */}
+        <div className="settings-tabs">
+          <button
+            className={`tab-button ${activeTab === 'profile' ? 'active' : ''}`}
+            onClick={() => setActiveTab('profile')}
+          >
+            Профиль
+          </button>
+          <button
+            className={`tab-button ${activeTab === 'progress' ? 'active' : ''}`}
+            onClick={() => setActiveTab('progress')}
+          >
+            Прогресс
+          </button>
+          <button
+            className={`tab-button ${activeTab === 'achievements' ? 'active' : ''}`}
+            onClick={() => setActiveTab('achievements')}
+          >
+            Достижения
+          </button>
+          <button
+            className={`tab-button ${activeTab === 'history' ? 'active' : ''}`}
+            onClick={() => setActiveTab('history')}
+          >
+            История
+          </button>
+        </div>
+
+        {activeTab === 'profile' && (
+          <form onSubmit={handleSubmit} className="settings-form">
           {/* Avatar Section */}
           <div className="form-section">
             <h3>Аватар</h3>
@@ -398,6 +697,45 @@ function AccountSettings() {
           {message && <p style={{ color: 'green', marginTop: '10px' }}>{message}</p>}
           {error && <p style={{ color: 'red', marginTop: '10px' }}>{error}</p>}
         </form>
+        )}
+
+        {activeTab === 'progress' && profileData && (
+          <div className="progress-tab">
+            <ProgressChart
+              subjects={profileData.progress || {}}
+              customSubjects={profileData.customSubjects || []}
+            />
+
+            {/* Add Custom Subject Section */}
+            <div className="form-section">
+              <h3>Добавить предмет</h3>
+              <div className="add-subject-form">
+                <div className="form-group">
+                  <label htmlFor="newSubjectName">Название предмета</label>
+                  <input
+                    type="text"
+                    id="newSubjectName"
+                    value={newSubjectName}
+                    onChange={(e) => setNewSubjectName(e.target.value)}
+                    className="form-input"
+                    placeholder="Введите название предмета"
+                  />
+                </div>
+                <button type="button" onClick={handleAddSubject} className="secondary-button">
+                  Добавить предмет
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'achievements' && (
+          <Achievements achievements={achievements} />
+        )}
+
+        {activeTab === 'history' && (
+          <History history={history} />
+        )}
       </div>
     </main>
   )

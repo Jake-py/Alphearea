@@ -13,7 +13,7 @@ const PROFILES_DIR = path.join(__dirname, 'profiles');
 const TESTS_DIR = path.join(__dirname, 'tests');
 
 // Hugging Face API configuration
-const HF_API_URL = "https://api-inference.huggingface.co/models/google/gemma-2b-it";
+const HF_API_URL = "https://api-inference.huggingface.co/models/meta-llama/Meta-Llama-3.1-8B-Instruct";
 const HF_API_KEY = process.env.HF_API_KEY;
 const HF_HEADERS = HF_API_KEY ? {"Authorization": `Bearer ${HF_API_KEY}`} : {};
 
@@ -63,7 +63,7 @@ app.use('/api/chat', (req, res, next) => {
 });
 
 // Pre-build context prompt template for efficiency
-const contextPromptTemplate = `You are Gemma 2, an AI assistant on the Alphearea educational platform. ${siteInfo.description} ${siteInfo.purpose}
+const contextPromptTemplate = `You are Meta-Llama-3.1-8B-Instruct, an AI assistant on the Alphearea educational platform. ${siteInfo.description} ${siteInfo.purpose}
 
 Site information:
 - Name: ${siteInfo.name}
@@ -85,11 +85,33 @@ app.post('/api/chat', async (req, res) => {
     return res.status(500).json({ error: 'AI service not configured' });
   }
 
-  // Build the full prompt
-  const contextPrompt = contextPromptTemplate + message.trim();
+  // Build the messages array for Llama 3.1 format
+  const messages = [
+    {
+      "role": "system",
+      "content": `You are Meta-Llama-3.1-8B-Instruct, an AI assistant on the Alphearea educational platform. ${siteInfo.description} ${siteInfo.purpose}
+
+Site information:
+- Name: ${siteInfo.name}
+- Purpose: ${siteInfo.purpose}
+- Description: ${siteInfo.description}
+
+If asked about the site, respond based on this information. Always be helpful and educational.`
+    },
+    {
+      "role": "user", 
+      "content": message.trim()
+    }
+  ];
 
   try {
-    const payload = { inputs: contextPrompt };
+    const payload = {
+      model: "meta-llama/Meta-Llama-3.1-8B-Instruct",
+      messages: messages,
+      max_new_tokens: 256,
+      temperature: 0.7
+    };
+    
     const response = await axios.post(HF_API_URL, payload, {
       headers: HF_HEADERS,
       timeout: 120000 // 120 seconds timeout
@@ -767,7 +789,14 @@ app.post('/api/generate-test', async (req, res) => {
     return res.status(400).json({ error: 'Topic is required' });
   }
 
-  const prompt = `Тема: ${topic}.
+  const messages = [
+    {
+      "role": "system",
+      "content": "You are an expert educator creating high-quality test questions. Always generate questions in the specified format."
+    },
+    {
+      "role": "user",
+      "content": `Тема: ${topic}.
 Сгенерируй 3 вопроса с вариантами ответа (A, B, C, D) и укажи правильный вариант.
 Формат:
 Вопрос 1: [Текст вопроса]
@@ -778,10 +807,18 @@ D) [Вариант 4]
 Правильный ответ: [Буква]
 
 Вопрос 2: [Текст вопроса]
-...`;
+...`
+    }
+  ];
 
   try {
-    const payload = { inputs: prompt };
+    const payload = {
+      model: "meta-llama/Meta-Llama-3.1-8B-Instruct",
+      messages: messages,
+      max_new_tokens: 500,
+      temperature: 0.7
+    };
+    
     const response = await axios.post(HF_API_URL, payload, {
       headers: HF_HEADERS,
       timeout: 300000 // 5 minutes timeout for AI generation
@@ -806,7 +843,14 @@ app.post('/api/tests/generate', async (req, res) => {
     return res.status(400).json({ error: 'Material content and subject are required' });
   }
 
-  const prompt = `You are an expert educator creating high-quality test questions. Based on the following material, generate ${numQuestions || 10} multiple-choice questions for ${subject} at ${difficulty || 'intermediate'} level.
+  const messages = [
+    {
+      "role": "system",
+      "content": "You are an expert educator creating high-quality test questions. Based on the provided material, generate multiple-choice questions in the exact format specified."
+    },
+    {
+      "role": "user",
+      "content": `Based on the following material, generate ${numQuestions || 10} multiple-choice questions for ${subject} at ${difficulty || 'intermediate'} level.
 
 Material:
 ${material}
@@ -823,10 +867,18 @@ Requirements:
 - Wrong answer 2
 - Wrong answer 3
 
-Generate the questions now:`;
+Generate the questions now:`
+    }
+  ];
 
   try {
-    const payload = { inputs: prompt };
+    const payload = {
+      model: "meta-llama/Meta-Llama-3.1-8B-Instruct",
+      messages: messages,
+      max_new_tokens: 1000,
+      temperature: 0.7
+    };
+    
     const response = await axios.post(HF_API_URL, payload, {
       headers: HF_HEADERS,
       timeout: 300000 // 5 minutes timeout for AI generation
@@ -891,6 +943,337 @@ app.post('/api/tests/cleanup', async (req, res) => {
   } catch (error) {
     console.error('Error cleaning up tests:', error);
     res.status(500).json({ error: 'Failed to clean up tests' });
+  }
+});
+
+// Progress tracking endpoints
+
+// Update material progress
+app.post('/api/progress/material', async (req, res) => {
+  const { username, subject, materialId, materialType, action } = req.body;
+
+  if (!username || !subject || !materialId || !action) {
+    return res.status(400).json({ error: 'Username, subject, materialId, and action are required' });
+  }
+
+  try {
+    const profileFile = path.join(PROFILES_DIR, `${username}.json`);
+    const profileStr = await fs.readFile(profileFile, 'utf8');
+    const profileData = JSON.parse(profileStr);
+
+    // Initialize progress structure if not exists
+    if (!profileData.profile.progress) {
+      profileData.profile.progress = {};
+    }
+    if (!profileData.profile.progress[subject]) {
+      profileData.profile.progress[subject] = { level: 'beginner', completed: [], xp: 0 };
+    }
+    if (!profileData.profile.progress[subject].materials) {
+      profileData.profile.progress[subject].materials = {};
+    }
+
+    // Update material progress
+    if (!profileData.profile.progress[subject].materials[materialId]) {
+      profileData.profile.progress[subject].materials[materialId] = {
+        type: materialType,
+        views: 0,
+        completed: false,
+        lastViewed: null
+      };
+    }
+
+    const material = profileData.profile.progress[subject].materials[materialId];
+
+    if (action === 'view') {
+      material.views += 1;
+      material.lastViewed = new Date().toISOString();
+      // Award XP for viewing material
+      profileData.profile.progress[subject].xp = (profileData.profile.progress[subject].xp || 0) + 5;
+    } else if (action === 'complete') {
+      material.completed = true;
+      material.lastViewed = new Date().toISOString();
+      // Award XP for completing material
+      profileData.profile.progress[subject].xp = (profileData.profile.progress[subject].xp || 0) + 10;
+      // Add to completed list if not already there
+      if (!profileData.profile.progress[subject].completed.includes(materialId)) {
+        profileData.profile.progress[subject].completed.push(materialId);
+      }
+    }
+
+    // Check for level up
+    const xp = profileData.profile.progress[subject].xp;
+    let newLevel = 'beginner';
+    if (xp >= 1000) newLevel = 'expert';
+    else if (xp >= 500) newLevel = 'advanced';
+    else if (xp >= 200) newLevel = 'intermediate';
+
+    if (newLevel !== profileData.profile.progress[subject].level) {
+      profileData.profile.progress[subject].level = newLevel;
+      // Add level up achievement
+      if (!profileData.profile.achievements) profileData.profile.achievements = [];
+      profileData.profile.achievements.push({
+        type: 'level_up',
+        subject: subject,
+        level: newLevel,
+        date: new Date().toISOString()
+      });
+    }
+
+    // Save updated profile
+    await fs.writeFile(profileFile, JSON.stringify(profileData, null, 2));
+
+    res.json({ message: 'Progress updated successfully', progress: profileData.profile.progress[subject] });
+  } catch (error) {
+    if (error.code === 'ENOENT') {
+      return res.status(404).json({ error: 'Profile not found' });
+    }
+    console.error('Error updating progress:', error);
+    res.status(500).json({ error: 'Failed to update progress' });
+  }
+});
+
+// Add custom subject to profile
+app.post('/api/progress/subject', async (req, res) => {
+  const { username, subjectName, subjectType } = req.body;
+
+  if (!username || !subjectName) {
+    return res.status(400).json({ error: 'Username and subjectName are required' });
+  }
+
+  try {
+    const profileFile = path.join(PROFILES_DIR, `${username}.json`);
+    const profileStr = await fs.readFile(profileFile, 'utf8');
+    const profileData = JSON.parse(profileStr);
+
+    // Initialize custom subjects if not exists
+    if (!profileData.profile.customSubjects) {
+      profileData.profile.customSubjects = [];
+    }
+
+    // Check if subject already exists
+    const existingSubject = profileData.profile.customSubjects.find(s => s.name === subjectName);
+    if (existingSubject) {
+      return res.status(409).json({ error: 'Subject already exists' });
+    }
+
+    // Add new subject
+    const newSubject = {
+      id: Date.now().toString(),
+      name: subjectName,
+      type: subjectType || 'custom',
+      addedDate: new Date().toISOString(),
+      progress: { level: 'beginner', completed: [], xp: 0, materials: {} }
+    };
+
+    profileData.profile.customSubjects.push(newSubject);
+
+    // Save updated profile
+    await fs.writeFile(profileFile, JSON.stringify(profileData, null, 2));
+
+    res.json({ message: 'Subject added successfully', subject: newSubject });
+  } catch (error) {
+    if (error.code === 'ENOENT') {
+      return res.status(404).json({ error: 'Profile not found' });
+    }
+    console.error('Error adding subject:', error);
+    res.status(500).json({ error: 'Failed to add subject' });
+  }
+});
+
+// Remove custom subject from profile
+app.delete('/api/progress/subject/:subjectId', async (req, res) => {
+  const { username } = req.query;
+  const { subjectId } = req.params;
+
+  if (!username || !subjectId) {
+    return res.status(400).json({ error: 'Username and subjectId are required' });
+  }
+
+  try {
+    const profileFile = path.join(PROFILES_DIR, `${username}.json`);
+    const profileStr = await fs.readFile(profileFile, 'utf8');
+    const profileData = JSON.parse(profileStr);
+
+    if (!profileData.profile.customSubjects) {
+      return res.status(404).json({ error: 'No custom subjects found' });
+    }
+
+    // Find and remove subject
+    const subjectIndex = profileData.profile.customSubjects.findIndex(s => s.id === subjectId);
+    if (subjectIndex === -1) {
+      return res.status(404).json({ error: 'Subject not found' });
+    }
+
+    profileData.profile.customSubjects.splice(subjectIndex, 1);
+
+    // Save updated profile
+    await fs.writeFile(profileFile, JSON.stringify(profileData, null, 2));
+
+    res.json({ message: 'Subject removed successfully' });
+  } catch (error) {
+    if (error.code === 'ENOENT') {
+      return res.status(404).json({ error: 'Profile not found' });
+    }
+    console.error('Error removing subject:', error);
+    res.status(500).json({ error: 'Failed to remove subject' });
+  }
+});
+
+// Log test result to history
+app.post('/api/progress/test', async (req, res) => {
+  const { username, testId, testTitle, subject, score, correct, total, timeSpent } = req.body;
+
+  if (!username || !testId || !subject || score === undefined) {
+    return res.status(400).json({ error: 'Username, testId, subject, and score are required' });
+  }
+
+  try {
+    const profileFile = path.join(PROFILES_DIR, `${username}.json`);
+    const profileStr = await fs.readFile(profileFile, 'utf8');
+    const profileData = JSON.parse(profileStr);
+
+    // Initialize history if not exists
+    if (!profileData.profile.history) {
+      profileData.profile.history = [];
+    }
+
+    // Add test result to history
+    const testResult = {
+      id: Date.now().toString(),
+      type: 'test',
+      testId,
+      testTitle,
+      subject,
+      score,
+      correct,
+      total,
+      timeSpent,
+      date: new Date().toISOString()
+    };
+
+    profileData.profile.history.push(testResult);
+
+    // Update subject progress XP
+    if (!profileData.profile.progress[subject]) {
+      profileData.profile.progress[subject] = { level: 'beginner', completed: [], xp: 0 };
+    }
+
+    // Award XP based on score
+    let xpAward = 0;
+    if (score >= 90) xpAward = 50;
+    else if (score >= 75) xpAward = 30;
+    else if (score >= 60) xpAward = 15;
+    else xpAward = 5;
+
+    profileData.profile.progress[subject].xp = (profileData.profile.progress[subject].xp || 0) + xpAward;
+
+    // Check for achievements
+    if (!profileData.profile.achievements) profileData.profile.achievements = [];
+
+    // Perfect score achievement
+    if (score === 100 && !profileData.profile.achievements.some(a => a.type === 'perfect_score' && a.subject === subject)) {
+      profileData.profile.achievements.push({
+        type: 'perfect_score',
+        subject,
+        date: new Date().toISOString()
+      });
+    }
+
+    // Test streak achievement (simplified - just count total tests)
+    const testCount = profileData.profile.history.filter(h => h.type === 'test' && h.subject === subject).length;
+    if (testCount >= 10 && !profileData.profile.achievements.some(a => a.type === 'test_streak' && a.subject === subject)) {
+      profileData.profile.achievements.push({
+        type: 'test_streak',
+        subject,
+        count: testCount,
+        date: new Date().toISOString()
+      });
+    }
+
+    // Check for level up
+    const xp = profileData.profile.progress[subject].xp;
+    let newLevel = 'beginner';
+    if (xp >= 1000) newLevel = 'expert';
+    else if (xp >= 500) newLevel = 'advanced';
+    else if (xp >= 200) newLevel = 'intermediate';
+
+    if (newLevel !== profileData.profile.progress[subject].level) {
+      profileData.profile.progress[subject].level = newLevel;
+      profileData.profile.achievements.push({
+        type: 'level_up',
+        subject,
+        level: newLevel,
+        date: new Date().toISOString()
+      });
+    }
+
+    // Save updated profile
+    await fs.writeFile(profileFile, JSON.stringify(profileData, null, 2));
+
+    res.json({ message: 'Test result logged successfully', result: testResult });
+  } catch (error) {
+    if (error.code === 'ENOENT') {
+      return res.status(404).json({ error: 'Profile not found' });
+    }
+    console.error('Error logging test result:', error);
+    res.status(500).json({ error: 'Failed to log test result' });
+  }
+});
+
+// Get user achievements
+app.get('/api/achievements/:username', async (req, res) => {
+  const { username } = req.params;
+
+  try {
+    const profileFile = path.join(PROFILES_DIR, `${username}.json`);
+    const profileStr = await fs.readFile(profileFile, 'utf8');
+    const profileData = JSON.parse(profileStr);
+
+    const achievements = profileData.profile.achievements || [];
+    res.json({ achievements });
+  } catch (error) {
+    if (error.code === 'ENOENT') {
+      return res.status(404).json({ error: 'Profile not found' });
+    }
+    console.error('Error loading achievements:', error);
+    res.status(500).json({ error: 'Failed to load achievements' });
+  }
+});
+
+// Get user history
+app.get('/api/history/:username', async (req, res) => {
+  const { username } = req.params;
+  const { type, subject, limit = 50 } = req.query;
+
+  try {
+    const profileFile = path.join(PROFILES_DIR, `${username}.json`);
+    const profileStr = await fs.readFile(profileFile, 'utf8');
+    const profileData = JSON.parse(profileStr);
+
+    let history = profileData.profile.history || [];
+
+    // Filter by type if specified
+    if (type) {
+      history = history.filter(h => h.type === type);
+    }
+
+    // Filter by subject if specified
+    if (subject) {
+      history = history.filter(h => h.subject === subject);
+    }
+
+    // Sort by date descending and limit
+    history = history
+      .sort((a, b) => new Date(b.date) - new Date(a.date))
+      .slice(0, parseInt(limit));
+
+    res.json({ history });
+  } catch (error) {
+    if (error.code === 'ENOENT') {
+      return res.status(404).json({ error: 'Profile not found' });
+    }
+    console.error('Error loading history:', error);
+    res.status(500).json({ error: 'Failed to load history' });
   }
 });
 

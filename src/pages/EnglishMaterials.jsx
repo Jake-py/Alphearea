@@ -1,5 +1,29 @@
 import React, { useEffect, useState } from "react";
 
+// Track material progress
+const trackMaterialProgress = async (subject, materialId, action) => {
+  try {
+    const user = JSON.parse(localStorage.getItem('user'))
+    if (!user || !user.username) return
+
+    await fetch('http://localhost:3002/api/progress/material', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        username: user.username,
+        subject,
+        materialId,
+        materialType: 'lesson',
+        action
+      }),
+    })
+  } catch (error) {
+    console.error('Failed to track material progress:', error)
+  }
+}
+
 function EnglishMaterials() {
   const [data, setData] = useState(null);
 
@@ -24,6 +48,7 @@ function EnglishMaterials() {
               style={{ color: '#4ecdc4', textDecoration: 'none' }}
               onMouseEnter={(e) => e.target.style.textDecoration = 'underline'}
               onMouseLeave={(e) => e.target.style.textDecoration = 'none'}
+              onClick={() => trackMaterialProgress('english', file.name, 'view')}
             >
               📄 {file.name}
             </a>

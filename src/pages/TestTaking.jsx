@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import '../styles/style.css'
 import '../styles/test-taking.css'
@@ -16,8 +16,24 @@ function TestTaking() {
   const [results, setResults] = useState(null)
   const [showResults, setShowResults] = useState(false)
 
+  const timerRef = useRef(null)
+
   const processTest = useCallback((testData, shuffleEnabled) => {
-    if (!testData) return null
+    if (!testData || !testData.questions || testData.questions.length === 0) {
+      // If no questions, create a default test
+      return {
+        title: 'Тест недоступен',
+        subject: 'general',
+        questions: [
+          {
+            question: 'Тест не может быть загружен. Пожалуйста, вернитесь к настройкам.',
+            options: ['OK'],
+            correctAnswer: 0
+          }
+        ],
+        createdAt: new Date().toISOString()
+      }
+    }
 
     let processedTest = { ...testData }
 
@@ -31,6 +47,8 @@ function TestTaking() {
 
       // Shuffle options within each question
       shuffledQuestions.forEach(question => {
+        if (!question.options || question.options.length < 2) return
+
         const originalCorrectAnswer = question.correctAnswer
         const shuffledOptions = [...question.options]
         const indices = shuffledOptions.map((_, index) => index)
@@ -52,6 +70,7 @@ function TestTaking() {
     return processedTest
   }, [])
 
+  // Process test when component mounts or state changes
   useEffect(() => {
     if (!originalTest || !settings) {
       navigate('/test-settings')
@@ -60,9 +79,14 @@ function TestTaking() {
 
     const processedTest = processTest(originalTest, settings.shuffle)
     setTest(processedTest)
+    setTimeLeft(settings.time * 60 || 1800)
+  }, [originalTest, settings, navigate, processTest])
 
-    // Timer countdown
-    const timer = setInterval(() => {
+  // Start timer when test is ready
+  useEffect(() => {
+    if (!test || isFinished) return
+
+    timerRef.current = setInterval(() => {
       setTimeLeft((prev) => {
         if (prev <= 1) {
           handleFinishTest()
@@ -72,8 +96,13 @@ function TestTaking() {
       })
     }, 1000)
 
-    return () => clearInterval(timer)
-  }, [originalTest, settings, navigate, processTest, handleFinishTest])
+    return () => {
+      if (timerRef.current) {
+        clearInterval(timerRef.current)
+        timerRef.current = null
+      }
+    }
+  }, [test, isFinished])
 
   const formatTime = (seconds) => {
     const mins = Math.floor(seconds / 60)
@@ -100,9 +129,9 @@ function TestTaking() {
     }
   }
 
-  const handleFinishTest = useCallback(() => {
-    if (!test) return
-    
+  const handleFinishTest = useCallback(async () => {
+    if (!test || !settings) return
+
     // Calculate results
     let correct = 0
     let total = test.questions.length
@@ -114,24 +143,56 @@ function TestTaking() {
     })
 
     const score = Math.round((correct / total) * 100)
+    const timeSpent = settings.time ? (settings.time * 60) - timeLeft : 0
     const results = {
       correct,
       total,
       score,
       answers,
-      timeSpent: (settings.time * 60) - timeLeft
+      timeSpent
     }
 
     setResults(results)
     setIsFinished(true)
     setShowResults(true)
+
+    // Clear timer
+    if (timerRef.current) {
+      clearInterval(timerRef.current)
+      timerRef.current = null
+    }
+
+    // Log test result to profile
+    try {
+      const user = JSON.parse(localStorage.getItem('user'))
+      if (user && user.username) {
+        await fetch('http://localhost:3002/api/progress/test', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            username: user.username,
+            testId: test.id || 'unknown',
+            testTitle: test.title,
+            subject: test.subject || 'general',
+            score,
+            correct,
+            total,
+            timeSpent
+          }),
+        })
+      }
+    } catch (error) {
+      console.error('Failed to log test result:', error)
+    }
   }, [test, answers, settings, timeLeft])
 
   const handleRestart = () => {
     navigate('/test-settings')
   }
 
-  if (!test || !settings) {
+  if (!test) {
     return <div className="loading">Загрузка теста...</div>
   }
 
@@ -256,7 +317,7 @@ function TestTaking() {
           <button
             onClick={handleFinishTest}
             className="nav-button finish"
-            disabled={Object.keys(answers).length < test.questions.length}
+            disabled={Object.keys(answers).length !== test.questions.length}
           >
             Завершить тест
           </button>

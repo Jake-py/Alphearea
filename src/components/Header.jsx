@@ -25,9 +25,7 @@ function Header({ onOpenChat, onToggleSidebar, onLogout }) {
           <li><button onClick={onOpenChat} className="ai-button">Ассистент ИИ</button></li>
         </ul>
       </nav>
-      <button className="mobile-menu-toggle" onClick={toggleMenu}>
-        ☰
-      </button>
+
     </header>
   )
 }

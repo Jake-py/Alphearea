@@ -5,10 +5,10 @@
 }
 
 .electronics-content {
-  background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+  background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%);
   border-radius: 15px;
   padding: 30px;
-  color: white;
+  color: #c2c0ff;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
 }
 
@@ -52,7 +52,7 @@
 .section-card h2 {
   font-size: 1.5em;
   margin-bottom: 15px;
-  color: #ffeb3b;
+  color: #a78bfa;
 }
 
 .section-card p {
@@ -63,18 +63,18 @@
 
 .section-link {
   display: inline-block;
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(75, 60, 222, 0.8);
   color: white;
   padding: 10px 20px;
   border-radius: 25px;
   text-decoration: none;
   font-weight: bold;
   transition: all 0.3s ease;
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  border: 1px solid rgba(107, 89, 255, 0.5);
 }
 
 .section-link:hover {
-  background: rgba(255, 255, 255, 0.3);
+  background: rgba(107, 89, 255, 0.9);
   transform: scale(1.05);
 }
 

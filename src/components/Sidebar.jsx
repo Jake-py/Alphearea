@@ -2,8 +2,16 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 
 function Sidebar({ isOpen }) {
+  const [openCategories, setOpenCategories] = useState({})
   const [openSubjects, setOpenSubjects] = useState({})
   const [openSubmenus, setOpenSubmenus] = useState({})
+
+  const toggleCategory = (category) => {
+    setOpenCategories(prev => ({
+      ...prev,
+      [category]: !prev[category]
+    }))
+  }
 
   const toggleSubject = (subject) => {
     setOpenSubjects(prev => ({
@@ -19,103 +27,169 @@ function Sidebar({ isOpen }) {
     }))
   }
 
+  const categories = [
+    {
+      name: "Иностранные языки",
+      icon: "/Alphearea/icon_language.png",
+      subjects: [
+        {
+          name: "Английский язык",
+          path: "/english",
+          subitems: [
+            { name: "Грамматика", path: "/english/grammar" },
+            {
+              name: "Курсы",
+              subitems: [
+                { name: "Начальный уровень", path: "/english/courses/beginner" },
+                { name: "Средний уровень", path: "/english/courses/intermediate" },
+                { name: "Продвинутый уровень", path: "/english/courses/advanced" }
+              ]
+            },
+            {
+              name: "Словарь",
+              subitems: [
+                { name: "Основные слова", path: "/english/dictionary/basic" },
+                { name: "Идиомы", path: "/english/dictionary/idioms" },
+                { name: "Фразовые глаголы", path: "/english/dictionary/phrasal-verbs" }
+              ]
+            },
+            { name: "Диалоги", path: "/english/dialogues" },
+            { name: "Материалы", path: "/english/materials" }
+          ]
+        },
+        {
+          name: "Корейский язык",
+          path: "/korean",
+          subitems: [
+            { name: "Грамматика", path: "/korean/grammar" },
+            { name: "Курсы", path: "/korean/courses" },
+            { name: "Диалоги", path: "/korean/dialogues" }
+          ]
+        },
+        {
+          name: "Русский язык",
+          path: "/russian",
+          subitems: [
+            { name: "Грамматика", path: "/russian/grammar" },
+            { name: "Курсы", path: "/russian/courses" },
+            { name: "Диалоги", path: "/russian/dialogues" }
+          ]
+        }
+      ]
+    },
+    {
+      name: "Математика и вычисления",
+      icon: "/Alphearea/icon_math.png",
+      subjects: [
+        {
+          name: "Математика",
+          path: "/mathematics",
+          subitems: [
+            { name: "Основы", path: "/mathematics/basics" },
+            { name: "Высшая математика", path: "/mathematics/advanced" },
+            { name: "Прикладная", path: "/mathematics/applied" },
+            { name: "Задачи", path: "/mathematics/problems" }
+          ]
+        },
+        {
+          name: "Программирование",
+          path: "/programming",
+          subitems: [
+            { name: "Основы", path: "/programming/basics" },
+            { name: "Веб-разработка", path: "/programming/web" },
+            { name: "Языки", path: "/programming/languages" },
+            { name: "Базы данных", path: "/programming/databases" },
+            { name: "Мобильная разработка", path: "/programming/mobile" },
+            { name: "Проекты", path: "/programming/projects" }
+          ]
+        }
+      ]
+    },
+    {
+      name: "Философия и психология",
+      icon: "/Alphearea/icon_philosophy.png",
+      subjects: [
+        {
+          name: "Философия",
+          path: "/philosophy",
+          subitems: [
+            { name: "Мудрости", path: "/philosophy/wisdom" },
+            { name: "Кратко про книги", path: "/philosophy/books" }
+          ]
+        },
+        {
+          name: "Психология",
+          path: "/psychology",
+          subitems: [
+            { name: "Теории", path: "/psychology/theories" },
+            { name: "Практики", path: "/psychology/practices" }
+          ]
+        }
+      ]
+    },
+    {
+      name: "Электроника",
+      icon: "/Alphearea/icon_electronics.png",
+      subjects: [
+        {
+          name: "Электроника",
+          path: "/electronics",
+          subitems: [
+            { name: "Основы", path: "/electronics/basics" },
+            { name: "Компоненты", path: "/electronics/components" },
+            { name: "Цифровая", path: "/electronics/digital" },
+            { name: "Аналоговая", path: "/electronics/analog" },
+            { name: "Схемы", path: "/electronics/circuits" },
+            { name: "Микроконтроллеры", path: "/electronics/microcontrollers" }
+          ]
+        }
+      ]
+    }
+  ]
+
   return (
     <aside className={`sidebar ${isOpen ? 'open' : 'closed'}`}>
       <h3>Инструменты для учебы</h3>
-      <ul>
-        <li className="subject" data-subject="english" onClick={() => toggleSubject('english')}>
-          <Link to="/english">Английский язык</Link>
-          <ul className={`sub-menu ${openSubjects.english ? 'show' : ''}`}>
-            <li><Link to="/english/grammar" onClick={(e) => e.stopPropagation()}>Грамматика</Link></li>
-            <li className="has-submenu" onClick={(e) => { e.stopPropagation(); toggleSubmenu('english-courses') }}>
-              Курсы
-              <ul className={`sub-sub-menu ${openSubmenus['english-courses'] ? 'show' : ''}`}>
-                <li><Link to="/english/courses/beginner" onClick={(e) => e.stopPropagation()}>Начальный уровень</Link></li>
-                <li><Link to="/english/courses/intermediate" onClick={(e) => e.stopPropagation()}>Средний уровень</Link></li>
-                <li><Link to="/english/courses/advanced" onClick={(e) => e.stopPropagation()}>Продвинутый уровень</Link></li>
-              </ul>
-            </li>
-            <li className="has-submenu" onClick={(e) => { e.stopPropagation(); toggleSubmenu('english-dictionary') }}>
-              Словарь
-              <ul className={`sub-sub-menu ${openSubmenus['english-dictionary'] ? 'show' : ''}`}>
-                <li><Link to="/english/dictionary/basic" onClick={(e) => e.stopPropagation()}>Основные слова</Link></li>
-                <li><Link to="/english/dictionary/idioms" onClick={(e) => e.stopPropagation()}>Идиомы</Link></li>
-                <li><Link to="/english/dictionary/phrasal-verbs" onClick={(e) => e.stopPropagation()}>Фразовые глаголы</Link></li>
-              </ul>
-            </li>
-            <li><Link to="/english/dialogues" onClick={(e) => e.stopPropagation()}>Диалоги</Link></li>
-            <li><Link to="/english/materials" onClick={(e) => e.stopPropagation()}>Материалы <span className="arrow">▶</span></Link></li>
-          </ul>
-        </li>
-
-        <li className="subject" data-subject="korean" onClick={() => toggleSubject('korean')}>
-          <Link to="/korean">Корейский язык</Link>
-          <ul className={`sub-menu ${openSubjects.korean ? 'show' : ''}`}>
-            <li><Link to="/korean/grammar" onClick={(e) => e.stopPropagation()}>Грамматика</Link></li>
-            <li><Link to="/korean/courses" onClick={(e) => e.stopPropagation()}>Курсы</Link></li>
-            <li><Link to="/korean/dialogues" onClick={(e) => e.stopPropagation()}>Диалоги</Link></li>
-          </ul>
-        </li>
-
-        <li className="subject" data-subject="russian" onClick={() => toggleSubject('russian')}>
-          <Link to="/russian">Русский язык</Link>
-          <ul className={`sub-menu ${openSubjects.russian ? 'show' : ''}`}>
-            <li><Link to="/russian/grammar" onClick={(e) => e.stopPropagation()}>Грамматика</Link></li>
-            <li><Link to="/russian/courses" onClick={(e) => e.stopPropagation()}>Курсы</Link></li>
-            <li><Link to="/russian/dialogues" onClick={(e) => e.stopPropagation()}>Диалоги</Link></li>
-          </ul>
-        </li>
-
-        <li className="subject" data-subject="philosophy" onClick={() => toggleSubject('philosophy')}>
-          <Link to="/philosophy">Философия</Link>
-          <ul className={`sub-menu ${openSubjects.philosophy ? 'show' : ''}`}>
-            <li><Link to="/philosophy/wisdom" onClick={(e) => e.stopPropagation()}>Мудрости</Link></li>
-            <li><Link to="/philosophy/books" onClick={(e) => e.stopPropagation()}>Кратко про книги</Link></li>
-          </ul>
-        </li>
-
-        <li className="subject" data-subject="psychology" onClick={() => toggleSubject('psychology')}>
-          <Link to="/psychology">Психология</Link>
-          <ul className={`sub-menu ${openSubjects.psychology ? 'show' : ''}`}>
-            <li><Link to="/psychology/theories" onClick={(e) => e.stopPropagation()}>Теории</Link></li>
-            <li><Link to="/psychology/practices" onClick={(e) => e.stopPropagation()}>Практики</Link></li>
-          </ul>
-        </li>
-
-        <li className="subject" data-subject="mathematics" onClick={() => toggleSubject('mathematics')}>
-          <Link to="/mathematics">Математика</Link>
-          <ul className={`sub-menu ${openSubjects.mathematics ? 'show' : ''}`}>
-            <li><Link to="/mathematics/basics" onClick={(e) => e.stopPropagation()}>Основы</Link></li>
-            <li><Link to="/mathematics/advanced" onClick={(e) => e.stopPropagation()}>Высшая математика</Link></li>
-            <li><Link to="/mathematics/applied" onClick={(e) => e.stopPropagation()}>Прикладная</Link></li>
-            <li><Link to="/mathematics/problems" onClick={(e) => e.stopPropagation()}>Задачи</Link></li>
-          </ul>
-        </li>
-
-        <li className="subject" data-subject="programming" onClick={() => toggleSubject('programming')}>
-          <Link to="/programming">Программирование</Link>
-          <ul className={`sub-menu ${openSubjects.programming ? 'show' : ''}`}>
-            <li><Link to="/programming/basics" onClick={(e) => e.stopPropagation()}>Основы</Link></li>
-            <li><Link to="/programming/web" onClick={(e) => e.stopPropagation()}>Веб-разработка</Link></li>
-            <li><Link to="/programming/languages" onClick={(e) => e.stopPropagation()}>Языки</Link></li>
-            <li><Link to="/programming/databases" onClick={(e) => e.stopPropagation()}>Базы данных</Link></li>
-            <li><Link to="/programming/mobile" onClick={(e) => e.stopPropagation()}>Мобильная разработка</Link></li>
-            <li><Link to="/programming/projects" onClick={(e) => e.stopPropagation()}>Проекты</Link></li>
-          </ul>
-        </li>
-
-        <li className="subject" data-subject="electronics" onClick={() => toggleSubject('electronics')}>
-          <Link to="/electronics">Электроника</Link>
-          <ul className={`sub-menu ${openSubjects.electronics ? 'show' : ''}`}>
-            <li><Link to="/electronics/basics" onClick={(e) => e.stopPropagation()}>Основы</Link></li>
-            <li><Link to="/electronics/components" onClick={(e) => e.stopPropagation()}>Компоненты</Link></li>
-            <li><Link to="/electronics/digital" onClick={(e) => e.stopPropagation()}>Цифровая</Link></li>
-            <li><Link to="/electronics/analog" onClick={(e) => e.stopPropagation()}>Аналоговая</Link></li>
-            <li><Link to="/electronics/circuits" onClick={(e) => e.stopPropagation()}>Схемы</Link></li>
-            <li><Link to="/electronics/microcontrollers" onClick={(e) => e.stopPropagation()}>Микроконтроллеры</Link></li>
-          </ul>
-        </li>
-      </ul>
+      <div className="categories">
+        {categories.map(cat => (
+          <div key={cat.name} className="category">
+            <div className="category-header" onClick={() => toggleCategory(cat.name)}>
+              <img src={cat.icon} alt={cat.name} className="category-icon" />
+              <h4>{cat.name}</h4>
+              <span className="arrow">{openCategories[cat.name] ? '▼' : '▶'}</span>
+            </div>
+            <ul className={`category-subjects ${openCategories[cat.name] ? 'show' : ''}`}>
+              {cat.subjects.map(subject => (
+                <li key={subject.name} className="subject">
+                  <Link to={subject.path} onClick={(e) => e.stopPropagation()}>{subject.name}</Link>
+                  {subject.subitems && subject.subitems.length > 0 && (
+                    <ul className={`sub-menu ${openSubjects[subject.name] ? 'show' : ''}`}>
+                      {subject.subitems.map(subitem => (
+                        subitem.subitems ? (
+                          <li key={subitem.name} className="has-submenu" onClick={(e) => { e.stopPropagation(); toggleSubmenu(`${subject.name}-${subitem.name}`) }}>
+                            {subitem.name}
+                            <ul className={`sub-sub-menu ${openSubmenus[`${subject.name}-${subitem.name}`] ? 'show' : ''}`}>
+                              {subitem.subitems.map(subSubitem => (
+                                <li key={subSubitem.name}>
+                                  <Link to={subSubitem.path} onClick={(e) => e.stopPropagation()}>{subSubitem.name}</Link>
+                                </li>
+                              ))}
+                            </ul>
+                          </li>
+                        ) : (
+                          <li key={subitem.name}>
+                            <Link to={subitem.path} onClick={(e) => e.stopPropagation()}>{subitem.name}</Link>
+                          </li>
+                        )
+                      ))}
+                    </ul>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))}
+      </div>
 
       <hr />
       <h3>Режимы проверки знаний</h3>

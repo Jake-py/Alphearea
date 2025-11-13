@@ -159,72 +159,77 @@ function TestSettings() {
           throw new Error(data.error || 'Не удалось сгенерировать тест')
         }
       } else if ((testMode === 'standard' || testMode === 'editor') && parsedQuestions?.length > 0) {
-      // Use parsed questions from smart editor
-      testData = {
-        title: `Разобранный тест - ${testFile?.name || 'файл'}`,
-        subject,
-        questions: parsedQuestions,
-        createdAt: new Date().toISOString()
-      }
-    } else if (testMode === 'standard' && testFile) {
-      // Parse uploaded file
-      const response = await fetch(API_ENDPOINTS.testsParse, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          content: materialContent,
-          format: 'standard'
-        }),
-      })
-
-      const data = await response.json()
-      if (response.ok) {
+        // Use parsed questions from smart editor
         testData = {
-          title: `Разобранный тест - ${testFile.name}`,
+          title: `Разобранный тест - ${testFile?.name || 'файл'}`,
           subject,
-          questions: data.questions || [],
+          questions: parsedQuestions,
           createdAt: new Date().toISOString()
         }
-      } else {
-        throw new Error(data.error || 'Не удалось разобрать файл')
-      }
-    } else {
-      // Load existing test or create sample test
-      testData = {
-        title: `Пример теста - ${subject}`,
-        subject,
-        questions: [
-          {
-            question: 'Пример вопроса 1?',
-            options: ['Вариант A', 'Вариант B', 'Вариант C', 'Вариант D'],
-            correctAnswer: 0
+      } else if (testMode === 'standard' && testFile) {
+        // Parse uploaded file
+        const response = await fetch(API_ENDPOINTS.testsParse, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
           },
-          {
-            question: 'Пример вопроса 2?',
-            options: ['Вариант A', 'Вариант B', 'Вариант C', 'Вариант D'],
-            correctAnswer: 1
+          body: JSON.stringify({
+            content: materialContent,
+            format: 'standard'
+          }),
+        })
+
+        const data = await response.json()
+        if (response.ok) {
+          testData = {
+            title: `Разобранный тест - ${testFile.name}`,
+            subject,
+            questions: data.questions || [],
+            createdAt: new Date().toISOString()
           }
-        ],
-        createdAt: new Date().toISOString()
+        } else {
+          throw new Error(data.error || 'Не удалось разобрать файл')
+        }
+      } else {
+        // Load existing test or create sample test
+        testData = {
+          title: `Пример теста - ${subject}`,
+          subject,
+          questions: [
+            {
+              question: 'Пример вопроса 1?',
+              options: ['Вариант A', 'Вариант B', 'Вариант C', 'Вариант D'],
+              correctAnswer: 0
+            },
+            {
+              question: 'Пример вопроса 2?',
+              options: ['Вариант A', 'Вариант B', 'Вариант C', 'Вариант D'],
+              correctAnswer: 1
+            }
+          ],
+          createdAt: new Date().toISOString()
+        }
       }
+
+      // Validate test data before navigation
+      if (!testData || !testData.questions || testData.questions.length === 0) {
+        throw new Error('Тест не содержит вопросов. Пожалуйста, проверьте настройки.')
+      }
+
+      // Navigate to test taking page with test data
+      navigate('/test-taking', {
+        state: {
+          test: testData,
+          settings: { subject, numTests, shuffle, time, testMode }
+        }
+      })
+
+    } catch (error) {
+      setError(error.message || 'Произошла ошибка. Попробуйте еще раз.')
+    } finally {
+      setIsLoading(false)
     }
-
-    // Navigate to test taking page with test data
-    navigate('/test-taking', {
-      state: {
-        test: testData,
-        settings: { subject, numTests, shuffle, time, testMode }
-      }
-    })
-
-  } catch (error) {
-    setError(error.message || 'Произошла ошибка. Попробуйте еще раз.')
-  } finally {
-    setIsLoading(false)
   }
-}
 
   return (
     <div className="test-settings-page">
@@ -283,7 +288,7 @@ function TestSettings() {
             min="1"
             max="100"
             value={numTests}
-            onChange={(e) => setNumTests(parseInt(e.target.value))}
+            onChange={(e) => setNumTests(parseInt(e.target.value) || 10)}
             required
           />
         </div>
@@ -306,7 +311,7 @@ function TestSettings() {
             min="1"
             max="300"
             value={time}
-            onChange={(e) => setTime(parseInt(e.target.value))}
+            onChange={(e) => setTime(parseInt(e.target.value) || 30)}
             required
           />
         </div>
@@ -369,12 +374,15 @@ function TestSettings() {
             <p>{testMode === 'ai' ? 'Генерируем тест с помощью ИИ...' : 'Обрабатываем файл...'}</p>
           </div>
         ) : (
-          <div className="action-buttons">
+        <div className="action-buttons">
             <button type="submit" className="start-test-button">
               {testMode === 'ai' ? 'Сгенерировать тест' : 'Начать тест'}
             </button>
             <button type="button" onClick={() => navigate('/test-creator')} className="create-test-button">
               Создать новый тест
+            </button>
+            <button type="button" onClick={() => navigate('/')} className="home-button">
+              На главную
             </button>
           </div>
         )}
