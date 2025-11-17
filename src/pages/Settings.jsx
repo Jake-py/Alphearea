@@ -2,6 +2,110 @@ import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import '../styles/settings.css'
 
+// Progress Chart Component
+function ProgressChart({ subjects, customSubjects }) {
+  const allSubjects = [
+    ...Object.entries(subjects).map(([key, value]) => ({
+      name: key,
+      ...value,
+      isCustom: false
+    })),
+    ...(customSubjects || []).map(subject => ({
+      name: subject.name,
+      ...subject.progress,
+      isCustom: true,
+      id: subject.id
+    }))
+  ]
+
+  return (
+    <div className="progress-chart">
+      <div className="subjects-grid">
+        {allSubjects.map((subject) => (
+          <div key={subject.name} className="subject-card">
+            <div className="subject-header">
+              <h4>{subject.name}</h4>
+              <span className={`level-badge level-${subject.level}`}>
+                {subject.level}
+              </span>
+            </div>
+            <div className="progress-info">
+              <div className="xp-display">
+                <span className="xp-label">XP:</span>
+                <span className="xp-value">{subject.xp || 0}</span>
+              </div>
+              <div className="completed-display">
+                <span className="completed-label">Завершено:</span>
+                <span className="completed-value">{subject.completed?.length || 0}</span>
+              </div>
+            </div>
+            <div className="progress-bar">
+              <div
+                className="progress-fill"
+                style={{
+                  width: `${Math.min((subject.xp || 0) / 10, 100)}%`
+                }}
+              ></div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+// History Component
+function History({ history }) {
+  const historyIcons = {
+    test: '📝',
+    material: '📖'
+  }
+
+  return (
+    <div className="activity-section">
+      <h3>Недавняя активность</h3>
+      {history && history.length > 0 ? (
+        <div className="activity-list">
+          {history.slice(0, 10).map((item, index) => (
+            <div key={index} className="activity-item">
+              <div className="activity-icon">
+                {historyIcons[item.type] || '📋'}
+              </div>
+              <div className="activity-content">
+                <div className="activity-header">
+                  <h4>{item.testTitle || item.materialId || item.type}</h4>
+                  <span className="activity-date">
+                    {new Date(item.date).toLocaleDateString('ru-RU')}
+                  </span>
+                </div>
+                <div className="activity-details">
+                  {item.type === 'test' && (
+                    <>
+                      <span className="subject-tag">{item.subject}</span>
+                      <span className="score-display">Результат: {item.score}%</span>
+                      <span className="time-display">
+                        Время: {Math.floor(item.timeSpent / 60)}:{(item.timeSpent % 60).toString().padStart(2, '0')}
+                      </span>
+                    </>
+                  )}
+                  {item.type === 'material' && (
+                    <>
+                      <span className="subject-tag">{item.subject}</span>
+                      <span className="action-display">{item.action === 'view' ? 'Просмотрено' : 'Завершено'}</span>
+                    </>
+                  )}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <p className="no-activity">Активность отсутствует.</p>
+      )}
+    </div>
+  )
+}
+
 function Settings() {
   const [user, setUser] = useState({
     username: '',
@@ -12,6 +116,9 @@ function Settings() {
     xp: 0,
     achievements: []
   })
+
+  const [profileData, setProfileData] = useState(null)
+  const [history, setHistory] = useState([])
 
   useEffect(() => {
     const savedUser = localStorage.getItem('user')
@@ -30,16 +137,25 @@ function Settings() {
         xp: profileData.xp || 0,
         achievements: profileData.achievements || []
       })
+
+      setProfileData(profileData)
+
+      // Load history
+      loadHistory(userData.username)
     }
   }, [])
 
-  const [progress] = useState({
-    english: 75,
-    korean: 45,
-    russian: 60,
-    philosophy: 30,
-    psychology: 20
-  })
+  const loadHistory = async (username) => {
+    try {
+      const response = await fetch(`http://localhost:3002/api/history/${username}`)
+      if (response.ok) {
+        const data = await response.json()
+        setHistory(data.history)
+      }
+    } catch (error) {
+      console.error('Failed to load history:', error)
+    }
+  }
 
   return (
     <main>
@@ -84,36 +200,18 @@ function Settings() {
         </div>
 
         {/* Progress Chart */}
-        <div className="progress-section">
-          <h3>Прогресс обучения</h3>
-          <div className="progress-chart">
-            {Object.entries(progress).map(([subject, percentage]) => (
-              <div key={subject} className="progress-item">
-                <div className="progress-label">
-                  <span className="subject-name">{subject.charAt(0).toUpperCase() + subject.slice(1)}</span>
-                  <span className="percentage">{percentage}%</span>
-                </div>
-                <div className="progress-bar">
-                  <div
-                    className="progress-fill"
-                    style={{ width: `${percentage}%` }}
-                  ></div>
-                </div>
-              </div>
-            ))}
+        {profileData && (
+          <div className="progress-section">
+            <h3>Прогресс обучения</h3>
+            <ProgressChart
+              subjects={profileData.progress || {}}
+              customSubjects={profileData.customSubjects || []}
+            />
           </div>
-        </div>
+        )}
 
         {/* Recent Activity */}
-        <div className="activity-section">
-          <h3>Недавняя активность</h3>
-          <ul className="activity-list">
-            <li>Завершил урок "Present Simple" - 2 дня назад</li>
-            <li>Получил достижение "Мастер английского" - 5 дней назад</li>
-            <li>Изучил 50 новых слов - неделя назад</li>
-            <li>Пройден тест по грамматике - 2 недели назад</li>
-          </ul>
-        </div>
+        <History history={history} />
       </div>
     </main>
   )

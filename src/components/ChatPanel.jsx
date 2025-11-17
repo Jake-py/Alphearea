@@ -55,7 +55,7 @@ function ChatPanel({ isOpen, onClose }) {
   return (
     <div className="chat-panel">
       <div className="chat-header">
-        <h3>Meta-Llama-3.1-8B-Instruct</h3>
+        <h3>JARVIS 2B</h3>
         <button onClick={onClose} className="close-button">×</button>
       </div>
       <div className="chat-messages">

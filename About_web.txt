@@ -6,7 +6,7 @@ Alphearea — это инновационная образовательная �
 
 ### Ключевые особенности:
 - **TDS (Too Damn Smart)**: Интеллектуальная система тестирования с тремя режимами работы
-- **ИИ-ассистент**: Интеграция с Meta-Llama-3.1-8B-Instruct для генерации тестов и чата
+- **ИИ-ассистент**: Интеграция с JARVIS 2B (локальная копия Gemma2:2b) для генерации тестов и чата
 - **Многоязычная поддержка**: Материалы на нескольких языках
 - **Система аккаунтов**: Полноценное управление пользователями с профилями
 - **Парсинг материалов**: Поддержка различных форматов файлов (PDF, DOCX, TXT)
@@ -181,7 +181,7 @@ Alphearea — это инновационная образовательная �
 
 ## Alphearea haqida (O'zbekcha)
 
-Alphearea - bu innovatsion ta'lim platformasi bo'lib, an'anaviy ta'lim usullarini zamonaviy sun'iy intellekt texnologiyalari bilan birlashtiradi. Ingliz, koreys, rus tillarini, falsafa, psixologiya, matematika, dasturlash va elektronikani o'rganish uchun tuzilgan materiallar taqdim etadi. Maqsad - sifatli ta'limni sun'iy intellekt yordami bilan ta'minlash. Saytda Gemma2 sun'iy intellekti ishlatiladi.
+Saytda JARVIS 2B (Gemma2:2b lokal nusxasi) sun'iy intellekti ishlatiladi.
 
 Текущая стоимость: $500,000 - $2,000,000. Идея - оптимизация процесса обучения с помощью ИИ и улучшение системы тестирования.
 

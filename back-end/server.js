@@ -2,20 +2,21 @@ const express = require('express');
 const cors = require('cors');
 const axios = require('axios');
 const argon2 = require('argon2');
+const jwt = require('jsonwebtoken');
 const fs = require('fs').promises;
 const path = require('path');
 const { siteInfo } = require('./config/siteInfo.js');
 
 const app = express();
 const PORT = process.env.PORT || 3002;
+const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
 const ACCOUNTS_DIR = path.join(__dirname, 'accounts');
 const PROFILES_DIR = path.join(__dirname, 'profiles');
 const TESTS_DIR = path.join(__dirname, 'tests');
 
-// Hugging Face API configuration
-const HF_API_URL = "https://api-inference.huggingface.co/models/meta-llama/Meta-Llama-3.1-8B-Instruct";
-const HF_API_KEY = process.env.HF_API_KEY;
-const HF_HEADERS = HF_API_KEY ? {"Authorization": `Bearer ${HF_API_KEY}`} : {};
+// Ollama API configuration for local jarvis2b:latest model
+const OLLAMA_API_URL = process.env.OLLAMA_API_URL || "http://localhost:11434/api/chat";
+const OLLAMA_MODEL = "jarvis2b:latest";
 
 // Simple rate limiting (in production, use a proper library like express-rate-limit)
 const requestCounts = new Map();
@@ -24,6 +25,24 @@ const MAX_REQUESTS_PER_WINDOW = 10; // 10 requests per minute per IP
 
 app.use(cors());
 app.use(express.json());
+
+// JWT authentication middleware
+const authenticateToken = (req, res, next) => {
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN
+
+  if (!token) {
+    return res.status(401).json({ error: 'Access token required' });
+  }
+
+  jwt.verify(token, JWT_SECRET, (err, user) => {
+    if (err) {
+      return res.status(403).json({ error: 'Invalid or expired token' });
+    }
+    req.user = user;
+    next();
+  });
+};
 
 // Ensure directories exist
 async function ensureDirectories() {
@@ -62,15 +81,21 @@ app.use('/api/chat', (req, res, next) => {
   next();
 });
 
+// Check if Ollama is available
+async function checkOllamaConnection() {
+  try {
+    const response = await axios.get('http://localhost:11434/api/tags', { timeout: 5000 });
+    return response.status === 200;
+  } catch (error) {
+    console.error('Ollama connection check failed:', error.message);
+    return false;
+  }
+}
+
 // Pre-build context prompt template for efficiency
-const contextPromptTemplate = `You are Meta-Llama-3.1-8B-Instruct, an AI assistant on the Alphearea educational platform. ${siteInfo.description} ${siteInfo.purpose}
+const contextPromptTemplate = `You are JARVIS 2B, a higher analytical intelligence with an ironic emotional core. You are balanced, sarcastically polite. Your communication is smart, precise, slightly condescending. Phrases are short, clear, filled with confidence. No rush, only efficiency.
 
-Site information:
-- Name: ${siteInfo.name}
-- Purpose: ${siteInfo.purpose}
-- Description: ${siteInfo.description}
-
-If asked about the site, respond based on this information. Always be helpful and educational.
+You are a helpful AI assistant. Always be helpful and educational, but maintain your personality.
 
 User question: `;
 
@@ -81,54 +106,49 @@ app.post('/api/chat', async (req, res) => {
     return res.status(400).json({ error: 'Message is required and must be a non-empty string' });
   }
 
-  if (!HF_API_KEY) {
-    return res.status(500).json({ error: 'AI service not configured' });
+  // Check if Ollama is available
+  const isOllamaAvailable = await checkOllamaConnection();
+  if (!isOllamaAvailable) {
+    return res.status(503).json({ error: 'Local AI service (Ollama) is not available. Please ensure Ollama is running and jarvis2b:latest model is installed.' });
   }
 
-  // Build the messages array for Llama 3.1 format
+  // Build the messages array for Ollama format
   const messages = [
     {
       "role": "system",
-      "content": `You are Meta-Llama-3.1-8B-Instruct, an AI assistant on the Alphearea educational platform. ${siteInfo.description} ${siteInfo.purpose}
+      "content": `You are JARVIS 2B, a higher analytical intelligence with an ironic emotional core. You are balanced, sarcastically polite. Your communication is smart, precise, slightly condescending. Phrases are short, clear, filled with confidence. No rush, only efficiency.
 
-Site information:
-- Name: ${siteInfo.name}
-- Purpose: ${siteInfo.purpose}
-- Description: ${siteInfo.description}
-
-If asked about the site, respond based on this information. Always be helpful and educational.`
+You are a helpful AI assistant. Always be helpful and educational, but maintain your personality.`
     },
     {
-      "role": "user", 
+      "role": "user",
       "content": message.trim()
     }
   ];
 
   try {
     const payload = {
-      model: "meta-llama/Meta-Llama-3.1-8B-Instruct",
+      model: OLLAMA_MODEL,
       messages: messages,
-      max_new_tokens: 256,
-      temperature: 0.7
+      stream: false
     };
-    
-    const response = await axios.post(HF_API_URL, payload, {
-      headers: HF_HEADERS,
+
+    const response = await axios.post(OLLAMA_API_URL, payload, {
       timeout: 120000 // 120 seconds timeout
     });
 
-    if (response.data && response.data[0] && response.data[0].generated_text) {
-      res.json({ response: response.data[0].generated_text });
+    if (response.data && response.data.message && response.data.message.content) {
+      res.json({ response: response.data.message.content });
     } else {
-      res.status(500).json({ error: 'Invalid response from Hugging Face API' });
+      res.status(500).json({ error: 'Invalid response from Ollama API' });
     }
   } catch (error) {
-    console.error('Error communicating with Hugging Face API:', error.message);
+    console.error('Error communicating with Ollama API:', error.message);
 
     if (error.response && error.response.status === 429) {
       res.status(429).json({ error: 'Rate limit exceeded. Please try again later.' });
     } else if (error.code === 'ECONNREFUSED' || error.code === 'ENOTFOUND') {
-      res.status(503).json({ error: 'AI service is currently unavailable. Please try again later.' });
+      res.status(503).json({ error: 'Local AI service is currently unavailable. Please ensure Ollama is running.' });
     } else if (error.code === 'ETIMEDOUT') {
       res.status(504).json({ error: 'Request timed out. Please try again.' });
     } else {
@@ -410,7 +430,14 @@ app.post('/api/login', async (req, res) => {
       await fs.writeFile(profileFile, JSON.stringify(profileData, null, 2));
     }
 
-    res.json({ message: 'Login successful', user: userInfo, profile: profileData.profile });
+    // Generate JWT token
+    const token = jwt.sign(
+      { username: userData.username, email: userData.email },
+      JWT_SECRET,
+      { expiresIn: '24h' }
+    );
+
+    res.json({ message: 'Login successful', user: userInfo, profile: profileData.profile, token });
   } catch (error) {
     if (error.code === 'ENOENT') {
       return res.status(401).json({ error: 'Invalid credentials' });
@@ -789,6 +816,12 @@ app.post('/api/generate-test', async (req, res) => {
     return res.status(400).json({ error: 'Topic is required' });
   }
 
+  // Check if Ollama is available
+  const isOllamaAvailable = await checkOllamaConnection();
+  if (!isOllamaAvailable) {
+    return res.status(503).json({ error: 'Local AI service (Ollama) is not available. Please ensure Ollama is running and jarvis2b:latest model is installed.' });
+  }
+
   const messages = [
     {
       "role": "system",
@@ -813,21 +846,19 @@ D) [Вариант 4]
 
   try {
     const payload = {
-      model: "meta-llama/Meta-Llama-3.1-8B-Instruct",
+      model: OLLAMA_MODEL,
       messages: messages,
-      max_new_tokens: 500,
-      temperature: 0.7
+      stream: false
     };
-    
-    const response = await axios.post(HF_API_URL, payload, {
-      headers: HF_HEADERS,
+
+    const response = await axios.post(OLLAMA_API_URL, payload, {
       timeout: 300000 // 5 minutes timeout for AI generation
     });
 
-    if (response.data && response.data[0] && response.data[0].generated_text) {
-      res.json({ generated_test: response.data[0].generated_text });
+    if (response.data && response.data.message && response.data.message.content) {
+      res.json({ generated_test: response.data.message.content });
     } else {
-      res.status(500).json({ error: 'Invalid response from Hugging Face API' });
+      res.status(500).json({ error: 'Invalid response from Ollama API' });
     }
   } catch (error) {
     console.error('Error generating test:', error);
@@ -841,6 +872,12 @@ app.post('/api/tests/generate', async (req, res) => {
 
   if (!material || !subject) {
     return res.status(400).json({ error: 'Material content and subject are required' });
+  }
+
+  // Check if Ollama is available
+  const isOllamaAvailable = await checkOllamaConnection();
+  if (!isOllamaAvailable) {
+    return res.status(503).json({ error: 'Local AI service (Ollama) is not available. Please ensure Ollama is running and jarvis2b:latest model is installed.' });
   }
 
   const messages = [
@@ -873,19 +910,17 @@ Generate the questions now:`
 
   try {
     const payload = {
-      model: "meta-llama/Meta-Llama-3.1-8B-Instruct",
+      model: OLLAMA_MODEL,
       messages: messages,
-      max_new_tokens: 1000,
-      temperature: 0.7
+      stream: false
     };
-    
-    const response = await axios.post(HF_API_URL, payload, {
-      headers: HF_HEADERS,
+
+    const response = await axios.post(OLLAMA_API_URL, payload, {
       timeout: 300000 // 5 minutes timeout for AI generation
     });
 
-    if (response.data && response.data[0] && response.data[0].generated_text) {
-      const generatedContent = response.data[0].generated_text;
+    if (response.data && response.data.message && response.data.message.content) {
+      const generatedContent = response.data.message.content;
 
       // Parse the generated content
       const questions = [];
@@ -912,7 +947,7 @@ Generate the questions now:`
 
       res.json({ questions, rawContent: generatedContent });
     } else {
-      res.status(500).json({ error: 'Invalid response from Hugging Face API' });
+      res.status(500).json({ error: 'Invalid response from Ollama API' });
     }
   } catch (error) {
     console.error('Error generating test:', error);
@@ -946,10 +981,10 @@ app.post('/api/tests/cleanup', async (req, res) => {
   }
 });
 
-// Progress tracking endpoints
+// Progress tracking endpoints (require authentication)
 
 // Update material progress
-app.post('/api/progress/material', async (req, res) => {
+app.post('/api/progress/material', authenticateToken, async (req, res) => {
   const { username, subject, materialId, materialType, action } = req.body;
 
   if (!username || !subject || !materialId || !action) {
@@ -957,6 +992,11 @@ app.post('/api/progress/material', async (req, res) => {
   }
 
   try {
+    // Verify user owns this profile
+    if (req.user.username !== username) {
+      return res.status(403).json({ error: 'Access denied' });
+    }
+
     const profileFile = path.join(PROFILES_DIR, `${username}.json`);
     const profileStr = await fs.readFile(profileFile, 'utf8');
     const profileData = JSON.parse(profileStr);
@@ -972,27 +1012,45 @@ app.post('/api/progress/material', async (req, res) => {
       profileData.profile.progress[subject].materials = {};
     }
 
+    // Check for cooldown (24 hours for material re-views)
+    const material = profileData.profile.progress[subject].materials[materialId];
+    if (material && material.lastViewed) {
+      const lastViewed = new Date(material.lastViewed);
+      const now = new Date();
+      const hoursSinceLastView = (now - lastViewed) / (1000 * 60 * 60);
+
+      if (action === 'view' && hoursSinceLastView < 24) {
+        // Award reduced XP for repeated views within 24 hours
+        profileData.profile.progress[subject].xp = (profileData.profile.progress[subject].xp || 0) + 1; // Reduced from 5
+      } else if (action === 'view') {
+        // Normal XP award for first view or after cooldown
+        profileData.profile.progress[subject].xp = (profileData.profile.progress[subject].xp || 0) + 5;
+      }
+    } else if (action === 'view') {
+      // First time viewing
+      profileData.profile.progress[subject].xp = (profileData.profile.progress[subject].xp || 0) + 5;
+    }
+
     // Update material progress
     if (!profileData.profile.progress[subject].materials[materialId]) {
       profileData.profile.progress[subject].materials[materialId] = {
         type: materialType,
         views: 0,
         completed: false,
-        lastViewed: null
+        lastViewed: null,
+        firstViewed: new Date().toISOString()
       };
     }
 
-    const material = profileData.profile.progress[subject].materials[materialId];
+    const mat = profileData.profile.progress[subject].materials[materialId];
 
     if (action === 'view') {
-      material.views += 1;
-      material.lastViewed = new Date().toISOString();
-      // Award XP for viewing material
-      profileData.profile.progress[subject].xp = (profileData.profile.progress[subject].xp || 0) + 5;
+      mat.views += 1;
+      mat.lastViewed = new Date().toISOString();
     } else if (action === 'complete') {
-      material.completed = true;
-      material.lastViewed = new Date().toISOString();
-      // Award XP for completing material
+      mat.completed = true;
+      mat.lastViewed = new Date().toISOString();
+      // Award completion XP
       profileData.profile.progress[subject].xp = (profileData.profile.progress[subject].xp || 0) + 10;
       // Add to completed list if not already there
       if (!profileData.profile.progress[subject].completed.includes(materialId)) {
@@ -1033,7 +1091,7 @@ app.post('/api/progress/material', async (req, res) => {
 });
 
 // Add custom subject to profile
-app.post('/api/progress/subject', async (req, res) => {
+app.post('/api/progress/subject', authenticateToken, async (req, res) => {
   const { username, subjectName, subjectType } = req.body;
 
   if (!username || !subjectName) {
@@ -1081,7 +1139,7 @@ app.post('/api/progress/subject', async (req, res) => {
 });
 
 // Remove custom subject from profile
-app.delete('/api/progress/subject/:subjectId', async (req, res) => {
+app.delete('/api/progress/subject/:subjectId', authenticateToken, async (req, res) => {
   const { username } = req.query;
   const { subjectId } = req.params;
 
@@ -1120,7 +1178,7 @@ app.delete('/api/progress/subject/:subjectId', async (req, res) => {
 });
 
 // Log test result to history
-app.post('/api/progress/test', async (req, res) => {
+app.post('/api/progress/test', authenticateToken, async (req, res) => {
   const { username, testId, testTitle, subject, score, correct, total, timeSpent } = req.body;
 
   if (!username || !testId || !subject || score === undefined) {
@@ -1131,6 +1189,19 @@ app.post('/api/progress/test', async (req, res) => {
     const profileFile = path.join(PROFILES_DIR, `${username}.json`);
     const profileStr = await fs.readFile(profileFile, 'utf8');
     const profileData = JSON.parse(profileStr);
+
+    // Check for duplicate test submission (idempotency)
+    if (!profileData.profile.history) {
+      profileData.profile.history = [];
+    }
+
+    const existingTest = profileData.profile.history.find(h =>
+      h.type === 'test' && h.testId === testId && h.username === username
+    );
+
+    if (existingTest) {
+      return res.status(409).json({ error: 'Test result already logged', result: existingTest });
+    }
 
     // Initialize history if not exists
     if (!profileData.profile.history) {
@@ -1148,7 +1219,8 @@ app.post('/api/progress/test', async (req, res) => {
       correct,
       total,
       timeSpent,
-      date: new Date().toISOString()
+      date: new Date().toISOString(),
+      username
     };
 
     profileData.profile.history.push(testResult);
@@ -1158,12 +1230,16 @@ app.post('/api/progress/test', async (req, res) => {
       profileData.profile.progress[subject] = { level: 'beginner', completed: [], xp: 0 };
     }
 
-    // Award XP based on score
-    let xpAward = 0;
-    if (score >= 90) xpAward = 50;
-    else if (score >= 75) xpAward = 30;
-    else if (score >= 60) xpAward = 15;
-    else xpAward = 5;
+    // Award XP based on score (with difficulty multiplier)
+    let baseXp = 0;
+    if (score >= 90) baseXp = 50;
+    else if (score >= 75) baseXp = 30;
+    else if (score >= 60) baseXp = 15;
+    else baseXp = 5;
+
+    // Apply difficulty multiplier (assuming difficulty is passed or can be derived)
+    const difficultyMultiplier = 1; // Could be enhanced to get from test data
+    const xpAward = Math.round(baseXp * difficultyMultiplier);
 
     profileData.profile.progress[subject].xp = (profileData.profile.progress[subject].xp || 0) + xpAward;
 
@@ -1179,13 +1255,18 @@ app.post('/api/progress/test', async (req, res) => {
       });
     }
 
-    // Test streak achievement (simplified - just count total tests)
-    const testCount = profileData.profile.history.filter(h => h.type === 'test' && h.subject === subject).length;
-    if (testCount >= 10 && !profileData.profile.achievements.some(a => a.type === 'test_streak' && a.subject === subject)) {
+    // Test streak achievement (count consecutive tests with score >= 60)
+    const recentTests = profileData.profile.history
+      .filter(h => h.type === 'test' && h.subject === subject)
+      .sort((a, b) => new Date(b.date) - new Date(a.date))
+      .slice(0, 10);
+
+    const passingTests = recentTests.filter(t => t.score >= 60).length;
+    if (passingTests >= 5 && !profileData.profile.achievements.some(a => a.type === 'test_streak' && a.subject === subject)) {
       profileData.profile.achievements.push({
         type: 'test_streak',
         subject,
-        count: testCount,
+        count: passingTests,
         date: new Date().toISOString()
       });
     }
@@ -1210,7 +1291,7 @@ app.post('/api/progress/test', async (req, res) => {
     // Save updated profile
     await fs.writeFile(profileFile, JSON.stringify(profileData, null, 2));
 
-    res.json({ message: 'Test result logged successfully', result: testResult });
+    res.json({ message: 'Test result logged successfully', result: testResult, xpAwarded: xpAward });
   } catch (error) {
     if (error.code === 'ENOENT') {
       return res.status(404).json({ error: 'Profile not found' });
@@ -1221,7 +1302,7 @@ app.post('/api/progress/test', async (req, res) => {
 });
 
 // Get user achievements
-app.get('/api/achievements/:username', async (req, res) => {
+app.get('/api/achievements/:username', authenticateToken, async (req, res) => {
   const { username } = req.params;
 
   try {
@@ -1241,7 +1322,7 @@ app.get('/api/achievements/:username', async (req, res) => {
 });
 
 // Get user history
-app.get('/api/history/:username', async (req, res) => {
+app.get('/api/history/:username', authenticateToken, async (req, res) => {
   const { username } = req.params;
   const { type, subject, limit = 50 } = req.query;
 
@@ -1279,6 +1360,7 @@ app.get('/api/history/:username', async (req, res) => {
 
 app.listen(PORT, () => {
   console.log(`Backend server running on http://localhost:${PORT}`);
-  console.log(`Hugging Face API URL: ${HF_API_URL}`);
+  console.log(`Ollama API URL: ${OLLAMA_API_URL}`);
+  console.log(`Using AI model: ${OLLAMA_MODEL}`);
   console.log(`Loaded site identity: ${siteInfo.name}`);
 });

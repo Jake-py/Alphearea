@@ -15,7 +15,12 @@ export default defineConfig({
   server: { historyApiFallback: true },
   build: {
     sourcemap: false, // отключаем eval для карт кода
-    minify: 'esbuild', // используем esbuild вместо terser для избежания eval
+    minify: 'terser', // используем terser для совместимости с CSP
+    terserOptions: {
+      compress: {
+        pure_funcs: ['console.log'], // удаляем console.log
+      }
+    },
     rollupOptions: {
       output: {
         manualChunks: {
