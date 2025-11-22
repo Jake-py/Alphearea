@@ -3,14 +3,14 @@ function About() {
     <main>
       <h2>О сайте</h2>
       <div className="about-content">
-        <div className="about-card">
+        <div className="about-card" style ={{ animationDelay: '0.1s', background: 'rgba(10, 83, 126, 1)'}}>
           <h3>Alphearea</h3>
           <p>Alphearea — это современная образовательная платформа для изучения языков и развития навыков. Здесь вы найдете материалы для английского, корейского и русского языков, а также разделы по философии, психологии, математике, программированию и электронике.</p>
           <p>Наша миссия — сделать обучение доступным, интересным и эффективным с помощью современных технологий и интерактивных подходов.</p>
         </div>
-        <div className="about-card">
+        <div className="about-card" style ={{ animationDelay: '0.2s', background: 'rgba(10, 83, 126, 1)'}}>
           <h3>TDS (Too Damn Smart)</h3>
-          <p>TDS (Too Damn Smart) — интеллектуальная платформа для тестирования и анализа знаний. Здесь технологии работают не вместо человека, а вместе с ним.</p>
+          <p>TDS (Too Damn Smart) технологическая компания, создающая умные решения, которые работают вместе с человеком. Мы разрабатываем продукты с ИИ и без него, но всегда с одним принципом: точность, эффективность и реальная польза.</p>
           <p>Система TDS включает:</p>
           <ul>
             <li>Стандартный режим загрузки тестов</li>
@@ -19,7 +19,7 @@ function About() {
             <li>Автоматическую проверку и валидацию</li>
           </ul>
         </div>
-        <div className="about-card">
+        <div className="about-card" style ={{ animationDelay: '0.3s', background: 'rgba(10, 83, 126, 1)'}}>
           <h3>Наши возможности</h3>
           <p>Платформа предлагает:</p>
           <ul>
@@ -29,6 +29,21 @@ function About() {
             <li><strong>Тестирование:</strong> Умная система создания и прохождения тестов</li>
             <li><strong>ИИ-ассистент:</strong> Помощник в обучении на основе JARVIS 2B (локальная копия Gemma2:2b)</li>
           </ul>
+        </div>
+        <div className="about-card" style ={{ animationDelay: '0.4s', background: 'rgba(10, 83, 126, 1)'}}>
+          <h3>Контакты</h3>
+          <p>Если у вас возникли вопросы или предложения, пожалуйста, свяжитесь с нами:</p>
+          <ul>
+            <li>Telegram: https://t.me/Alphearea</li>
+            <li>Телефон: +998 91 395 00 01</li>
+            <li>Почта: red717ice@gmail.com</li>
+          </ul>
+        </div>
+        <div className="about-card" style ={{ animationDelay: '0.5s',  background: 'rgba(20, 50, 184, 1)'}}>
+          <h3>Команда</h3>
+          <p>Проект разрабатывалась в рамках проекта TDS (Too Damn Smart)</p>
+          <li>RΞD ICΞ - Главный разработчик и архитектор системы</li>
+          <li>Jibi - UX/UI дизайнер</li>
         </div>
       </div>
     </main>

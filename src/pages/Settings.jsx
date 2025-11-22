@@ -201,11 +201,17 @@ function Settings() {
 
         {/* Progress Chart */}
         {profileData && (
-          <div className="progress-section">
+          <div
+          style={{ marginTop: '20px' }}
+          className="progress-section">
             <h3>Прогресс обучения</h3>
             <ProgressChart
               subjects={profileData.progress || {}}
               customSubjects={profileData.customSubjects || []}
+              level={profileData.level}
+              xp={profileData.xp}
+              achievements={profileData.achievements}
+              completed={profileData.completed}
             />
           </div>
         )}

@@ -1,31 +1,46 @@
-import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { useState } from 'react';
+import { Link } from 'react-router-dom';
 
 function Sidebar({ isOpen }) {
-  const [openCategories, setOpenCategories] = useState({})
-  const [openSubjects, setOpenSubjects] = useState({})
-  const [openSubmenus, setOpenSubmenus] = useState({})
+  const [openCategories, setOpenCategories] = useState({});
+  const [openSubjects, setOpenSubjects] = useState({});
+  const [openSubmenus, setOpenSubmenus] = useState({});
 
-  const toggleCategory = (category) => {
+  const toggleCategory = (category, e) => {
+    e.stopPropagation();
     setOpenCategories(prev => ({
       ...prev,
       [category]: !prev[category]
-    }))
-  }
+    }));
+  };
 
-  const toggleSubject = (subject) => {
+  const toggleSubject = (subject, e) => {
+    e.stopPropagation();
     setOpenSubjects(prev => ({
       ...prev,
       [subject]: !prev[subject]
-    }))
-  }
+    }));
+  };
 
-  const toggleSubmenu = (submenu) => {
+  const toggleSubmenu = (submenu, e) => {
+    e.stopPropagation();
     setOpenSubmenus(prev => ({
       ...prev,
       [submenu]: !prev[submenu]
-    }))
-  }
+    }));
+  };
+
+  const handleItemHover = (e, isHover) => {
+    // Simple hover effect without GSAP
+    const target = e.currentTarget;
+    if (isHover) {
+      target.style.backgroundColor = 'rgba(79, 195, 247, 0.1)';
+      target.style.paddingLeft = '15px';
+    } else {
+      target.style.backgroundColor = 'transparent';
+      target.style.paddingLeft = '10px';
+    }
+  };
 
   const categories = [
     {
@@ -145,61 +160,121 @@ function Sidebar({ isOpen }) {
         }
       ]
     }
-  ]
+  ];
 
   return (
-    <aside className={`sidebar ${isOpen ? 'open' : 'closed'}`}>
-      <h3>Инструменты для учебы</h3>
-      <div className="categories">
-        {categories.map(cat => (
-          <div key={cat.name} className="category">
-            <div className="category-header" onClick={() => toggleCategory(cat.name)}>
-              <img src={cat.icon} alt={cat.name} className="category-icon" />
-              <h4>{cat.name}</h4>
-              <span className="arrow">{openCategories[cat.name] ? '▼' : '▶'}</span>
-            </div>
-            <ul className={`category-subjects ${openCategories[cat.name] ? 'show' : ''}`}>
-              {cat.subjects.map(subject => (
-                <li key={subject.name} className="subject">
-                  <Link to={subject.path} onClick={(e) => e.stopPropagation()}>{subject.name}</Link>
-                  {subject.subitems && subject.subitems.length > 0 && (
-                    <ul className={`sub-menu ${openSubjects[subject.name] ? 'show' : ''}`}>
-                      {subject.subitems.map(subitem => (
-                        subitem.subitems ? (
-                          <li key={subitem.name} className="has-submenu" onClick={(e) => { e.stopPropagation(); toggleSubmenu(`${subject.name}-${subitem.name}`) }}>
-                            {subitem.name}
-                            <ul className={`sub-sub-menu ${openSubmenus[`${subject.name}-${subitem.name}`] ? 'show' : ''}`}>
-                              {subitem.subitems.map(subSubitem => (
-                                <li key={subSubitem.name}>
-                                  <Link to={subSubitem.path} onClick={(e) => e.stopPropagation()}>{subSubitem.name}</Link>
-                                </li>
-                              ))}
-                            </ul>
-                          </li>
-                        ) : (
-                          <li key={subitem.name}>
-                            <Link to={subitem.path} onClick={(e) => e.stopPropagation()}>{subitem.name}</Link>
-                          </li>
-                        )
-                      ))}
-                    </ul>
-                  )}
-                </li>
-              ))}
-            </ul>
+    <div className="sidebar-container">
+      <aside className={`sidebar ${isOpen ? 'open' : 'closed'}`}>
+        <div className="sidebar-content">
+          <h3>Инструменты для учебы</h3>
+          <div className="categories">
+            {categories.map(category => (
+              <div 
+                key={category.name}
+                className="category category-item"
+                onMouseEnter={(e) => handleItemHover(e, true)}
+                onMouseLeave={(e) => handleItemHover(e, false)}
+                onClick={(e) => toggleCategory(category.name, e)}
+              >
+                <div className="category-header">
+                  <h4>{category.name}</h4>
+                  <span className="arrow">{openCategories[category.name] ? '▼' : '▶'}</span>
+                </div>
+                {openCategories[category.name] && (
+                  <div className="submenu">
+                    {category.subjects.map(subject => (
+                      <div 
+                        key={subject.name}
+                        className="subject"
+                        onMouseEnter={(e) => handleItemHover(e, true)}
+                        onMouseLeave={(e) => handleItemHover(e, false)}
+                        onClick={(e) => toggleSubject(subject.name, e)}
+                      >
+                        <div className="subject-header">
+                          <Link to={subject.path}>{subject.name}</Link>
+                          {subject.subitems && (
+                            <span className="arrow">
+                              {openSubjects[subject.name] ? '▼' : '▶'}
+                            </span>
+                          )}
+                        </div>
+                        {subject.subitems && openSubjects[subject.name] && (
+                          <div className="subject-submenu">
+                            {subject.subitems.map((item, index) => (
+                              <div 
+                                key={index}
+                                className="submenu-item"
+                                onMouseEnter={(e) => handleItemHover(e, true)}
+                                onMouseLeave={(e) => handleItemHover(e, false)}
+                              >
+                                {item.path ? (
+                                  <Link to={item.path}>{item.name}</Link>
+                                ) : (
+                                  <div onClick={(e) => toggleSubmenu(item.name, e)}>
+                                    {item.name}
+                                  </div>
+                                )}
+                                {item.subitems && (
+                                  <div className={`nested-submenu ${openSubmenus[item.name] ? 'open' : ''}`}>
+                                    {item.subitems.map((subitem, subIndex) => (
+                                      <Link 
+                                        key={subIndex} 
+                                        to={subitem.path}
+                                        className="nested-submenu-item"
+                                      >
+                                        {subitem.name}
+                                      </Link>
+                                    ))}
+                                  </div>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ))}
           </div>
-        ))}
-      </div>
 
-      <hr />
-      <h3>Режимы проверки знаний</h3>
-      <ul>
-        <li><Link to="/test-settings">Пройти тест</Link></li>
-        <li>Ответить на вопросы</li>
-        <li>И прочее</li>
-      </ul>
-    </aside>
-  )
+          <hr />
+          <h3>Режимы проверки знаний</h3>
+          <ul className="knowledge-tests">
+            <li>
+              <Link 
+                to="/test-settings"
+                className="test-link"
+                onMouseEnter={(e) => handleItemHover(e, true)}
+                onMouseLeave={(e) => handleItemHover(e, false)}
+              >
+                Пройти тест
+              </Link>
+            </li>
+            <li>
+              <span 
+                className="test-link"
+                onMouseEnter={(e) => handleItemHover(e, true)}
+                onMouseLeave={(e) => handleItemHover(e, false)}
+              >
+                Ответить на вопросы
+              </span>
+            </li>
+            <li>
+              <span 
+                className="test-link"
+                onMouseEnter={(e) => handleItemHover(e, true)}
+                onMouseLeave={(e) => handleItemHover(e, false)}
+              >
+                И прочее
+              </span>
+            </li>
+          </ul>
+        </div>
+      </aside>
+    </div>
+  );
 }
 
-export default Sidebar
+export default Sidebar;

@@ -33,3 +33,5 @@ dist-ssr
 # User data
 back-end/accounts/
 back-end/profiles/
+node_modules/
+dist/

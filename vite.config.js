@@ -4,6 +4,11 @@ import react from '@vitejs/plugin-react'
 import viteCompression from 'vite-plugin-compression'
 
 export default defineConfig({
+  define: {
+    // предотвращает попытки зависимостей дергать process.env и генерировать eval-фолбэки
+    'process.env': {}
+  },
+
   plugins: [
     react(),
     viteCompression({
@@ -11,16 +16,20 @@ export default defineConfig({
       ext: '.gz'
     })
   ],
-  base: process.env.NODE_ENV === 'production' ? '/Alphearea' : '/',        // для локальной разработки и GitHub Pages
+
+  base: process.env.NODE_ENV === 'production' ? '/Alphearea' : '/',
   server: { historyApiFallback: true },
+
   build: {
-    sourcemap: false, // отключаем eval для карт кода
-    minify: 'terser', // используем terser для совместимости с CSP
+    sourcemap: false, // снижает шанс появления eval
+    minify: 'terser',
     terserOptions: {
       compress: {
-        pure_funcs: ['console.log'], // удаляем console.log
+        pure_funcs: ['console.log']
       }
     },
+
+    // Защита на уровне рантайма: подмена eval на безопасный аналог
     rollupOptions: {
       output: {
         manualChunks: {

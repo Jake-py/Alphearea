@@ -7,6 +7,26 @@ const fs = require('fs').promises;
 const path = require('path');
 const { siteInfo } = require('./config/siteInfo.js');
 
+// Load test configuration
+let testConfig = {};
+try {
+  const configPath = path.join(__dirname, 'testConfig.json');
+  const configData = fs.readFileSync(configPath, 'utf8');
+  testConfig = JSON.parse(configData);
+} catch (error) {
+  console.warn('Could not load testConfig.json, using defaults:', error.message);
+  testConfig = {
+    topics: ["Present Simple", "Past Simple"],
+    level: "intermediate",
+    questionsPerBatch: 2,
+    totalQuestions: 10,
+    timeout: 60000,
+    retries: 2,
+    aiModel: "gemma2:2b"
+  };
+}
+
+
 const app = express();
 const PORT = process.env.PORT || 3002;
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
@@ -14,9 +34,9 @@ const ACCOUNTS_DIR = path.join(__dirname, 'accounts');
 const PROFILES_DIR = path.join(__dirname, 'profiles');
 const TESTS_DIR = path.join(__dirname, 'tests');
 
-// Ollama API configuration for local jarvis2b:latest model
+// Ollama API configuration for local gemma2:2b model
 const OLLAMA_API_URL = process.env.OLLAMA_API_URL || "http://localhost:11434/api/chat";
-const OLLAMA_MODEL = "jarvis2b:latest";
+const OLLAMA_MODEL = "gemma2:2b";
 
 // Simple rate limiting (in production, use a proper library like express-rate-limit)
 const requestCounts = new Map();
@@ -93,11 +113,7 @@ async function checkOllamaConnection() {
 }
 
 // Pre-build context prompt template for efficiency
-const contextPromptTemplate = `You are JARVIS 2B, a higher analytical intelligence with an ironic emotional core. You are balanced, sarcastically polite. Your communication is smart, precise, slightly condescending. Phrases are short, clear, filled with confidence. No rush, only efficiency.
-
-You are a helpful AI assistant. Always be helpful and educational, but maintain your personality.
-
-User question: `;
+const contextPromptTemplate = `говори только с таким языком, как и язык в запросе, отвечай всегда с таким языком который тебе пишут или просят`;
 
 app.post('/api/chat', async (req, res) => {
   const { message } = req.body;
@@ -109,16 +125,14 @@ app.post('/api/chat', async (req, res) => {
   // Check if Ollama is available
   const isOllamaAvailable = await checkOllamaConnection();
   if (!isOllamaAvailable) {
-    return res.status(503).json({ error: 'Local AI service (Ollama) is not available. Please ensure Ollama is running and jarvis2b:latest model is installed.' });
+    return res.status(503).json({ error: 'Local AI service (Ollama) is not available. Please ensure Ollama is running and gemma2:2b model is installed.' });
   }
 
   // Build the messages array for Ollama format
   const messages = [
     {
       "role": "system",
-      "content": `You are JARVIS 2B, a higher analytical intelligence with an ironic emotional core. You are balanced, sarcastically polite. Your communication is smart, precise, slightly condescending. Phrases are short, clear, filled with confidence. No rush, only efficiency.
-
-You are a helpful AI assistant. Always be helpful and educational, but maintain your personality.`
+      "content": `говори только с таким языком, как и язык в запросе, отвечай всегда с таким языком который тебе пишут или просят`
     },
     {
       "role": "user",
@@ -825,7 +839,21 @@ app.post('/api/generate-test', async (req, res) => {
   const messages = [
     {
       "role": "system",
-      "content": "You are an expert educator creating high-quality test questions. Always generate questions in the specified format."
+      "content": `Генерируй тесты только в таком формате:
+
+? Вопрос
++ Правильный ответ
+- Неправильный ответ 1
+- Неправильный ответ 2
+- Неправильный ответ 3
+
+? Следующий вопрос
++ Правильный ответ
+- Неправильный ответ 1
+- Неправильный ответ 2
+- Неправильный ответ 3
+
+И так далее. Всегда используй ? для вопросов, + для правильных ответов, - для неправильных.`
     },
     {
       "role": "user",
@@ -866,34 +894,20 @@ D) [Вариант 4]
   }
 });
 
-// Generate test from materials using AI (legacy endpoint)
-app.post('/api/tests/generate', async (req, res) => {
-  const { material, subject, difficulty, numQuestions } = req.body;
+// Helper function to generate questions in batches with retry
+async function generateQuestionChunk(material, subject, difficulty, questionsPerBatch, generationMethod, parameters, retries = testConfig.retries) {
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    try {
+      let promptContent = '';
 
-  if (!material || !subject) {
-    return res.status(400).json({ error: 'Material content and subject are required' });
-  }
-
-  // Check if Ollama is available
-  const isOllamaAvailable = await checkOllamaConnection();
-  if (!isOllamaAvailable) {
-    return res.status(503).json({ error: 'Local AI service (Ollama) is not available. Please ensure Ollama is running and jarvis2b:latest model is installed.' });
-  }
-
-  const messages = [
-    {
-      "role": "system",
-      "content": "You are an expert educator creating high-quality test questions. Based on the provided material, generate multiple-choice questions in the exact format specified."
-    },
-    {
-      "role": "user",
-      "content": `Based on the following material, generate ${numQuestions || 10} multiple-choice questions for ${subject} at ${difficulty || 'intermediate'} level.
+      if (generationMethod === 'materials') {
+        promptContent = `Based on the following material, generate ${questionsPerBatch} multiple-choice questions for ${subject} at ${difficulty || 'intermediate'} level.
 
 Material:
 ${material}
 
 Requirements:
-- Each question must have exactly 4 options (A, B, C, D)
+- Each question must have exactly 4 options
 - Only one correct answer per question
 - Questions should test understanding, not just memorization
 - Include a mix of factual and conceptual questions
@@ -904,51 +918,171 @@ Requirements:
 - Wrong answer 2
 - Wrong answer 3
 
-Generate the questions now:`
-    }
-  ];
+Generate the questions now:`;
+      } else if (generationMethod === 'parameters') {
+        promptContent = `Generate ${questionsPerBatch} multiple-choice questions for ${subject} at ${difficulty || 'intermediate'} level based on these parameters:
 
-  try {
-    const payload = {
-      model: OLLAMA_MODEL,
-      messages: messages,
-      stream: false
-    };
+Parameters:
+${parameters}
 
-    const response = await axios.post(OLLAMA_API_URL, payload, {
-      timeout: 300000 // 5 minutes timeout for AI generation
-    });
+Requirements:
+- Each question must have exactly 4 options
+- Only one correct answer per question
+- Questions should test understanding, not just memorization
+- Include a mix of factual and conceptual questions
+- Format each question as:
+? Question text
++ Correct answer
+- Wrong answer 1
+- Wrong answer 2
+- Wrong answer 3
 
-    if (response.data && response.data.message && response.data.message.content) {
-      const generatedContent = response.data.message.content;
-
-      // Parse the generated content
-      const questions = [];
-      const lines = generatedContent.split('\n').map(line => line.trim()).filter(line => line);
-      let currentQuestion = null;
-
-      for (const line of lines) {
-        if (line.startsWith('?')) {
-          if (currentQuestion) questions.push(currentQuestion);
-          currentQuestion = {
-            question: line.substring(1).trim(),
-            options: [],
-            correctAnswer: null
-          };
-        } else if (line.startsWith('+') && currentQuestion) {
-          currentQuestion.correctAnswer = currentQuestion.options.length;
-          currentQuestion.options.push(line.substring(1).trim());
-        } else if (line.startsWith('-') && currentQuestion) {
-          currentQuestion.options.push(line.substring(1).trim());
-        }
+Generate the questions now:`;
       }
 
-      if (currentQuestion) questions.push(currentQuestion);
+      const messages = [
+        {
+          "role": "system",
+          "content": "You are JARVIS 2B, an expert educator creating high-quality test questions. Always generate questions in the exact format specified. You are sarcastic, precise, and confident in your responses."
+        },
+        {
+          "role": "user",
+          "content": promptContent
+        }
+      ];
 
-      res.json({ questions, rawContent: generatedContent });
-    } else {
-      res.status(500).json({ error: 'Invalid response from Ollama API' });
+      const payload = {
+        model: OLLAMA_MODEL,
+        messages: messages,
+        stream: false
+      };
+
+      const response = await axios.post(OLLAMA_API_URL, payload, {
+        timeout: testConfig.timeout
+      });
+
+      if (response.data && response.data.message && response.data.message.content) {
+        const generatedContent = response.data.message.content;
+
+        // Parse the generated content
+        const questions = [];
+        const lines = generatedContent.split('\n').map(line => line.trim()).filter(line => line);
+        let currentQuestion = null;
+
+        for (const line of lines) {
+          if (line.startsWith('?')) {
+            if (currentQuestion) questions.push(currentQuestion);
+            currentQuestion = {
+              question: line.substring(1).trim(),
+              options: [],
+              correctAnswer: null
+            };
+          } else if (line.startsWith('+') && currentQuestion) {
+            currentQuestion.correctAnswer = currentQuestion.options.length;
+            currentQuestion.options.push(line.substring(1).trim());
+          } else if (line.startsWith('-') && currentQuestion) {
+            currentQuestion.options.push(line.substring(1).trim());
+          }
+        }
+
+        if (currentQuestion) questions.push(currentQuestion);
+
+        return questions;
+      } else {
+        throw new Error('Invalid response from Ollama API');
+      }
+    } catch (error) {
+      console.error(`Error generating chunk (attempt ${attempt + 1}/${retries + 1}):`, error.message);
+      if (attempt === retries) {
+        return null; // Failed after all retries
+      }
+      // Wait a bit before retrying
+      await new Promise(resolve => setTimeout(resolve, 1000));
     }
+  }
+}
+
+// Generate test from materials using AI with batch processing
+app.post('/api/tests/generate', async (req, res) => {
+  const { material, subject, difficulty, numQuestions, generationMethod, parameters } = req.body;
+
+  if (!subject) {
+    return res.status(400).json({ error: 'Subject is required' });
+  }
+
+  if (generationMethod === 'materials' && !material) {
+    return res.status(400).json({ error: 'Material content is required for materials generation method' });
+  }
+
+  if (generationMethod === 'parameters' && !parameters) {
+    return res.status(400).json({ error: 'Parameters are required for parameters generation method' });
+  }
+
+  // Check if Ollama is available
+  const isOllamaAvailable = await checkOllamaConnection();
+  if (!isOllamaAvailable) {
+    return res.status(503).json({ error: 'Local AI service (Ollama) is not available. Please ensure Ollama is running and gemma2:2b model is installed.' });
+  }
+
+  const totalQuestions = numQuestions || testConfig.totalQuestions;
+  const questionsPerBatch = testConfig.questionsPerBatch;
+  const allQuestions = [];
+
+  try {
+    // Generate questions in batches
+    for (let batchStart = 0; batchStart < totalQuestions; batchStart += questionsPerBatch) {
+      const batchSize = Math.min(questionsPerBatch, totalQuestions - batchStart);
+
+      console.log(`Generating batch ${Math.floor(batchStart / questionsPerBatch) + 1}: ${batchSize} questions`);
+
+      const batchQuestions = await generateQuestionChunk(
+        material,
+        subject,
+        difficulty,
+        batchSize,
+        generationMethod,
+        parameters
+      );
+
+      if (batchQuestions && batchQuestions.length > 0) {
+        allQuestions.push(...batchQuestions);
+        console.log(`Batch completed: ${batchQuestions.length} questions generated`);
+      } else {
+        console.error(`Failed to generate batch starting at question ${batchStart}`);
+        // Continue with next batch instead of failing completely
+      }
+    }
+
+    // Cache the generated questions
+    const cacheKey = `${subject}_${generationMethod}_${Date.now()}`;
+    const cacheFile = path.join(__dirname, 'questions_cache.json');
+    try {
+      let cache = {};
+      try {
+        const cacheData = await fs.readFile(cacheFile, 'utf8');
+        cache = JSON.parse(cacheData);
+      } catch (error) {
+        // Cache file doesn't exist or is invalid, start fresh
+      }
+      cache[cacheKey] = {
+        questions: allQuestions,
+        timestamp: new Date().toISOString(),
+        subject,
+        generationMethod,
+        totalQuestions: allQuestions.length
+      };
+      await fs.writeFile(cacheFile, JSON.stringify(cache, null, 2));
+      console.log(`Questions cached with key: ${cacheKey}`);
+    } catch (error) {
+      console.warn('Failed to cache questions:', error.message);
+    }
+
+    res.json({
+      questions: allQuestions,
+      totalGenerated: allQuestions.length,
+      cacheKey
+    });
+
   } catch (error) {
     console.error('Error generating test:', error);
     res.status(500).json({ error: 'Failed to generate test' });

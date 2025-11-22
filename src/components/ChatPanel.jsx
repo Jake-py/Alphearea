@@ -37,7 +37,7 @@ function ChatPanel({ isOpen, onClose }) {
         setMessages(prev => [...prev, { text: 'Error: Unable to get response', sender: 'ai' }]);
       }
     } catch (error) {
-      setMessages(prev => [...prev, { text: 'Error: Network issue', sender: 'ai' }]);
+      setMessages(prev => [...prev, { text: 'Error: Реши проблему с сервером или интернетом', sender: 'ai' }]);
     } finally {
       setIsLoading(false);
       setInput('');
@@ -55,7 +55,7 @@ function ChatPanel({ isOpen, onClose }) {
   return (
     <div className="chat-panel">
       <div className="chat-header">
-        <h3>JARVIS 2B</h3>
+        <h3>Gemma2 : 2B </h3>
         <button onClick={onClose} className="close-button">×</button>
       </div>
       <div className="chat-messages">
@@ -64,7 +64,7 @@ function ChatPanel({ isOpen, onClose }) {
             <p>{msg.text}</p>
           </div>
         ))}
-        {isLoading && <div className="message ai loading">Thinking...</div>}
+        {isLoading && <div className="message ai loading">Думаю...</div>}
       </div>
       <div className="chat-input">
         <input
@@ -72,10 +72,17 @@ function ChatPanel({ isOpen, onClose }) {
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyPress={handleKeyPress}
-          placeholder="Ask me anything..."
+          placeholder="Спроси кое что, но в пределах своих возможностей) ..."
+          className="input-field"
+          autoComplete="off"
+          autoCorrect="off"
+          autoCapitalize="off"
+          spellCheck="false"
+          enterKeyHint="send"
           disabled={isLoading}
         />
-        <button onClick={sendMessage} disabled={isLoading || !input.trim()}>
+        <button onClick={sendMessage} disabled={isLoading || !input.trim()}
+          className="send-button">
           Send
         </button>
       </div>
