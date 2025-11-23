@@ -4,11 +4,22 @@ function NeonTitle({ tag = 'h1' }) {
   const [animationState, setAnimationState] = useState(0)
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      setAnimationState(prev => (prev + 1) % 4)
-    }, 800)
-    return () => clearInterval(interval)
-  }, [])
+  let animationFrameId;
+  let lastTime = performance.now();
+
+  const update = (now) => {
+    if (now - lastTime >= 800) { // интервал 800ms
+      setAnimationState(prev => (prev + 1) % 4);
+      lastTime = now;
+    }
+    animationFrameId = requestAnimationFrame(update);
+  };
+
+  animationFrameId = requestAnimationFrame(update);
+
+  return () => cancelAnimationFrame(animationFrameId);
+}, []);
+
 
   const Tag = tag
 

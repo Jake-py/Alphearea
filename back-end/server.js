@@ -996,9 +996,18 @@ Generate the questions now:`;
       if (attempt === retries) {
         return null; // Failed after all retries
       }
-      // Wait a bit before retrying
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+  // Wait a bit before retrying (без setTimeout)
+      await new Promise(resolve => {
+        const start = performance.now();
+        function check(now) {
+          if (now - start >= 1000) resolve();
+          else requestAnimationFrame(check);
+        }
+        requestAnimationFrame(check);
+      });
     }
+
   }
 }
 
