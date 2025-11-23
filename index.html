@@ -3,24 +3,15 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    
-    <!-- Favicon -->
-    <link rel="icon" href="/Alphearea/favicon.ico" />
 
-    <!-- Content Security Policy -->
     <meta http-equiv="Content-Security-Policy"
-    content="script-src 'self'; style-src 'self 'unsafe-inline' https://fonts.googleapis.com; img-src 'self';" />
+      content="script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' blob: data:;"
+    />
+
     <title>Alphearea</title>
-
-    <!-- Preload modules -->
-    <link rel="modulepreload" crossorigin href="/Alphearea/assets/vendor-_g6xLlVr.js">
-    <link rel="modulepreload" crossorigin href="/Alphearea/assets/router-BlHQZFQs.js">
-
-    <!-- Stylesheet -->
-    <link rel="stylesheet" crossorigin href="/Alphearea/assets/index-CKlx4-_B.css">
-    
     <!-- Main JS module -->
-    <script type="module" crossorigin src="/Alphearea/assets/index-dW14U-5N.js"></script>
+    <script type="module" src="/src/main.jsx"></script>
+    <link rel="stylesheet" href="/src/styles/style.css">
   </head>
   <body>
     <div id="root"></div>
