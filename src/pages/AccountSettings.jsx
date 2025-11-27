@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import '../styles/settings.css'
+import { API_ENDPOINTS } from '../config/api.js'
 
 // Progress Chart Component
 function ProgressChart({ subjects, customSubjects }) {
@@ -17,51 +18,70 @@ function ProgressChart({ subjects, customSubjects }) {
     }))
   ]
 
+  if (!allSubjects || allSubjects.length === 0) {
+    return (
+      <div className="progress-chart no-data" style={h}>
+        <h3>Прогресс по предметам</h3>
+        <div className="no-subjects">
+          <p>Нет данных прогресса. Добавьте предмет или проверьте профиль.</p>
+          <p className="debug-hint">В консоли: <code>JSON.parse(localStorage.getItem('profile'))</code></p>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="progress-chart">
       <h3>Прогресс по предметам</h3>
       <div className="subjects-grid">
-        {allSubjects.map((subject) => (
-          <div key={subject.name} className="subject-card">
-            <div className="subject-header">
-              <h4>{subject.name}</h4>
-              <span className={`level-badge level-${subject.level}`}>
-                {subject.level}
-              </span>
-            </div>
-            <div className="progress-info">
-              <div className="xp-display">
-                <span className="xp-label">XP:</span>
-                <span className="xp-value">{subject.xp || 0}</span>
+        {allSubjects.map((subject) => {
+          const xp = subject.xp ?? 0
+          const level = subject.level || 'beginner'
+          const completedCount = subject.completed?.length || 0
+          const widthPercent = Math.min(xp / 10, 100)
+
+          return (
+            <div key={subject.name} className="subject-card">
+              <div className="subject-header">
+                <h4>{subject.name}</h4>
+                <span className={`level-badge level-${level}`}>
+                  {level}
+                </span>
               </div>
-              <div className="completed-display">
-                <span className="completed-label">Завершено:</span>
-                <span className="completed-value">{subject.completed?.length || 0}</span>
+              <div className="progress-info">
+                <div className="xp-display">
+                  <span className="xp-label">XP:</span>
+                  <span className="xp-value">{xp}</span>
+                </div>
+                <div className="completed-display">
+                  <span className="completed-label">Завершено:</span>
+                  <span className="completed-value">{completedCount}</span>
+                </div>
               </div>
+              <div className="progress-bar">
+                <div
+                  className="progress-fill"
+                  style={{
+                    width: `${widthPercent}%`,
+                    minWidth: xp > 0 ? undefined : '6px'
+                  }}
+                ></div>
+              </div>
+              {subject.isCustom && (
+                <button
+                  className="remove-subject-btn"
+                  onClick={() => {
+                    if (window.confirm(`Удалить предмет "${subject.name}"?`)) {
+                      window.dispatchEvent(new CustomEvent('removeSubject', { detail: subject.id }));
+                    }
+                  }}
+                >
+                  Удалить
+                </button>
+              )}
             </div>
-            <div className="progress-bar">
-              <div
-                className="progress-fill"
-                style={{
-                  width: `${Math.min((subject.xp || 0) / 10, 100)}%`
-                }}
-              ></div>
-            </div>
-            {subject.isCustom && (
-              <button
-                className="remove-subject-btn"
-                onClick={() => {
-                  if (window.confirm(`Удалить предмет "${subject.name}"?`)) {
-                    // This will be handled by parent component
-                    window.dispatchEvent(new CustomEvent('removeSubject', { detail: subject.id }));
-                  }
-                }}
-              >
-                Удалить
-              </button>
-            )}
-          </div>
-        ))}
+          )
+        })}
       </div>
     </div>
   )
@@ -215,7 +235,7 @@ function AccountSettings() {
         currentPassword: '',
         newPassword: '',
         confirmPassword: '',
-        avatar: profile.avatar || '/default-avatar.png',
+        avatar: profile.avatar || '/avatar_red.jpg',
         twoFactorEnabled: profile.twoFactorEnabled || false,
         language: profile.language || 'ru'
       })

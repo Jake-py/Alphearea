@@ -1,0 +1,408 @@
+/* ===== ACHIEVEMENTS PAGE ===== */
+.achievements-page {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.achievements-header {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.achievements-header h1 {
+    font-size: 2.5em;
+    color: #4caf50;
+    text-shadow: 0 0 20px rgba(76, 175, 80, 0.5);
+    margin: 0 0 10px;
+}
+
+.header-subtitle {
+    color: #b0b0b0;
+    font-size: 1.1em;
+}
+
+/* ===== PROGRESS SECTION ===== */
+.progress-section {
+    margin-bottom: 40px;
+}
+
+.progress-card {
+    background: linear-gradient(135deg, rgba(76, 175, 80, 0.15), rgba(56, 142, 60, 0.1));
+    border: 1px solid rgba(76, 175, 80, 0.3);
+    border-radius: 15px;
+    padding: 25px;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 8px 32px rgba(76, 175, 80, 0.1);
+}
+
+.progress-card.main-progress {
+    display: flex;
+    align-items: center;
+    gap: 30px;
+    margin-bottom: 25px;
+    background: linear-gradient(135deg, rgba(255, 193, 7, 0.15), rgba(255, 152, 0, 0.1));
+    border-color: rgba(255, 193, 7, 0.3);
+    box-shadow: 0 8px 32px rgba(255, 193, 7, 0.1);
+}
+
+.progress-icon {
+    font-size: 60px;
+    animation: pulse 2s ease-in-out infinite;
+}
+
+.progress-info {
+    flex: 1;
+}
+
+.progress-info h3 {
+    margin: 0 0 10px;
+    color: #e0e0e0;
+    font-size: 1em;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.progress-value {
+    font-size: 2.5em;
+    font-weight: bold;
+    color: #ffc107;
+    text-shadow: 0 0 10px rgba(255, 193, 7, 0.5);
+    margin: 0 0 15px;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 12px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1px solid rgba(255, 193, 7, 0.2);
+    margin-bottom: 10px;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #4caf50, #ffc107);
+    border-radius: 10px;
+    transition: width 0.5s ease;
+    box-shadow: 0 0 10px rgba(76, 175, 80, 0.5);
+}
+
+.progress-text {
+    margin: 0;
+    color: #b0b0b0;
+    font-size: 0.9em;
+}
+
+.progress-cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+}
+
+.progress-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.card-icon {
+    font-size: 40px;
+    margin-bottom: 15px;
+}
+
+.card-content h4 {
+    margin: 0 0 10px;
+    color: #e0e0e0;
+    font-size: 0.9em;
+}
+
+.card-value {
+    font-size: 1.8em;
+    font-weight: bold;
+    color: #4caf50;
+    text-shadow: 0 0 8px rgba(76, 175, 80, 0.4);
+    margin: 0;
+}
+
+/* ===== TABS SECTION ===== */
+.tabs-section {
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 15px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    overflow: hidden;
+}
+
+.tabs-header {
+    display: flex;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.tab-btn {
+    flex: 1;
+    padding: 20px;
+    background: transparent;
+    border: none;
+    color: #b0b0b0;
+    font-size: 1em;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border-bottom: 3px solid transparent;
+}
+
+.tab-btn:hover {
+    color: #e0e0e0;
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.tab-btn.active {
+    color: #4caf50;
+    border-bottom-color: #4caf50;
+    background: rgba(76, 175, 80, 0.1);
+    text-shadow: 0 0 10px rgba(76, 175, 80, 0.3);
+}
+
+/* ===== ACHIEVEMENTS GRID ===== */
+.achievements-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 20px;
+    padding: 30px;
+}
+
+.achievement-card {
+    background: linear-gradient(135deg, rgba(76, 175, 80, 0.15), rgba(56, 142, 60, 0.1));
+    border: 2px solid rgba(76, 175, 80, 0.3);
+    border-radius: 15px;
+    padding: 20px;
+    text-align: center;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    backdrop-filter: blur(10px);
+}
+
+.achievement-card.unlocked {
+    animation: slideInUp 0.5s ease;
+    box-shadow: 0 8px 24px rgba(76, 175, 80, 0.15);
+}
+
+.achievement-card.unlocked:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 12px 32px rgba(76, 175, 80, 0.25);
+    border-color: rgba(76, 175, 80, 0.6);
+}
+
+.achievement-card.locked {
+    background: linear-gradient(135deg, rgba(100, 100, 100, 0.1), rgba(80, 80, 80, 0.05));
+    border-color: rgba(100, 100, 100, 0.2);
+    opacity: 0.6;
+}
+
+.achievement-icon {
+    font-size: 40px;
+    margin-bottom: 15px;
+}
+
+.achievement-card h3 {
+    margin: 15px 0 8px;
+    color: #e0e0e0;
+    font-size: 1em;
+}
+
+.achievement-card p {
+    margin: 0 0 10px;
+    color: #b0b0b0;
+    font-size: 0.85em;
+}
+
+.locked-badge {
+    display: inline-block;
+    padding: 5px 12px;
+    background: rgba(100, 100, 100, 0.3);
+    border-radius: 20px;
+    color: #888;
+    font-size: 0.75em;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+/* ===== HISTORY SECTION ===== */
+.history-section {
+    padding: 30px;
+}
+
+.history-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.history-item {
+    display: flex;
+    align-items: center;
+    padding: 15px;
+    background: linear-gradient(90deg, rgba(76, 175, 80, 0.1), rgba(56, 142, 60, 0.05));
+    border: 1px solid rgba(76, 175, 80, 0.2);
+    border-radius: 10px;
+    transition: all 0.3s ease;
+}
+
+.history-item:hover {
+    background: linear-gradient(90deg, rgba(76, 175, 80, 0.15), rgba(56, 142, 60, 0.1));
+    border-color: rgba(76, 175, 80, 0.4);
+    transform: translateX(5px);
+}
+
+.history-icon {
+    font-size: 28px;
+    margin-right: 20px;
+}
+
+.history-content {
+    flex: 1;
+}
+
+.history-content h4 {
+    margin: 0 0 5px;
+    color: #e0e0e0;
+}
+
+.history-date {
+    margin: 0;
+    color: #888;
+    font-size: 0.85em;
+}
+
+.history-points {
+    margin-left: auto;
+}
+
+.points-badge {
+    display: inline-block;
+    padding: 8px 15px;
+    background: linear-gradient(135deg, rgba(76, 175, 80, 0.25), rgba(56, 142, 60, 0.15));
+    border: 1px solid rgba(76, 175, 80, 0.3);
+    border-radius: 20px;
+    color: #4caf50;
+    font-weight: bold;
+    font-size: 0.95em;
+    text-shadow: 0 0 5px rgba(76, 175, 80, 0.3);
+}
+
+/* ===== EMPTY STATE ===== */
+.empty-state {
+    padding: 60px 30px;
+    text-align: center;
+    color: #888;
+}
+
+.empty-state p {
+    font-size: 1.1em;
+    margin: 0;
+}
+
+/* ===== TIPS SECTION ===== */
+.tips-section {
+    margin-top: 50px;
+    padding: 30px;
+    background: linear-gradient(135deg, rgba(33, 150, 243, 0.1), rgba(3, 169, 244, 0.05));
+    border: 1px solid rgba(33, 150, 243, 0.2);
+    border-radius: 15px;
+}
+
+.tips-section h3 {
+    margin-top: 0;
+    color: #2196f3;
+    font-size: 1.3em;
+    text-shadow: 0 0 10px rgba(33, 150, 243, 0.3);
+}
+
+.tips-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+}
+
+.tip-card {
+    position: relative;
+    padding: 20px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    transition: all 0.3s ease;
+}
+
+.tip-card:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(33, 150, 243, 0.3);
+}
+
+.tip-number {
+    display: inline-block;
+    width: 30px;
+    height: 30px;
+    background: linear-gradient(135deg, #2196f3, #1976d2);
+    border-radius: 50%;
+    color: white;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 10px;
+}
+
+.tip-card h4 {
+    margin: 10px 0 8px;
+    color: #e0e0e0;
+}
+
+.tip-card p {
+    margin: 0;
+    color: #b0b0b0;
+    font-size: 0.9em;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+    .achievements-header h1 {
+        font-size: 1.8em;
+    }
+
+    .progress-card.main-progress {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .progress-value {
+        font-size: 2em;
+    }
+
+    .achievements-grid {
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+        gap: 15px;
+        padding: 20px;
+    }
+
+    .tab-btn {
+        padding: 15px 10px;
+        font-size: 0.85em;
+    }
+
+    .history-list {
+        gap: 10px;
+    }
+
+    .history-item {
+        flex-wrap: wrap;
+    }
+
+    .history-icon {
+        margin-right: 15px;
+    }
+
+    .tips-grid {
+        grid-template-columns: 1fr;
+    }
+}

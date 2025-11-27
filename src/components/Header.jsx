@@ -1,13 +1,31 @@
+<<<<<<< HEAD
 import React, { useState, useRef } from 'react'
+=======
+import React, { useState, useRef, useEffect } from 'react'
+>>>>>>> 8b7114a (feat: интеграция системы Points, добавлены тесты и страница достижений, обновления курсов и UI компонентов)
 import { Link, useLocation } from 'react-router-dom'
 import '../styles/style.css'
+import '../styles/pointsHeader.css'
 import NeonTitle from './NeonTitle.jsx'
+<<<<<<< HEAD
 import gsap from 'gsap'
 
 function Header({ onOpenChat, onToggleSidebar, onLogout }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const navRef = useRef(null)
   const location = useLocation()
+=======
+import usePoints from '../hooks/usePoints'
+import gsap from 'gsap'
+
+function Header({ onOpenChat, onToggleSidebar, onLogout, username }) {
+  const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const navRef = useRef(null)
+  const location = useLocation()
+  
+  // Получаем информацию о points пользователя
+  const { points, loading } = usePoints(username)
+>>>>>>> 8b7114a (feat: интеграция системы Points, добавлены тесты и страница достижений, обновления курсов и UI компонентов)
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen)
@@ -57,6 +75,15 @@ function Header({ onOpenChat, onToggleSidebar, onLogout }) {
 
       <NeonTitle />
 
+<<<<<<< HEAD
+=======
+      <div className="points-counter">
+        <span className="points-icon">⭐</span>
+        <span className="points-value">{loading ? '...' : points}</span>
+        <span className="points-label">pts</span>
+      </div>
+
+>>>>>>> 8b7114a (feat: интеграция системы Points, добавлены тесты и страница достижений, обновления курсов и UI компонентов)
       <nav className={`main-nav ${isMenuOpen ? 'open' : ''}`}>
         <ul>
           <li>

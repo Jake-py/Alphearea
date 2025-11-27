@@ -1,14 +1,26 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
+import { PointsInfo } from '../components/PointsNotification'
+import usePoints from '../hooks/usePoints'
 import '../styles/Electronics.css'
 
 function Electronics() {
+  const username = JSON.parse(localStorage.getItem('user') || '{}').username || 'user'
+  const { points } = usePoints(username)
+
   return (
     <div className="electronics-page">
       <div className="electronics-content">
         <h1 className="page-title">Электроника</h1>
+        
+        <PointsInfo 
+          currentPoints={points}
+          pointsForCompletion={18}
+          description="Получайте points при изучении электроники и прохождении практических курсов"
+        />
+        
         <p className="page-description">
-          Изучайте электронику от основ до сложных схем. Теория и практика в мире электронных компонентов.
+          Освойте основы электроники, схемотехнику и микроэлектронику. От теории к практике.
         </p>
         
         <div className="electronics-sections">

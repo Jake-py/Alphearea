@@ -1,12 +1,24 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
+import { PointsInfo } from '../components/PointsNotification'
+import usePoints from '../hooks/usePoints'
 import '../styles/Programming.css'
 
 function Programming() {
+  const username = JSON.parse(localStorage.getItem('user') || '{}').username || 'user'
+  const { points } = usePoints(username)
+
   return (
     <div className="programming-page">
       <div className="programming-content">
         <h1 className="page-title">Программирование</h1>
+        
+        <PointsInfo 
+          currentPoints={points}
+          pointsForCompletion={20}
+          description="Получайте points при прохождении курсов программирования и решении задач"
+        />
+        
         <p className="page-description">
           Изучайте программирование от основ до продвинутых концепций. Практические проекты и современные технологии.
         </p>
