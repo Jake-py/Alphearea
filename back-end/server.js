@@ -996,7 +996,7 @@ Generate the questions now:`;
       if (attempt === retries) {
         return null; // Failed after all retries
       }
-<<<<<<< HEAD
+
       
   // Wait a bit before retrying (без setTimeout)
       await new Promise(resolve => {
@@ -1008,13 +1008,9 @@ Generate the questions now:`;
         requestAnimationFrame(check);
       });
     }
-
-=======
-      // Wait a bit before retrying
-      await new Promise(resolve => setTimeout(resolve, 1000));
-    }
->>>>>>> 8b7114a (feat: интеграция системы Points, добавлены тесты и страница достижений, обновления курсов и UI компонентов)
   }
+
+  return null;
 }
 
 // Generate test from materials using AI with batch processing

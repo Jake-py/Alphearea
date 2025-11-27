@@ -29,14 +29,7 @@ body {
     font-size: 2.5em;
     font-weight: bold;
     position: relative;
-<<<<<<< HEAD
     left: 15%;
-=======
-    left: 5%;
-    text-transform: uppercase;
-    letter-spacing: 2px;
-
->>>>>>> 8b7114a (feat: интеграция системы Points, добавлены тесты и страница достижений, обновления курсов и UI компонентов)
     background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4, #ffeaa7);
     background-size: 300% 300%;
     -webkit-background-clip: text;
@@ -307,7 +300,6 @@ nav a:hover {
 /* ===== SIDEBAR ===== */
 .sidebar {
     position: fixed;
-<<<<<<< HEAD
     top: 140px; /* теперь панель начинается под верхней */
     left: 0;
     width: 250px;
@@ -323,23 +315,7 @@ nav a:hover {
 
 .sidebar.open {
     transform: translateX(0);
-=======
-    top: 60px;
-    left: 0;
-    width: 250px;
-    height: calc(100vh - 60px);
-    background-color: #1a1a2e;
-    color: #e0e0e0;
-    padding: 20px;
-    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.3);
-    z-index: 900;
-    overflow-y: auto;
-    border-right: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.sidebar.open {
-    display: block;
->>>>>>> 8b7114a (feat: интеграция системы Points, добавлены тесты и страница достижений, обновления курсов и UI компонентов)
+    animation: sidebarSlideIn 0.3s ease-in-out;
 }
 
 @keyframes sidebarSlideIn {
