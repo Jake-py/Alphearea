@@ -9,6 +9,10 @@ body {
     color: #e0e0e0;
     overflow-x: hidden;
     transition: all 0.5s ease;
+    .main-app {
+    position: relative;
+    left: 15%; /* сдвиг только для основного сайта */
+}
 }
 
 @keyframes backgroundShift {
@@ -25,7 +29,14 @@ body {
     font-size: 2.5em;
     font-weight: bold;
     position: relative;
+<<<<<<< HEAD
     left: 15%;
+=======
+    left: 5%;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+
+>>>>>>> 8b7114a (feat: интеграция системы Points, добавлены тесты и страница достижений, обновления курсов и UI компонентов)
     background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4, #ffeaa7);
     background-size: 300% 300%;
     -webkit-background-clip: text;
@@ -169,6 +180,11 @@ button:hover {
 
 /* ===== HEADER ===== */
 header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 60px;
     background: linear-gradient(90deg, rgba(26, 26, 46, 0.95), rgba(22, 33, 62, 0.95));
     color: #e0e0e0;
     padding: 15px 20px;
@@ -179,6 +195,7 @@ header {
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
     animation: headerSlideIn 0.8s ease-out;
+    z-index: 1000;
 }
 
 .sidebar-toggle {
@@ -275,8 +292,11 @@ nav a:hover {
 /* ===== CONTENT ===== */
 .content {
     display: flex;
-    height: calc(100vh - 80px);
+    height: calc(100vh - 60px);
     animation: contentFadeIn 1.2s ease-out;
+    margin-left: 250px;
+    margin-top: 60px;
+    position: relative;
 }
 
 @keyframes contentFadeIn {
@@ -287,6 +307,7 @@ nav a:hover {
 /* ===== SIDEBAR ===== */
 .sidebar {
     position: fixed;
+<<<<<<< HEAD
     top: 140px; /* теперь панель начинается под верхней */
     left: 0;
     width: 250px;
@@ -302,11 +323,40 @@ nav a:hover {
 
 .sidebar.open {
     transform: translateX(0);
+=======
+    top: 60px;
+    left: 0;
+    width: 250px;
+    height: calc(100vh - 60px);
+    background-color: #1a1a2e;
+    color: #e0e0e0;
+    padding: 20px;
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.3);
+    z-index: 900;
+    overflow-y: auto;
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.sidebar.open {
+    display: block;
+>>>>>>> 8b7114a (feat: интеграция системы Points, добавлены тесты и страница достижений, обновления курсов и UI компонентов)
 }
 
 @keyframes sidebarSlideIn {
     0% { transform: translateX(-100%); opacity: 0; }
     100% { transform: translateX(0); opacity: 1; }
+}
+
+/* Десктоп - боковая панель всегда видима */
+@media (min-width: 769px) {
+    .content {
+        margin-left: 250px;
+    }
+
+    .sidebar {
+        display: block;
+        transform: translateX(0) !important;
+    }
 }
 
 .sidebar h3 {
@@ -1126,13 +1176,26 @@ main {
     .content {
         flex-direction: column;
         padding: 10px;
+        margin-left: 0;
+        margin-top: 60px;
     }
 
     .sidebar {
-        width: 100%;
+        position: fixed;
+        top: 60px;
+        left: 0;
+        width: 250px;
+        height: calc(100vh - 60px);
         padding: 15px;
-        border-right: none;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        border-right: 1px solid rgba(255, 255, 255, 0.1);
+        border-bottom: none;
+        z-index: 899;
+        transform: translateX(-100%);
+        transition: transform 0.3s ease-in-out;
+    }
+
+    .sidebar.open {
+        transform: translateX(0);
     }
 
     header {
@@ -1228,4 +1291,31 @@ main {
     .stat-number {
         font-size: 2em;
     }
+}
+
+/* ===== LESSON COMPLETION BUTTON ===== */
+.complete-btn {
+    display: inline-block;
+    padding: 10px 20px;
+    background: linear-gradient(45deg, #4caf50, #45a049);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 0.95em;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+    margin-top: 10px;
+}
+
+.complete-btn:hover {
+    background: linear-gradient(45deg, #45a049, #3d8b40);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(76, 175, 80, 0.4);
+}
+
+.complete-btn:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
 }

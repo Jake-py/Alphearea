@@ -1,0 +1,76 @@
+/* ===== POINTS COUNTER IN HEADER ===== */
+.points-counter {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 18px;
+    background: linear-gradient(135deg, rgba(255, 193, 7, 0.15), rgba(255, 152, 0, 0.1));
+    border: 1px solid rgba(255, 193, 7, 0.3);
+    border-radius: 22px;
+    color: #ffc107;
+    font-weight: bold;
+    box-shadow: 0 4px 12px rgba(255, 193, 7, 0.15);
+    transition: all 0.3s ease;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.points-counter:hover {
+    background: linear-gradient(135deg, rgba(255, 193, 7, 0.25), rgba(255, 152, 0, 0.15));
+    box-shadow: 0 6px 16px rgba(255, 193, 7, 0.25);
+    transform: translateY(-2px);
+}
+
+.points-icon {
+    font-size: 1.2em;
+    animation: pointsGlow 2s ease-in-out infinite;
+    flex-shrink: 0;
+}
+
+@keyframes pointsGlow {
+    0%, 100% {
+        text-shadow: 0 0 5px rgba(255, 193, 7, 0.5);
+        transform: scale(1);
+    }
+    50% {
+        text-shadow: 0 0 15px rgba(255, 193, 7, 0.8);
+        transform: scale(1.1);
+    }
+}
+
+.points-value {
+    font-size: 0.95em;
+    font-weight: bold;
+    min-width: auto;
+    text-align: center;
+    text-shadow: 0 0 8px rgba(255, 193, 7, 0.4);
+}
+
+.points-label {
+    font-size: 0.65em;
+    opacity: 0.9;
+    font-weight: 600;
+    letter-spacing: 1px;
+}
+
+/* Адаптивность для мобильных */
+@media (max-width: 768px) {
+    .points-counter {
+        gap: 5px;
+        padding: 6px 12px;
+        font-size: 0.9em;
+    }
+
+    .points-icon {
+        font-size: 1em;
+    }
+
+    .points-value {
+        min-width: 30px;
+        font-size: 0.9em;
+    }
+
+    .points-label {
+        font-size: 0.65em;
+    }
+}

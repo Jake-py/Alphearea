@@ -1,12 +1,24 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
+import { PointsInfo } from '../components/PointsNotification'
+import usePoints from '../hooks/usePoints'
 import '../styles/Mathematics.css'
 
 function Mathematics() {
+  const username = JSON.parse(localStorage.getItem('user') || '{}').username || 'user'
+  const { points } = usePoints(username)
+
   return (
     <div className="mathematics-page">
       <div className="mathematics-content">
         <h1 className="page-title">Математика</h1>
+        
+        <PointsInfo 
+          currentPoints={points}
+          pointsForCompletion={12}
+          description="Получайте points при решении задач и завершении курсов математики"
+        />
+        
         <p className="page-description">
           Изучайте математику от основ до высших разделов. Интерактивные уроки, задачи и тесты.
         </p>

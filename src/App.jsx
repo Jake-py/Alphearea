@@ -44,6 +44,12 @@ import SiteSettings from './pages/SiteSettings.jsx'
 import TestTaking from './pages/TestTaking.jsx'
 import TestCreator from './pages/TestCreator.jsx'
 import SmartEditor from './pages/SmartEditor.jsx'
+import Achievements from './pages/Achievements.jsx'
+import EnglishGrammarTest from './pages/EnglishGrammarTest.jsx'
+import KoreanGrammarTest from './pages/KoreanGrammarTest.jsx'
+import RussianGrammarTest from './pages/RussianGrammarTest.jsx'
+import PhilosophyWisdomTest from './pages/PhilosophyWisdomTest.jsx'
+import PsychologyTheoriesTest from './pages/PsychologyTheoriesTest.jsx'
 import { API_ENDPOINTS } from './config/api.js'
 
 function App() {
@@ -525,10 +531,16 @@ function App() {
   return (
     <Router>
       <div id="main-container">
-        <Header onOpenChat={() => setIsChatOpen(true)} onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} onLogout={handleLogout} />
+        <Header 
+          onOpenChat={() => setIsChatOpen(true)} 
+          onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} 
+          onLogout={handleLogout}
+          username={username}
+        />
+        <Sidebar isOpen={isSidebarOpen} />
         <div className="content">
-          <Sidebar isOpen={isSidebarOpen} />
-          <Routes>
+          <main>
+            <Routes>
             <Route path="/" element={<Main />} />
             <Route path="/english" element={<English />} />
             <Route path="/english/grammar" element={<EnglishGrammar />} />
@@ -563,11 +575,18 @@ function App() {
             <Route path="/settings/privacy" element={<PrivacySettings />} />
             <Route path="/settings/site" element={<SiteSettings />} />
             <Route path="/about" element={<About />} />
+            <Route path="/achievements" element={<Achievements />} />
+            <Route path="/english/grammar/test" element={<EnglishGrammarTest />} />
+            <Route path="/korean/grammar/test" element={<KoreanGrammarTest />} />
+            <Route path="/russian/grammar/test" element={<RussianGrammarTest />} />
+            <Route path="/philosophy/wisdom/test" element={<PhilosophyWisdomTest />} />
+            <Route path="/psychology/theories/test" element={<PsychologyTheoriesTest />} />
 
             <Route path="/test-taking" element={<TestTaking />} />
             <Route path="/test-creator" element={<TestCreator />} />
             <Route path="/smart-editor" element={<SmartEditor />} />
           </Routes>
+          </main>
         </div>
         <ChatPanel isOpen={isChatOpen} onClose={() => setIsChatOpen(false)} />
       </div>

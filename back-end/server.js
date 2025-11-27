@@ -996,6 +996,7 @@ Generate the questions now:`;
       if (attempt === retries) {
         return null; // Failed after all retries
       }
+<<<<<<< HEAD
       
   // Wait a bit before retrying (без setTimeout)
       await new Promise(resolve => {
@@ -1008,6 +1009,11 @@ Generate the questions now:`;
       });
     }
 
+=======
+      // Wait a bit before retrying
+      await new Promise(resolve => setTimeout(resolve, 1000));
+    }
+>>>>>>> 8b7114a (feat: интеграция системы Points, добавлены тесты и страница достижений, обновления курсов и UI компонентов)
   }
 }
 
@@ -1498,6 +1504,156 @@ app.get('/api/history/:username', authenticateToken, async (req, res) => {
     }
     console.error('Error loading history:', error);
     res.status(500).json({ error: 'Failed to load history' });
+  }
+});
+
+// ===== POINTS SYSTEM ENDPOINTS =====
+
+// Get user points
+app.get('/api/profile/:userId/points', async (req, res) => {
+  const { userId } = req.params;
+
+  try {
+    const profileFile = path.join(PROFILES_DIR, `${userId}.json`);
+    const profileStr = await fs.readFile(profileFile, 'utf8');
+    const profileData = JSON.parse(profileStr);
+
+    const points = profileData.profile?.points || 0;
+    res.json({ points });
+  } catch (error) {
+    if (error.code === 'ENOENT') {
+      return res.status(404).json({ error: 'User not found' });
+    }
+    console.error('Error loading points:', error);
+    res.status(500).json({ error: 'Failed to load points' });
+  }
+});
+
+// Add points to user
+app.post('/api/profile/add-points', async (req, res) => {
+  const { userId, points, type, contentId, difficulty } = req.body;
+
+  if (!userId || !points || points <= 0) {
+    return res.status(400).json({ error: 'Invalid userId or points' });
+  }
+
+  try {
+    const profileFile = path.join(PROFILES_DIR, `${userId}.json`);
+    const profileStr = await fs.readFile(profileFile, 'utf8');
+    const profileData = JSON.parse(profileStr);
+
+    // Initialize points if not exists
+    if (!profileData.profile) {
+      profileData.profile = {};
+    }
+    if (!profileData.profile.points) {
+      profileData.profile.points = 0;
+    }
+    if (!profileData.profile.pointsHistory) {
+      profileData.profile.pointsHistory = [];
+    }
+
+    // Add points
+    profileData.profile.points += points;
+    profileData.profile.pointsHistory.push({
+      date: new Date().toISOString(),
+      points,
+      type,
+      contentId,
+      difficulty,
+      totalPoints: profileData.profile.points
+    });
+
+    // Save updated profile
+    await fs.writeFile(profileFile, JSON.stringify(profileData, null, 2));
+
+    res.json({ 
+      success: true,
+      points,
+      totalPoints: profileData.profile.points,
+      message: 'Points added successfully' 
+    });
+  } catch (error) {
+    if (error.code === 'ENOENT') {
+      return res.status(404).json({ error: 'User profile not found' });
+    }
+    console.error('Error adding points:', error);
+    res.status(500).json({ error: 'Failed to add points' });
+  }
+});
+
+// Use points (spend/deduct)
+app.post('/api/profile/use-points', async (req, res) => {
+  const { userId, points, reason } = req.body;
+
+  if (!userId || !points || points <= 0) {
+    return res.status(400).json({ error: 'Invalid userId or points' });
+  }
+
+  try {
+    const profileFile = path.join(PROFILES_DIR, `${userId}.json`);
+    const profileStr = await fs.readFile(profileFile, 'utf8');
+    const profileData = JSON.parse(profileStr);
+
+    // Check if user has enough points
+    const currentPoints = profileData.profile?.points || 0;
+    if (currentPoints < points) {
+      return res.status(400).json({ error: 'Insufficient points' });
+    }
+
+    // Deduct points
+    profileData.profile.points -= points;
+    if (!profileData.profile.pointsHistory) {
+      profileData.profile.pointsHistory = [];
+    }
+    profileData.profile.pointsHistory.push({
+      date: new Date().toISOString(),
+      points: -points,
+      type: 'spend',
+      reason,
+      totalPoints: profileData.profile.points
+    });
+
+    // Save updated profile
+    await fs.writeFile(profileFile, JSON.stringify(profileData, null, 2));
+
+    res.json({ 
+      success: true,
+      pointsUsed: points,
+      totalPoints: profileData.profile.points,
+      message: 'Points used successfully' 
+    });
+  } catch (error) {
+    if (error.code === 'ENOENT') {
+      return res.status(404).json({ error: 'User profile not found' });
+    }
+    console.error('Error using points:', error);
+    res.status(500).json({ error: 'Failed to use points' });
+  }
+});
+
+// Get points history
+app.get('/api/profile/:userId/points-history', async (req, res) => {
+  const { userId } = req.params;
+  const { limit = 50 } = req.query;
+
+  try {
+    const profileFile = path.join(PROFILES_DIR, `${userId}.json`);
+    const profileStr = await fs.readFile(profileFile, 'utf8');
+    const profileData = JSON.parse(profileStr);
+
+    let history = profileData.profile?.pointsHistory || [];
+    history = history
+      .sort((a, b) => new Date(b.date) - new Date(a.date))
+      .slice(0, parseInt(limit));
+
+    res.json({ history });
+  } catch (error) {
+    if (error.code === 'ENOENT') {
+      return res.status(404).json({ error: 'User profile not found' });
+    }
+    console.error('Error loading points history:', error);
+    res.status(500).json({ error: 'Failed to load points history' });
   }
 });
 

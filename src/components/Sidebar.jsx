@@ -271,6 +271,19 @@ function Sidebar({ isOpen }) {
               </span>
             </li>
           </ul>
+<<<<<<< HEAD
+=======
+
+          {/* Ссылка на Достижения */}
+          <Link 
+            to="/achievements"
+            className="achievements-link"
+            onMouseEnter={(e) => handleItemHover(e, true)}
+            onMouseLeave={(e) => handleItemHover(e, false)}
+          >
+            🏆 Мои Достижения
+          </Link>
+>>>>>>> 8b7114a (feat: интеграция системы Points, добавлены тесты и страница достижений, обновления курсов и UI компонентов)
         </div>
       </aside>
     </div>

@@ -1,9 +1,21 @@
 import { Link } from 'react-router-dom'
+import { PointsInfo } from '../components/PointsNotification'
+import usePoints from '../hooks/usePoints'
 
 function Psychology() {
+  const username = JSON.parse(localStorage.getItem('user') || '{}').username || 'user'
+  const { points } = usePoints(username)
+
   return (
     <main>
       <h2>Психология</h2>
+      
+      <PointsInfo 
+        currentPoints={points}
+        pointsForCompletion={15}
+        description="Получайте points при изучении теорий и практик психологии"
+      />
+      
       <div className="subject-blocks">
         <div className="block">
           <h3>Теории</h3>
