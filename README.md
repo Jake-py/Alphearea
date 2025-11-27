@@ -25,6 +25,231 @@ npm start
 # Backend запустится на http://localhost:3002
 ```
 
+## 🌐 Развертывание на GitHub Pages
+
+### Предварительные требования
+- Репозиторий на GitHub с именем `Alphearea`
+- GitHub Actions включен
+- Branch `main` - основная ветка
+
+### Шаг 1: Локальная сборка
+
+```bash
+# Установите зависимости (если еще не установлены)
+npm install
+
+# Соберите проект для production
+npm run build
+
+# Проверьте локально, что все работает
+npx serve -s dist
+
+# Откройте http://localhost:3000 и проверьте:
+# ✓ Все страницы загружаются без 404 ошибок
+# ✓ DevTools Console - нет красных ошибок
+# ✓ DevTools Network - все файлы с 200 ОК
+# ✓ CSS и JS загруженные и работают
+```
+
+### Шаг 2: Проверьте правильные пути
+
+После сборки в `dist/index.html` должны быть относительные пути:
+```html
+<link rel="icon" href="./favicon.ico" />
+<script type="module" src="./src/main.jsx"></script>
+```
+
+Vite автоматически обновляет пути в `dist/index.html` на относительные.
+
+**Файлы, которые должны быть в dist/:**
+```
+dist/
+├── index.html           ← Главный файл
+├── favicon.ico          ← Иконка (скопирована из public/)
+├── assets/              ← Все JS и CSS будут здесь
+│   ├── main-*.js
+│   ├── style-*.css
+│   ├── vendor-*.js
+│   └── ...
+└── _headers             ← Security headers (из public/)
+```
+
+### Шаг 3: Загрузка на GitHub
+
+```bash
+# Убедитесь, что все изменения committed
+git add .
+git commit -m "build: optimize for GitHub Pages with correct asset paths"
+
+# Загрузите на GitHub
+git push origin main
+```
+
+### Шаг 4: Включите GitHub Pages
+
+**Способ 1: Через Settings (Рекомендуется)**
+1. Откройте Settings вашего репозитория
+2. Перейдите в "Pages"
+3. В разделе "Source" выберите "Deploy from a branch"
+4. Выберите ветку "main" и папку "/ (root)"
+5. Нажмите Save
+
+**Способ 2: Через GitHub Actions (Автоматический)**
+
+Создайте файл `.github/workflows/deploy.yml`:
+
+```yaml
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm install
+      
+      - name: Build
+        run: npm run build
+      
+      - name: Deploy
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./dist
+```
+
+### Шаг 5: Проверьте развертывание
+
+```bash
+# Ваш сайт будет доступен по адресу:
+https://Jake-py.github.io/Alphearea/
+
+# Проверьте:
+# ✓ Страница загружается без ошибок
+# ✓ DevTools Console - нет ошибок CSP
+# ✓ DevTools Network - все ресурсы 200 ОК
+# ✓ Функциональность работает полностью
+```
+
+### 🔐 Security Headers (GitHub Pages)
+
+Файл `_headers` в `public/` автоматически копируется в `dist/` и используется GitHub Pages для установки HTTP headers:
+
+```
+X-Frame-Options: DENY
+X-Content-Type-Options: nosniff
+X-XSS-Protection: 1; mode=block
+Referrer-Policy: strict-origin-when-cross-origin
+Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; ...
+```
+
+**ПРИМЕЧАНИЕ:** Если GitHub Pages не поддерживает `_headers`, используйте Netlify или Vercel вместо GitHub Pages для полного контроля над headers.
+
+### Альтернативный хостинг (с полным контролем CSP)
+
+#### Netlify
+1. Используйте `netlify.toml` в корне проекта:
+```toml
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+    Content-Security-Policy = "default-src 'self'; ..."
+```
+
+2. Подключите репозиторий на https://netlify.com
+
+#### Vercel
+1. Используйте `vercel.json` в корне проекта:
+```json
+{
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "X-Frame-Options",
+          "value": "DENY"
+        },
+        {
+          "key": "Content-Security-Policy",
+          "value": "default-src 'self'; ..."
+        }
+      ]
+    }
+  ]
+}
+```
+
+2. Подключите репозиторий на https://vercel.com
+
+### 📊 Проверочный список перед развертыванием
+
+- ✅ `npm run build` выполняется без ошибок
+- ✅ `dist/` содержит index.html, favicon.ico и папку assets/
+- ✅ `npx serve -s dist` работает без 404 ошибок
+- ✅ DevTools Console - нет красных ошибок
+- ✅ Все ресурсы загружаются (Network tab - все 200 ОК)
+- ✅ Функциональность (навигация, тесты, очки) работает
+- ✅ GitHub Pages Settings правильно настроены
+- ✅ `_headers` находится в `public/` (будет скопирован в `dist/`)
+
+### 🐛 Решение проблем
+
+**Проблема: 404 ошибки в консоли**
+- Проверьте DevTools Network tab
+- Убедитесь, что пути абсолютные начинаются с точки: `./assets/`
+- Очистите кэш браузера (Ctrl+Shift+Del) и перезагрузите
+
+**Проблема: CSP блокирует ресурсы**
+- Проверьте, что `_headers` в папке `public/`
+- Убедитесь, что GitHub Pages поддерживает `_headers` (может потребоваться Netlify)
+- Проверьте DevTools Console на ошибки CSP
+
+**Проблема: Стили/скрипты не загружаются**
+- Убедитесь, что вите.config.js имеет `base: '/Alphearea'` для production
+- Перестройте проект: `npm run build`
+- Очистите кэш: `rm -rf dist/` и пересоберите
+
+**Проблема: Роутинг не работает (вместо страницы - 404)**
+- GitHub Pages не поддерживает client-side routing автоматически
+- Используйте `react-router-dom` с `BrowserRouter` (уже используется)
+- Или используйте HashRouter вместо BrowserRouter для GitHub Pages
+
+Для полного client-side routing на GitHub Pages используйте файл `dist/404.html`:
+```html
+<!DOCTYPE html>
+<html>
+  <head>
+    <script>
+      sessionStorage.redirect = location.href;
+    </script>
+    <meta http-equiv="refresh" content="0;URL='/Alphearea/'">
+  </head>
+  <body>
+  </body>
+</html>
+```
+
 ## 📦 Сборка для production
 
 ```bash
@@ -34,31 +259,6 @@ npm run build
 # Все файлы будут в папке dist/
 # Загрузите их на GitHub Pages
 ```
-
-## 🔒 Безопасность
-
-### Content Security Policy (CSP)
-
-Сайт использует строгую CSP политику для защиты от:
-- XSS атак
-- Injection атак
-- Clickjacking
-
-**Текущая CSP политика:**
-```
-default-src 'self'
-script-src 'self'
-style-src 'self' 'unsafe-inline'
-img-src 'self' data: https:
-font-src 'self' data:
-connect-src 'self' http://localhost:3002 http://localhost:5173 https://api.github.com
-frame-ancestors 'none'
-base-uri 'self'
-form-action 'self'
-object-src 'none'
-```
-
-Подробнее см. [SECURITY_FIX.md](./SECURITY_FIX.md)
 
 ## 📋 Структура проекта
 

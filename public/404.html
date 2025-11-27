@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Alphearea - Перенаправление</title>
+    <script>
+      // Сохраните текущий URL для восстановления после перезагрузки
+      sessionStorage.redirect = location.href;
+    </script>
+    <!-- Перенаправьте на главную страницу Alphearea -->
+    <meta http-equiv="refresh" content="0;URL='/Alphearea/'">
+  </head>
+  <body>
+    <!-- Если редирект не сработал, покажите сообщение -->
+    <p>Перенаправление на главную страницу...</p>
+    <script>
+      // Если метаредирект не сработал, используйте JavaScript
+      if (sessionStorage.redirect && location.href !== sessionStorage.redirect) {
+        sessionStorage.removeItem('redirect');
+        location.href = sessionStorage.redirect;
+      }
+    </script>
+  </body>
+</html>
