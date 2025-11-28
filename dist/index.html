@@ -4,10 +4,8 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     
-    <!-- Content Security Policy для безопасности (без frame-ancestors и X-Frame-Options) -->
-    <!-- ПРИМЕЧАНИЕ: frame-ancestors и X-Frame-Options работают ТОЛЬКО как HTTP заголовки -->
-    <!-- Для GitHub Pages используйте файл public/_headers который копируется в dist/_headers -->
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:; connect-src 'self' https://api.github.com;">
+    <!-- Content Security Policy для безопасности -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' blob:; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https://api.github.com; base-uri 'self'; form-action 'self'; object-src 'none';">
     
     <!-- Additional security headers -->
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
@@ -17,11 +15,6 @@
     
     <title>Alphearea - Платформа обучения</title>
     <link rel="icon" href="/Alphearea/assets/favicon-BE2yXnGK.ico" type="image/x-icon" />
-    <!-- Стили подключаются Vite автоматически при сборке (если импортированы в JS) -->
-    <script type="module" crossorigin src="/Alphearea/assets/index-B7-rvOef.js"></script>
-    <link rel="modulepreload" crossorigin href="/Alphearea/assets/vendor-_g6xLlVr.js">
-    <link rel="modulepreload" crossorigin href="/Alphearea/assets/router-BlHQZFQs.js">
-    <link rel="stylesheet" crossorigin href="/Alphearea/assets/index-UHTZQQP5.css">
   </head>
   <body>
     <div id="root"></div>
