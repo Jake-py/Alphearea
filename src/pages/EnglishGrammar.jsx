@@ -14,8 +14,9 @@ function EnglishGrammar() {
 
   const handleLessonComplete = async (lessonId, lessonName) => {
     // Начисляем points за прохождение урока
-    const result = await awardPoints('lesson', lessonId, 'beginner')
-    
+    const difficulty = lessonId === 'english-grammar-complete' ? 'advanced' : 'beginner'
+    const result = await awardPoints('lesson', lessonId, difficulty)
+
     if (result.success) {
       setCompletedLesson(lessonName)
       setShowReward(true)
@@ -66,37 +67,16 @@ function EnglishGrammar() {
           <article className="card">
             <h4>Present Simple</h4>
             <p>Когда используется и как правильно строить предложения.</p>
-            <PointsNotification pointsValue={10} description="За прохождение этого урока" />
-            <button 
-              className="complete-btn"
-              onClick={() => handleLessonComplete('present-simple', 'Present Simple')}
-            >
-              ✓ Завершить урок
-            </button>
           </article>
 
           <article className="card">
             <h4>Past Continuous</h4>
             <p>Как описывать действия, которые длились в прошлом.</p>
-            <PointsNotification pointsValue={10} description="За прохождение этого урока" />
-            <button 
-              className="complete-btn"
-              onClick={() => handleLessonComplete('past-continuous', 'Past Continuous')}
-            >
-              ✓ Завершить урок
-            </button>
           </article>
 
           <article className="card">
             <h4>Артикли</h4>
             <p>Как понять, какой артикль использовать в разных ситуациях.</p>
-            <PointsNotification pointsValue={10} description="За прохождение этого урока" />
-            <button 
-              className="complete-btn"
-              onClick={() => handleLessonComplete('articles', 'Артикли')}
-            >
-              ✓ Завершить урок
-            </button>
           </article>
         </div>
       </section>
@@ -107,6 +87,18 @@ function EnglishGrammar() {
 
         <button className="btn-primary" onClick={handleStartTest}>
           🚀 Начать тест
+        </button>
+      </section>
+
+      <section className="completion">
+        <h3>Завершение раздела</h3>
+        <p>После изучения уроков и прохождения теста, отметьте завершение раздела грамматики:</p>
+        <PointsNotification pointsValue={30} description="За завершение раздела грамматики" />
+        <button
+          className="complete-btn"
+          onClick={() => handleLessonComplete('english-grammar-complete', 'Английская грамматика')}
+        >
+          ✓ Завершить урок
         </button>
       </section>
 

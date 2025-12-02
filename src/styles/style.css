@@ -300,10 +300,10 @@ nav a:hover {
 /* ===== SIDEBAR ===== */
 .sidebar {
     position: fixed;
-    top: 140px; /* теперь панель начинается под верхней */
+    top: 60px; /* панель начинается под header */
     left: 0;
     width: 250px;
-    height: calc(100vh - 70px);
+    height: calc(100vh - 60px);
     background-color: #1a1a2e;
     color: #e0e0e0;
     padding: 20px;
@@ -323,15 +323,19 @@ nav a:hover {
     100% { transform: translateX(0); opacity: 1; }
 }
 
-/* Десктоп - боковая панель всегда видима */
+/* Десктоп - боковая панель управляется состоянием */
 @media (min-width: 769px) {
     .content {
+        margin-left: 0;
+        transition: margin-left 0.3s ease-in-out;
+    }
+
+    .content.sidebar-open {
         margin-left: 250px;
     }
 
     .sidebar {
         display: block;
-        transform: translateX(0) !important;
     }
 }
 

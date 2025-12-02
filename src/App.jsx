@@ -55,10 +55,14 @@ import { API_ENDPOINTS } from './config/api.js'
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [username, setUsername] = useState('')
+  const [userId, setUserId] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [isChatOpen, setIsChatOpen] = useState(false)
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true)
+  const [isSidebarOpen, setIsSidebarOpen] = useState(() => {
+    const saved = localStorage.getItem('sidebarOpen')
+    return saved !== null ? JSON.parse(saved) : false
+  })
   const [showRegistration, setShowRegistration] = useState(false)
   const [registrationStep, setRegistrationStep] = useState(1)
   const [registrationData, setRegistrationData] = useState({
@@ -106,6 +110,7 @@ function App() {
       const data = await response.json()
       if (response.ok) {
         setIsLoggedIn(true)
+        setUserId(data.user.username)
         localStorage.setItem('user', JSON.stringify(data.user))
         localStorage.setItem('profile', JSON.stringify(data.profile))
       } else {
@@ -269,12 +274,19 @@ function App() {
     const savedUser = localStorage.getItem('user')
     const savedProfile = localStorage.getItem('profile')
     if (savedUser && savedProfile) {
+      const userData = JSON.parse(savedUser)
       setIsLoggedIn(true)
+      setUserId(userData.username)
     }
   }, [])
 
+  useEffect(() => {
+    localStorage.setItem('sidebarOpen', JSON.stringify(isSidebarOpen))
+  }, [isSidebarOpen])
+
   const handleLogout = () => {
     setIsLoggedIn(false)
+    setUserId('')
     localStorage.removeItem('user')
     localStorage.removeItem('profile')
   }
@@ -531,14 +543,15 @@ function App() {
   return (
     <Router>
       <div id="main-container">
-        <Header 
-          onOpenChat={() => setIsChatOpen(true)} 
-          onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} 
+        <Header
+          onOpenChat={() => setIsChatOpen(true)}
+          onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
           onLogout={handleLogout}
           username={username}
+          userId={userId}
         />
         <Sidebar isOpen={isSidebarOpen} />
-        <div className="content">
+        <div className={`content ${isSidebarOpen ? 'sidebar-open' : ''}`}>
           <main>
             <Routes>
             <Route path="/" element={<Main />} />

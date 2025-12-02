@@ -3,9 +3,10 @@ import { Link, useLocation } from 'react-router-dom'
 import '../styles/style.css'
 import '../styles/pointsHeader.css'
 import NeonTitle from './NeonTitle.jsx'
+import PointsCounter from './PointsCounter.jsx'
 import gsap from 'gsap'
 
-function Header({ onOpenChat, onToggleSidebar, onLogout }) {
+function Header({ onOpenChat, onToggleSidebar, onLogout, userId }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const navRef = useRef(null)
   const location = useLocation()
@@ -57,6 +58,8 @@ function Header({ onOpenChat, onToggleSidebar, onLogout }) {
 
 
       <NeonTitle />
+
+      {userId && <PointsCounter userId={userId} />}
 
       <nav className={`main-nav ${isMenuOpen ? 'open' : ''}`}>
         <ul>

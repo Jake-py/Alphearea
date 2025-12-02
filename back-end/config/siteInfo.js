@@ -9,4 +9,4 @@ const siteInfo = {
   }
 };
 
-module.exports = { siteInfo };
+export { siteInfo };
