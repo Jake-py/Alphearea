@@ -243,7 +243,7 @@ function Sidebar({ isOpen }) {
           <h3>Режимы проверки знаний</h3>
           <ul className="knowledge-tests">
             <li>
-              <Link 
+              <Link
                 to="/test-settings"
                 className="test-link"
                 onMouseEnter={(e) => handleItemHover(e, true)}
@@ -253,7 +253,7 @@ function Sidebar({ isOpen }) {
               </Link>
             </li>
             <li>
-              <span 
+              <span
                 className="test-link"
                 onMouseEnter={(e) => handleItemHover(e, true)}
                 onMouseLeave={(e) => handleItemHover(e, false)}
@@ -262,13 +262,28 @@ function Sidebar({ isOpen }) {
               </span>
             </li>
             <li>
-              <span 
+              <span
                 className="test-link"
                 onMouseEnter={(e) => handleItemHover(e, true)}
                 onMouseLeave={(e) => handleItemHover(e, false)}
               >
                 И прочее
               </span>
+            </li>
+          </ul>
+
+          <hr />
+          <h3>Прогресс и достижения</h3>
+          <ul className="knowledge-tests">
+            <li>
+              <Link
+                to="/achievements"
+                className="test-link"
+                onMouseEnter={(e) => handleItemHover(e, true)}
+                onMouseLeave={(e) => handleItemHover(e, false)}
+              >
+                🏆 Мои достижения
+              </Link>
             </li>
           </ul>
           

@@ -2,6 +2,7 @@
   "name": "alphearea-backend",
   "version": "1.0.0",
   "description": "Backend for Alphearea AI Assistant",
+  "type": "module",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"

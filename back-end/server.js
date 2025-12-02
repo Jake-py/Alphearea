@@ -1,17 +1,21 @@
-const express = require('express');
-const cors = require('cors');
-const axios = require('axios');
-const argon2 = require('argon2');
-const jwt = require('jsonwebtoken');
-const fs = require('fs').promises;
-const path = require('path');
-const { siteInfo } = require('./config/siteInfo.js');
+import express from 'express';
+import cors from 'cors';
+import axios from 'axios';
+import argon2 from 'argon2';
+import jwt from 'jsonwebtoken';
+import fs from 'fs/promises';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import { siteInfo } from './config/siteInfo.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Load test configuration
 let testConfig = {};
 try {
   const configPath = path.join(__dirname, 'testConfig.json');
-  const configData = fs.readFileSync(configPath, 'utf8');
+  const configData = await fs.readFile(configPath, 'utf8');
   testConfig = JSON.parse(configData);
 } catch (error) {
   console.warn('Could not load testConfig.json, using defaults:', error.message);
