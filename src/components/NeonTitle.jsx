@@ -2,6 +2,13 @@ import React, { useState, useEffect } from 'react'
 
 function NeonTitle({ tag = 'h1' }) {
   const [animationState, setAnimationState] = useState(0)
+  const [loadGlitch, setLoadGlitch] = useState(true)
+
+  useEffect(() => {
+    // Load glitch effect
+    const timer = setTimeout(() => setLoadGlitch(false), 400)
+    return () => clearTimeout(timer)
+  }, [])
 
   useEffect(() => {
   let animationFrameId;
@@ -35,7 +42,7 @@ function NeonTitle({ tag = 'h1' }) {
 
   return (
     <Tag
-      className="neon-title"
+      className={`neon-title ${loadGlitch ? 'load-glitch' : ''}`}
       style={{
         transform: getTransform(),
         transition: 'transform 0.8s ease-in-out'

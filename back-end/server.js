@@ -1,5 +1,6 @@
 import express from 'express';
 import cors from 'cors';
+import helmet from 'helmet';
 import axios from 'axios';
 import argon2 from 'argon2';
 import jwt from 'jsonwebtoken';
@@ -49,6 +50,23 @@ const MAX_REQUESTS_PER_WINDOW = 10; // 10 requests per minute per IP
 
 app.use(cors());
 app.use(express.json());
+
+// Security headers with CSP
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'", "blob:", "data:"],
+      styleSrc: ["'self'", "'unsafe-inline'"],
+      imgSrc: ["'self'", "data:", "https:"],
+      fontSrc: ["'self'", "data:"],
+      connectSrc: ["'self'", "http://localhost:3002", "https://api.github.com"],
+      baseUri: ["'self'"],
+      formAction: ["'self'"],
+      objectSrc: ["'none'"],
+    },
+  },
+}));
 
 // JWT authentication middleware
 const authenticateToken = (req, res, next) => {

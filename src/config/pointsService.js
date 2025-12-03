@@ -194,6 +194,10 @@ export class PointsService {
    * Получает текущий баланс points пользователя
    */
   async getUserPoints(userId) {
+    if (!userId) {
+      return 0;
+    }
+
     try {
       const response = await fetch(`/api/profile/${userId}/points`, {
         headers: {
