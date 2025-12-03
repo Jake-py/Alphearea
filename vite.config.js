@@ -17,7 +17,7 @@ export default defineConfig({
     })
   ],
 
-  base: process.env.NODE_ENV === 'production' ? '/Alphearea' : '/',
+  base: '/Alphearea/',
   server: {
     historyApiFallback: true,
     proxy: {
