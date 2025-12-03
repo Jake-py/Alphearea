@@ -216,20 +216,16 @@ app.use(express.json());
 
 ## Текущий статус CSP в Alphearea
 
-**CSP полностью отключён** для обеспечения совместимости с Vite + React.
+**Все ограничители безопасности полностью отключены** для максимальной совместимости.
 
 ### index.html (development)
-Без CSP мета-тега.
+Без CSP мета-тега и security headers.
 
 ### public/_headers (production)
-Без CSP директивы. Только базовые security headers:
-```
-/*
-  X-Frame-Options: DENY
-  X-Content-Type-Options: nosniff
-  X-XSS-Protection: 1; mode=block
-  Referrer-Policy: strict-origin-when-cross-origin
-```
+Полностью пустой файл - никаких security headers.
+
+### server.js
+Без helmet middleware - только CORS и express.json().
 
 ### server.js (helmet CSP)
 ```javascript
