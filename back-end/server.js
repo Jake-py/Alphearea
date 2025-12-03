@@ -51,21 +51,9 @@ const MAX_REQUESTS_PER_WINDOW = 10; // 10 requests per minute per IP
 app.use(cors());
 app.use(express.json());
 
-// Security headers with CSP
+// Security headers (CSP disabled)
 app.use(helmet({
-  contentSecurityPolicy: {
-    directives: {
-      defaultSrc: ["'self'"],
-      scriptSrc: ["'self'", "blob:", "data:"],
-      styleSrc: ["'self'", "'unsafe-inline'"],
-      imgSrc: ["'self'", "data:", "https:"],
-      fontSrc: ["'self'", "data:"],
-      connectSrc: ["'self'", "http://localhost:3002", "https://api.github.com"],
-      baseUri: ["'self'"],
-      formAction: ["'self'"],
-      objectSrc: ["'none'"],
-    },
-  },
+  contentSecurityPolicy: false, // Disable CSP
 }));
 
 // JWT authentication middleware
