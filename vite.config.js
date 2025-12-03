@@ -5,7 +5,6 @@ import viteCompression from 'vite-plugin-compression'
 
 export default defineConfig({
   define: {
-    // предотвращает попытки зависимостей дергать process.env и генерировать eval-фолбэки
     'process.env': {}
   },
 
@@ -38,7 +37,6 @@ export default defineConfig({
       }
     },
 
-    // Защита на уровне рантайма: подмена eval на безопасный аналог
     rollupOptions: {
       output: {
         manualChunks: {

@@ -216,17 +216,19 @@ app.use(express.json());
 
 ## Текущий статус CSP в Alphearea
 
-CSP настроен с учётом особенностей Vite + React:
-- **Development**: Без CSP (локальный dev server)
-- **Production (_headers)**: Строгий CSP без 'unsafe-eval' для максимальной безопасности
+**CSP полностью отключён** для обеспечения совместимости с Vite + React.
 
 ### index.html (development)
-Без CSP мета-тега для совместимости с HMR.
+Без CSP мета-тега.
 
 ### public/_headers (production)
+Без CSP директивы. Только базовые security headers:
 ```
 /*
-  Content-Security-Policy: default-src 'self'; script-src 'self' blob: data:; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https://api.github.com; base-uri 'self'; form-action 'self'; object-src 'none';
+  X-Frame-Options: DENY
+  X-Content-Type-Options: nosniff
+  X-XSS-Protection: 1; mode=block
+  Referrer-Policy: strict-origin-when-cross-origin
 ```
 
 ### server.js (helmet CSP)
