@@ -18,7 +18,16 @@ export default defineConfig({
   ],
 
   base: process.env.NODE_ENV === 'production' ? '/Alphearea' : '/',
-  server: { historyApiFallback: true },
+  server: {
+    historyApiFallback: true,
+    proxy: {
+      '/api': {
+        target: 'http://localhost:3002',
+        changeOrigin: true,
+        secure: false,
+      },
+    },
+  },
 
   build: {
     sourcemap: false, // снижает шанс появления eval

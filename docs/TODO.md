@@ -1,27 +1,7 @@
-# TODO: Implement Duolingo-like Progress Tracking System
+# TODO: Add Glitch Animations to Main Page
 
 ## Tasks
-- [x] Backend Enhancements
-  - [x] Extend profile JSON structure with achievements, history, and custom subjects
-  - [x] Add progress update endpoints (material viewed, test completed)
-  - [x] Add history logging endpoints
-  - [x] Add achievement checking logic
-- [x] Frontend Components
-  - [x] Update AccountSettings.jsx - Add subjects diagram/chart and manual subject management
-  - [x] Modify TestTaking.jsx - Save test results to profile history
-  - [x] Update material viewing components to log progress (EnglishMaterials.jsx, etc.)
-  - [x] Add progress visualization components
-  - [x] Implement achievement notifications
-- [ ] Profile Structure Updates
-  - [ ] Update existing profile JSON files with new structure
-  - [ ] Migrate old progress data to new format
-- [ ] Achievement System
-  - [ ] Define achievement types and criteria
-  - [ ] Implement automatic achievement unlocking
-  - [ ] Add achievement display in profile
-
-## Followup steps
-- [ ] Test progress tracking across different subjects
-- [ ] Test achievement unlocking
-- [ ] Validate data persistence
-- [ ] Test UI components for progress visualization
+- [x] Modify src/pages/Main.jsx to add "Начать обучение" button, background grid, bottom glitch strips, and change "Alphearea" to glitch-text span
+- [x] Update src/styles/style.css with glitch animations for title, button, grid, and strips (glitch interval 3-4s, grid full page, button glitch)
+- [x] Modify src/components/NeonTitle.jsx to add load glitch effect
+- [x] Test the animations on the main page (dev server running on localhost:5174)
