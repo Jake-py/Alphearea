@@ -3,7 +3,7 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import viteCompression from 'vite-plugin-compression'
 
-export default defineConfig({
+export default defineConfig(({ command }) => ({
   define: {
     'process.env': {}
   },
@@ -16,7 +16,7 @@ export default defineConfig({
     })
   ],
 
-  base: '/Alphearea/',
+  base: command === 'build' ? '/Alphearea/' : '/',
   server: {
     historyApiFallback: true,
     proxy: {
@@ -46,4 +46,4 @@ export default defineConfig({
       }
     }
   }
-})
+}))
