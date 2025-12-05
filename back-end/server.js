@@ -42,31 +42,31 @@ const TESTS_DIR = path.join(__dirname, 'tests');
 const OLLAMA_API_URL = process.env.OLLAMA_API_URL || "http://localhost:11434/api/chat";
 const OLLAMA_MODEL = "gemma2:2b";
 
-// Simple rate limiting (in production, use a proper library like express-rate-limit)
-const requestCounts = new Map();
-const RATE_LIMIT_WINDOW = 60 * 1000; // 1 minute
-const MAX_REQUESTS_PER_WINDOW = 10; // 10 requests per minute per IP
+// Simple rate limiting disabled
+// const requestCounts = new Map();
+// const RATE_LIMIT_WINDOW = 60 * 1000; // 1 minute
+// const MAX_REQUESTS_PER_WINDOW = 10; // 10 requests per minute per IP
 
-app.use(cors());
+// app.use(cors()); // CORS disabled
 app.use(express.json());
 
-// JWT authentication middleware
-const authenticateToken = (req, res, next) => {
-  const authHeader = req.headers['authorization'];
-  const token = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN
+// JWT authentication middleware disabled
+// const authenticateToken = (req, res, next) => {
+//   const authHeader = req.headers['authorization'];
+//   const token = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN
 
-  if (!token) {
-    return res.status(401).json({ error: 'Access token required' });
-  }
+//   if (!token) {
+//     return res.status(401).json({ error: 'Access token required' });
+//   }
 
-  jwt.verify(token, JWT_SECRET, (err, user) => {
-    if (err) {
-      return res.status(403).json({ error: 'Invalid or expired token' });
-    }
-    req.user = user;
-    next();
-  });
-};
+//   jwt.verify(token, JWT_SECRET, (err, user) => {
+//     if (err) {
+//       return res.status(403).json({ error: 'Invalid or expired token' });
+//     }
+//     req.user = user;
+//     next();
+//   });
+// };
 
 // Ensure directories exist
 async function ensureDirectories() {
@@ -82,28 +82,28 @@ async function ensureDirectories() {
 
 ensureDirectories();
 
-// Rate limiting middleware
-app.use('/api/chat', (req, res, next) => {
-  const clientIP = req.ip || req.connection.remoteAddress;
-  const now = Date.now();
-  const windowStart = now - RATE_LIMIT_WINDOW;
+// Rate limiting middleware disabled
+// app.use('/api/chat', (req, res, next) => {
+//   const clientIP = req.ip || req.connection.remoteAddress;
+//   const now = Date.now();
+//   const windowStart = now - RATE_LIMIT_WINDOW;
 
-  if (!requestCounts.has(clientIP)) {
-    requestCounts.set(clientIP, []);
-  }
+//   if (!requestCounts.has(clientIP)) {
+//     requestCounts.set(clientIP, []);
+//   }
 
-  const requests = requestCounts.get(clientIP);
-  // Remove old requests outside the window
-  const validRequests = requests.filter(time => time > windowStart);
-  requestCounts.set(clientIP, validRequests);
+//   const requests = requestCounts.get(clientIP);
+//   // Remove old requests outside the window
+//   const validRequests = requests.filter(time => time > windowStart);
+//   requestCounts.set(clientIP, validRequests);
 
-  if (validRequests.length >= MAX_REQUESTS_PER_WINDOW) {
-    return res.status(429).json({ error: 'Too many requests. Please try again later.' });
-  }
+//   if (validRequests.length >= MAX_REQUESTS_PER_WINDOW) {
+//     return res.status(429).json({ error: 'Too many requests. Please try again later.' });
+//   }
 
-  validRequests.push(now);
-  next();
-});
+//   validRequests.push(now);
+//   next();
+// });
 
 // Check if Ollama is available
 async function checkOllamaConnection() {
@@ -1133,7 +1133,7 @@ app.post('/api/tests/cleanup', async (req, res) => {
 // Progress tracking endpoints (require authentication)
 
 // Update material progress
-app.post('/api/progress/material', authenticateToken, async (req, res) => {
+app.post('/api/progress/material', async (req, res) => {
   const { username, subject, materialId, materialType, action } = req.body;
 
   if (!username || !subject || !materialId || !action) {
@@ -1141,10 +1141,10 @@ app.post('/api/progress/material', authenticateToken, async (req, res) => {
   }
 
   try {
-    // Verify user owns this profile
-    if (req.user.username !== username) {
-      return res.status(403).json({ error: 'Access denied' });
-    }
+    // Authentication disabled
+    // if (req.user.username !== username) {
+    //   return res.status(403).json({ error: 'Access denied' });
+    // }
 
     const profileFile = path.join(PROFILES_DIR, `${username}.json`);
     const profileStr = await fs.readFile(profileFile, 'utf8');
@@ -1240,7 +1240,7 @@ app.post('/api/progress/material', authenticateToken, async (req, res) => {
 });
 
 // Add custom subject to profile
-app.post('/api/progress/subject', authenticateToken, async (req, res) => {
+app.post('/api/progress/subject', async (req, res) => {
   const { username, subjectName, subjectType } = req.body;
 
   if (!username || !subjectName) {
@@ -1288,7 +1288,7 @@ app.post('/api/progress/subject', authenticateToken, async (req, res) => {
 });
 
 // Remove custom subject from profile
-app.delete('/api/progress/subject/:subjectId', authenticateToken, async (req, res) => {
+app.delete('/api/progress/subject/:subjectId', async (req, res) => {
   const { username } = req.query;
   const { subjectId } = req.params;
 
@@ -1327,7 +1327,7 @@ app.delete('/api/progress/subject/:subjectId', authenticateToken, async (req, re
 });
 
 // Log test result to history
-app.post('/api/progress/test', authenticateToken, async (req, res) => {
+app.post('/api/progress/test', async (req, res) => {
   const { username, testId, testTitle, subject, score, correct, total, timeSpent } = req.body;
 
   if (!username || !testId || !subject || score === undefined) {
@@ -1451,7 +1451,7 @@ app.post('/api/progress/test', authenticateToken, async (req, res) => {
 });
 
 // Get user achievements
-app.get('/api/achievements/:username', authenticateToken, async (req, res) => {
+app.get('/api/achievements/:username', async (req, res) => {
   const { username } = req.params;
 
   try {
@@ -1471,7 +1471,7 @@ app.get('/api/achievements/:username', authenticateToken, async (req, res) => {
 });
 
 // Get user history
-app.get('/api/history/:username', authenticateToken, async (req, res) => {
+app.get('/api/history/:username', async (req, res) => {
   const { username } = req.params;
   const { type, subject, limit = 50 } = req.query;
 
