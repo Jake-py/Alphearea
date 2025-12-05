@@ -15,15 +15,11 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     
     <!-- ═══════════════════════════════════════════════════════════════════════ -->
-    <!-- 2. CONTENT SECURITY POLICY (CSP) - ОСНОВНАЯ ЗАЩИТА                     -->
+    <!-- 2. CONTENT SECURITY POLICY (CSP) - DISABLED                           -->
     <!-- ═══════════════════════════════════════════════════════════════════════ -->
-    <!-- ИСПРАВЛЕНО:                                                            -->
-    <!--   ✓ Удален конфликт merge (<<<, ===, >>>)                             -->
-    <!--   ✓ Удалена опасная директива require-trusted-types-for 'script'      -->
-    <!--   ✓ Добавлены правильные подключения для GitHub Pages                 -->
-    <!--   ✓ Переформатирована политика для корректного парсинга               -->
+    <!-- CSP disabled as per security requirements                             -->
     <!-- ═══════════════════════════════════════════════════════════════════════ -->
-    <meta http-equiv="Content-Security-Policy" content="
+    <!--<meta http-equiv="Content-Security-Policy" content="
       default-src 'self';
       script-src 'self';
       style-src 'self' 'unsafe-inline';
@@ -33,15 +29,15 @@
       frame-ancestors 'none';
       base-uri 'self';
       form-action 'self';
-      object-src 'none';">
-    
+      object-src 'none';">-->
+
     <!-- ═══════════════════════════════════════════════════════════════════════ -->
-    <!-- 3. ДОПОЛНИТЕЛЬНЫЕ SECURITY HEADERS                                     -->
+    <!-- 3. ДОПОЛНИТЕЛЬНЫЕ SECURITY HEADERS - DISABLED                         -->
     <!-- ═══════════════════════════════════════════════════════════════════════ -->
-    <meta http-equiv="X-Content-Type-Options" content="nosniff" />
-    <meta http-equiv="X-Frame-Options" content="DENY" />
-    <meta http-equiv="X-XSS-Protection" content="1; mode=block" />
-    <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin" />
+    <!--<meta http-equiv="X-Content-Type-Options" content="nosniff" />-->
+    <!--<meta http-equiv="X-Frame-Options" content="DENY" />-->
+    <!--<meta http-equiv="X-XSS-Protection" content="1; mode=block" />-->
+    <!--<meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin" />-->
     
     <!-- ═══════════════════════════════════════════════════════════════════════ -->
     <!-- 4. ИНФОРМАЦИЯ О СТРАНИЦЕ                                               -->
