@@ -78,21 +78,180 @@
   transform: scale(1.05);
 }
 
+.mathematics-basics-page {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #2d1b69 0%, #1a0b4a 100%);
+  color: white;
+  padding: 80px 20px 80px 20px; /* padding for fixed nav */
+  max-width: 1400px;
+  margin: 0 auto;
+  display: flex;
+  gap: 20px;
+}
+
+.basics-content {
+  flex: 1;
+}
+
+.basics-content h1 {
+  color: #4ecdc4;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.chapters-panel {
+  width: 300px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  padding: 20px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(10px);
+}
+
+.chapters-toggle {
+  width: 100%;
+  background: #4ecdc4;
+  color: #2d1b69;
+  border: none;
+  padding: 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 14px;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.chapters-toggle:hover {
+  background: #3bb3a8;
+}
+
+.chapters-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.chapter-item {
+  padding: 10px 15px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 14px;
+  color: white;
+}
+
+.chapter-item:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.chapter-item.active {
+  background: #4ecdc4;
+  color: #2d1b69;
+  border-color: #4ecdc4;
+}
+
+.chapter-content {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+  padding: 20px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(10px);
+}
+
 @media (max-width: 768px) {
   .mathematics-page {
     padding: 10px;
   }
-  
+
   .mathematics-content {
     padding: 20px;
   }
-  
+
   .page-title {
     font-size: 2em;
   }
-  
+
   .mathematics-sections {
     grid-template-columns: 1fr;
     gap: 20px;
   }
+
+  .mathematics-basics-page {
+    flex-direction: column;
+  }
+
+  .chapters-panel {
+    width: 100%;
+  }
+}
+
+.fixed-nav {
+  position: fixed;
+  left: 0;
+  right: 0;
+  background: rgba(45, 27, 105, 0.9);
+  backdrop-filter: blur(10px);
+  z-index: 1000;
+  padding: 10px 20px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+.top-nav {
+  top: 0;
+}
+
+.bottom-nav {
+  bottom: 0;
+}
+
+.nav-content {
+  max-width: 1400px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.nav-content h3 {
+  color: #4ecdc4;
+  margin: 0;
+  font-size: 16px;
+}
+
+.nav-chapters {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.bottom-nav .nav-chapters {
+  justify-content: center;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.nav-chapter {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 8px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 14px;
+}
+
+.nav-chapter:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.nav-chapter.active {
+  background: #4ecdc4;
+  color: #2d1b69;
+  border-color: #4ecdc4;
 }
