@@ -36,7 +36,6 @@
   ✅ Добавлены дополнительные security headers
      ДОБАВЛЕНЫ:
        • X-UA-Compatible - совместимость с IE
-       • X-Content-Type-Options - защита от sniffing
        • X-Frame-Options - защита от clickjacking
        • X-XSS-Protection - XSS фильтр браузера
        • Referrer-Policy - контроль referrer
@@ -150,7 +149,6 @@
 │       object-src 'none';">                                                    │
 │                                                                               │
 │     <meta http-equiv="X-UA-Compatible" content="IE=edge" />                   │
-│     <meta http-equiv="X-Content-Type-Options" content="nosniff" />            │
 │     <meta http-equiv="X-Frame-Options" content="DENY" />                      │
 │     <meta http-equiv="X-XSS-Protection" content="1; mode=block" />            │
 │     <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin" />│
@@ -264,11 +262,10 @@
    • Vite автоматически обновляет пути при build
 
 3. SECURITY HEADERS
-   • X-UA-Compatible - совместимость
-   • X-Content-Type-Options - от mime sniffing
-   • X-Frame-Options - от clickjacking
-   • X-XSS-Protection - встроенный XSS фильтр
-   • Referrer-Policy - приватность
+    • X-UA-Compatible - совместимость
+    • X-Frame-Options - от clickjacking
+    • X-XSS-Protection - встроенный XSS фильтр
+    • Referrer-Policy - приватность
 
 4. НИКАКИХ БЛОКИРОВОК
    • Нет eval() в коде

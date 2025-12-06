@@ -45,7 +45,6 @@
     <!-- ════════════════════════════════════════════════════════════════ -->
     <!-- ДОПОЛНИТЕЛЬНЫЕ SECURITY HEADERS                                 -->
     <!-- ════════════════════════════════════════════════════════════════ -->
-    <meta http-equiv="X-Content-Type-Options" content="nosniff" />
     <meta http-equiv="X-Frame-Options" content="DENY" />
     <meta http-equiv="X-XSS-Protection" content="1; mode=block" />
     <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin" />
@@ -163,10 +162,6 @@
 
   ✅ X-UA-Compatible: IE=edge
      - Совместимость с IE и старыми браузерами
-
-  ✅ X-Content-Type-Options: nosniff
-     - Предотвращение mime-type sniffing атак
-     - Браузер должен доверять Content-Type заголовку
 
   ✅ X-Frame-Options: DENY
      - Защита от clickjacking
