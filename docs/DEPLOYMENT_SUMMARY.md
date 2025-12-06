@@ -39,7 +39,6 @@
 
   ✅ Оставлены мета-теги, которые браузер поддерживает:
      • X-UA-Compatible: IE=edge
-     • X-Content-Type-Options: nosniff
      • X-XSS-Protection: 1; mode=block
      • Referrer-Policy: strict-origin-when-cross-origin
      • Content-Security-Policy (в мета-теге)
@@ -56,7 +55,6 @@
   
   ✅ Содержит полные security headers:
      • X-Frame-Options: DENY (защита от clickjacking)
-     • X-Content-Type-Options: nosniff (защита от MIME sniffing)
      • X-XSS-Protection: 1; mode=block (XSS фильтр)
      • Referrer-Policy: strict-origin-when-cross-origin (приватность)
      • Content-Security-Policy: полная политика
@@ -228,12 +226,6 @@ git add . && git commit -m "build: GitHub Pages ready" && git push origin main
 │ X-Frame-Options: DENY                                                       │
 │ Запрещает встраивание сайта в <iframe>                                      │
 │ Защита от: Clickjacking атак                                                │
-└─────────────────────────────────────────────────────────────────────────────┘
-
-┌─────────────────────────────────────────────────────────────────────────────┐
-│ X-Content-Type-Options: nosniff                                             │
-│ Браузер должен доверять Content-Type заголовку                              │
-│ Защита от: MIME sniffing атак                                               │
 └─────────────────────────────────────────────────────────────────────────────┘
 
 ┌─────────────────────────────────────────────────────────────────────────────┐

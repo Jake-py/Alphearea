@@ -61,7 +61,6 @@ object-src 'none';
 
 Добавлены мета-теги для дополнительной защиты:
 - `X-UA-Compatible` - защита от старых версий IE
-- `X-Content-Type-Options: nosniff` - предотвращение mime-type sniffing
 - `X-Frame-Options: DENY` - защита от clickjacking
 - `X-XSS-Protection` - защита от XSS
 - `Referrer-Policy: strict-origin-when-cross-origin` - контроль referrer
@@ -95,7 +94,6 @@ object-src 'none';
     
     <!-- Дополнительные security headers -->
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta http-equiv="X-Content-Type-Options" content="nosniff" />
     <meta http-equiv="X-Frame-Options" content="DENY" />
     <meta http-equiv="X-XSS-Protection" content="1; mode=block" />
     <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin" />

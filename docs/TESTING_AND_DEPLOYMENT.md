@@ -279,7 +279,6 @@ dist/
 │
 ├── _headers (для GitHub Pages)
 │   X-Frame-Options: DENY
-│   X-Content-Type-Options: nosniff
 │   Content-Security-Policy: ...
 │
 ├── 404.html (для client-side routing)
