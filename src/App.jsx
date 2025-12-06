@@ -35,6 +35,7 @@ import PsychologyPractices from './pages/PsychologyPractices.jsx'
 import TestSettings from './pages/TestSettings.jsx'
 import ChatPanel from './components/ChatPanel.jsx'
 import Mathematics from './pages/Mathematics.jsx'
+import MathematicsBasics from './pages/MathematicsBasics.jsx'
 import Programming from './pages/Programming.jsx'
 import Electronics from './pages/Electronics.jsx'
 
@@ -580,6 +581,7 @@ function App() {
             <Route path="/psychology/theories" element={<PsychologyTheories />} />
             <Route path="/psychology/practices" element={<PsychologyPractices />} />
             <Route path="/mathematics" element={<Mathematics />} />
+            <Route path="/mathematics/basics" element={<MathematicsBasics />} />
             <Route path="/programming" element={<Programming />} />
             <Route path="/electronics" element={<Electronics />} />
             <Route path="/test-settings" element={<TestSettings />} />
