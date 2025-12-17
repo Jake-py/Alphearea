@@ -69,13 +69,6 @@ function About() {
                 Главный разработчик и архитектор системы
               </div>
             </div>
-            <div className="team-member">
-              <img src="/jibi.png" alt="Jibi" className="team-photo" />
-              <div>
-                <strong>Jibi</strong><br />
-                UX/UI дизайнер
-              </div>
-            </div>
           </div>
         </div>
       </div>
