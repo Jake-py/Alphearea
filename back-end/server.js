@@ -7,6 +7,7 @@ import fs from 'fs/promises';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { siteInfo } from './config/siteInfo.js';
+import { GoogleGenAI } from "@google/genai";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -26,7 +27,7 @@ try {
     totalQuestions: 10,
     timeout: 60000,
     retries: 2,
-    aiModel: "gemma2:2b"
+    aiModel: "gemini-3-pro-preview"
   };
 }
 
@@ -38,9 +39,10 @@ const ACCOUNTS_DIR = path.join(__dirname, 'accounts');
 const PROFILES_DIR = path.join(__dirname, 'profiles');
 const TESTS_DIR = path.join(__dirname, 'tests');
 
-// Ollama API configuration for local gemma2:2b model
-const OLLAMA_API_URL = process.env.OLLAMA_API_URL || "http://localhost:11434/api/chat";
-const OLLAMA_MODEL = "gemma2:2b";
+// Gemini AI configuration
+const GENAI_API_KEY = process.env.GOOGLE_GENAI_API_KEY;
+const genAI = new GoogleGenAI({ apiKey: GENAI_API_KEY });
+const GEMINI_MODEL = "gemini-3-pro-preview";
 
 // Simple rate limiting disabled
 // const requestCounts = new Map();
@@ -49,6 +51,25 @@ const OLLAMA_MODEL = "gemma2:2b";
 
 // app.use(cors()); // CORS disabled
 app.use(express.json());
+
+// Security headers middleware
+app.use((req, res, next) => {
+  res.setHeader("Content-Security-Policy",
+    "default-src 'self'; " +
+    "script-src 'self' 'wasm-unsafe-eval' blob:; " +
+    "style-src 'self' 'unsafe-inline' blob:; " +
+    "img-src 'self' data: blob:; " +
+    "font-src 'self' data: blob:; " +
+    "worker-src blob: 'self'; " +
+    "connect-src 'self' http://localhost:3002; " +
+    "frame-src 'none'; " +
+    "object-src 'none';");
+  
+  res.setHeader("X-Content-Type-Options", "nosniff");
+  res.setHeader("X-Frame-Options", "DENY");
+  res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
+  next();
+});
 
 // JWT authentication middleware disabled
 // const authenticateToken = (req, res, next) => {
@@ -105,13 +126,16 @@ ensureDirectories();
 //   next();
 // });
 
-// Check if Ollama is available
-async function checkOllamaConnection() {
+// Check if Gemini AI is available
+async function checkGeminiConnection() {
   try {
-    const response = await axios.get('http://localhost:11434/api/tags', { timeout: 5000 });
-    return response.status === 200;
+    const model = genAI.getGenerativeModel({ model: GEMINI_MODEL });
+    const result = await model.generateContent({
+      contents: [{ role: "user", parts: [{ text: "Test connection" }] }]
+    });
+    return result.response !== undefined;
   } catch (error) {
-    console.error('Ollama connection check failed:', error.message);
+    console.error('Gemini AI connection check failed:', error.message);
     return false;
   }
 }
@@ -126,47 +150,29 @@ app.post('/api/chat', async (req, res) => {
     return res.status(400).json({ error: 'Message is required and must be a non-empty string' });
   }
 
-  // Check if Ollama is available
-  const isOllamaAvailable = await checkOllamaConnection();
-  if (!isOllamaAvailable) {
-    return res.status(503).json({ error: 'Local AI service (Ollama) is not available. Please ensure Ollama is running and gemma2:2b model is installed.' });
+  // Check if Gemini AI is available
+  const isGeminiAvailable = await checkGeminiConnection();
+  if (!isGeminiAvailable) {
+    return res.status(503).json({ error: 'Gemini AI service is not available. Please ensure your API key is valid.' });
   }
 
-  // Build the messages array for Ollama format
-  const messages = [
-    {
-      "role": "system",
-      "content": `говори только с таким языком, как и язык в запросе, отвечай всегда с таким языком который тебе пишут или просят`
-    },
-    {
-      "role": "user",
-      "content": message.trim()
-    }
-  ];
-
   try {
-    const payload = {
-      model: OLLAMA_MODEL,
-      messages: messages,
-      stream: false
-    };
+    const model = genAI.getGenerativeModel({ model: GEMINI_MODEL });
+    const prompt = `говори только с таким языком, как и язык в запросе, отвечай всегда с таким языком который тебе пишут или просят\n\nUser: ${message.trim()}`;
 
-    const response = await axios.post(OLLAMA_API_URL, payload, {
-      timeout: 120000 // 120 seconds timeout
+    const result = await model.generateContent({
+      contents: [{ role: "user", parts: [{ text: prompt }] }]
     });
 
-    if (response.data && response.data.message && response.data.message.content) {
-      res.json({ response: response.data.message.content });
-    } else {
-      res.status(500).json({ error: 'Invalid response from Ollama API' });
-    }
+    const responseText = await result.response.text();
+    res.json({ response: responseText });
   } catch (error) {
-    console.error('Error communicating with Ollama API:', error.message);
+    console.error('Error communicating with Gemini AI:', error.message);
 
-    if (error.response && error.response.status === 429) {
+    if (error.message.includes('API key')) {
+      res.status(401).json({ error: 'Invalid Gemini AI API key.' });
+    } else if (error.message.includes('quota')) {
       res.status(429).json({ error: 'Rate limit exceeded. Please try again later.' });
-    } else if (error.code === 'ECONNREFUSED' || error.code === 'ENOTFOUND') {
-      res.status(503).json({ error: 'Local AI service is currently unavailable. Please ensure Ollama is running.' });
     } else if (error.code === 'ETIMEDOUT') {
       res.status(504).json({ error: 'Request timed out. Please try again.' });
     } else {
@@ -834,16 +840,15 @@ app.post('/api/generate-test', async (req, res) => {
     return res.status(400).json({ error: 'Topic is required' });
   }
 
-  // Check if Ollama is available
-  const isOllamaAvailable = await checkOllamaConnection();
-  if (!isOllamaAvailable) {
-    return res.status(503).json({ error: 'Local AI service (Ollama) is not available. Please ensure Ollama is running and jarvis2b:latest model is installed.' });
+  // Check if Gemini AI is available
+  const isGeminiAvailable = await checkGeminiConnection();
+  if (!isGeminiAvailable) {
+    return res.status(503).json({ error: 'Gemini AI service is not available. Please ensure your API key is valid.' });
   }
 
-  const messages = [
-    {
-      "role": "system",
-      "content": `Генерируй тесты только в таком формате:
+  try {
+    const model = genAI.getGenerativeModel({ model: GEMINI_MODEL });
+    const prompt = `Генерируй тесты только в таком формате:
 
 ? Вопрос
 + Правильный ответ
@@ -857,41 +862,17 @@ app.post('/api/generate-test', async (req, res) => {
 - Неправильный ответ 2
 - Неправильный ответ 3
 
-И так далее. Всегда используй ? для вопросов, + для правильных ответов, - для неправильных.`
-    },
-    {
-      "role": "user",
-      "content": `Тема: ${topic}.
-Сгенерируй 3 вопроса с вариантами ответа (A, B, C, D) и укажи правильный вариант.
-Формат:
-Вопрос 1: [Текст вопроса]
-A) [Вариант 1]
-B) [Вариант 2]
-C) [Вариант 3]
-D) [Вариант 4]
-Правильный ответ: [Буква]
+И так далее. Всегда используй ? для вопросов, + для правильных ответов, - для неправильных.
 
-Вопрос 2: [Текст вопроса]
-...`
-    }
-  ];
+Тема: ${topic}.
+Сгенерируй 3 вопроса с вариантами ответа (A, B, C, D) и укажи правильный вариант.`;
 
-  try {
-    const payload = {
-      model: OLLAMA_MODEL,
-      messages: messages,
-      stream: false
-    };
-
-    const response = await axios.post(OLLAMA_API_URL, payload, {
-      timeout: 300000 // 5 minutes timeout for AI generation
+    const result = await model.generateContent({
+      contents: [{ role: "user", parts: [{ text: prompt }] }]
     });
 
-    if (response.data && response.data.message && response.data.message.content) {
-      res.json({ generated_test: response.data.message.content });
-    } else {
-      res.status(500).json({ error: 'Invalid response from Ollama API' });
-    }
+    const responseText = await result.response.text();
+    res.json({ generated_test: responseText });
   } catch (error) {
     console.error('Error generating test:', error);
     res.status(500).json({ error: 'Failed to generate test' });
@@ -944,65 +925,49 @@ Requirements:
 Generate the questions now:`;
       }
 
-      const messages = [
-        {
-          "role": "system",
-          "content": "You are JARVIS 2B, an expert educator creating high-quality test questions. Always generate questions in the exact format specified. You are sarcastic, precise, and confident in your responses."
-        },
-        {
-          "role": "user",
-          "content": promptContent
-        }
-      ];
+      const model = genAI.getGenerativeModel({ model: GEMINI_MODEL });
+      const systemPrompt = "You are JARVIS 2B, an expert educator creating high-quality test questions. Always generate questions in the exact format specified. You are sarcastic, precise, and confident in your responses.";
 
-      const payload = {
-        model: OLLAMA_MODEL,
-        messages: messages,
-        stream: false
-      };
-
-      const response = await axios.post(OLLAMA_API_URL, payload, {
-        timeout: testConfig.timeout
+      const result = await model.generateContent({
+        contents: [
+          { role: "user", parts: [{ text: systemPrompt }] },
+          { role: "user", parts: [{ text: promptContent }] }
+        ]
       });
 
-      if (response.data && response.data.message && response.data.message.content) {
-        const generatedContent = response.data.message.content;
+      const generatedContent = await result.response.text();
 
-        // Parse the generated content
-        const questions = [];
-        const lines = generatedContent.split('\n').map(line => line.trim()).filter(line => line);
-        let currentQuestion = null;
+      // Parse the generated content
+      const questions = [];
+      const lines = generatedContent.split('\n').map(line => line.trim()).filter(line => line);
+      let currentQuestion = null;
 
-        for (const line of lines) {
-          if (line.startsWith('?')) {
-            if (currentQuestion) questions.push(currentQuestion);
-            currentQuestion = {
-              question: line.substring(1).trim(),
-              options: [],
-              correctAnswer: null
-            };
-          } else if (line.startsWith('+') && currentQuestion) {
-            currentQuestion.correctAnswer = currentQuestion.options.length;
-            currentQuestion.options.push(line.substring(1).trim());
-          } else if (line.startsWith('-') && currentQuestion) {
-            currentQuestion.options.push(line.substring(1).trim());
-          }
+      for (const line of lines) {
+        if (line.startsWith('?')) {
+          if (currentQuestion) questions.push(currentQuestion);
+          currentQuestion = {
+            question: line.substring(1).trim(),
+            options: [],
+            correctAnswer: null
+          };
+        } else if (line.startsWith('+') && currentQuestion) {
+          currentQuestion.correctAnswer = currentQuestion.options.length;
+          currentQuestion.options.push(line.substring(1).trim());
+        } else if (line.startsWith('-') && currentQuestion) {
+          currentQuestion.options.push(line.substring(1).trim());
         }
-
-        if (currentQuestion) questions.push(currentQuestion);
-
-        return questions;
-      } else {
-        throw new Error('Invalid response from Ollama API');
       }
+
+      if (currentQuestion) questions.push(currentQuestion);
+
+      return questions;
     } catch (error) {
       console.error(`Error generating chunk (attempt ${attempt + 1}/${retries + 1}):`, error.message);
       if (attempt === retries) {
         return null; // Failed after all retries
       }
 
-      
-  // Wait a bit before retrying (без setTimeout)
+      // Wait a bit before retrying (без setTimeout)
       await new Promise(resolve => {
         const start = performance.now();
         function check(now) {
@@ -1033,10 +998,10 @@ app.post('/api/tests/generate', async (req, res) => {
     return res.status(400).json({ error: 'Parameters are required for parameters generation method' });
   }
 
-  // Check if Ollama is available
-  const isOllamaAvailable = await checkOllamaConnection();
-  if (!isOllamaAvailable) {
-    return res.status(503).json({ error: 'Local AI service (Ollama) is not available. Please ensure Ollama is running and gemma2:2b model is installed.' });
+  // Check if Gemini AI is available
+  const isGeminiAvailable = await checkGeminiConnection();
+  if (!isGeminiAvailable) {
+    return res.status(503).json({ error: 'Gemini AI service is not available. Please ensure your API key is valid.' });
   }
 
   const totalQuestions = numQuestions || testConfig.totalQuestions;
@@ -1659,7 +1624,6 @@ app.get('/api/profile/:userId/points-history', async (req, res) => {
 
 app.listen(PORT, () => {
   console.log(`Backend server running on http://localhost:${PORT}`);
-  console.log(`Ollama API URL: ${OLLAMA_API_URL}`);
-  console.log(`Using AI model: ${OLLAMA_MODEL}`);
+  console.log(`Using AI model: ${GEMINI_MODEL}`);
   console.log(`Loaded site identity: ${siteInfo.name}`);
 });

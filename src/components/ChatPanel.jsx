@@ -55,7 +55,7 @@ function ChatPanel({ isOpen, onClose }) {
   return (
     <div className="chat-panel">
       <div className="chat-header">
-        <h3>Gemma2 : 2B </h3>
+        <h3>Gemini AI</h3>
         <button onClick={onClose} className="close-button">×</button>
       </div>
       <div className="chat-messages">

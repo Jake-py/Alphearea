@@ -3,7 +3,7 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import viteCompression from 'vite-plugin-compression'
 
-export default defineConfig(({ command }) => ({
+export default defineConfig(({ mode }) => ({
   define: {
     'process.env': {}
   },
@@ -16,9 +16,12 @@ export default defineConfig(({ command }) => ({
     })
   ],
 
-  base: command === 'build' ? '/Alphearea/' : '/',
+  base: mode === 'production' ? '/Alphearea/' : '/',
   server: {
     historyApiFallback: true,
+    headers: {
+      'Content-Security-Policy': "default-src 'self'; script-src 'self' 'wasm-unsafe-eval' blob:; style-src 'self' 'unsafe-inline' blob:; img-src 'self' data: blob:; font-src 'self' data: blob:; worker-src blob: 'self'; connect-src 'self' http://localhost:* ws://localhost:*; frame-src 'none'; object-src 'none'",
+    },
     proxy: {
       '/api': {
         target: 'http://localhost:3002',
@@ -41,7 +44,8 @@ export default defineConfig(({ command }) => ({
       output: {
         manualChunks: {
           vendor: ['react', 'react-dom'],
-          router: ['react-router-dom']
+          router: ['react-router-dom'],
+          transformers: ['@xenova/transformers']
         }
       }
     }
