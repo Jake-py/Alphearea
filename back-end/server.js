@@ -10,6 +10,9 @@ import { config } from 'dotenv';
 import { siteInfo } from './config/siteInfo.js';
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { HfInference } from '@huggingface/inference';
+import https from 'https';
+import cookieParser from 'cookie-parser';
+import csurf from 'csurf';
 
 // Load environment variables from .env.production file
 config({ path: path.resolve(process.cwd(), '.env.production') });
@@ -44,6 +47,10 @@ const ACCOUNTS_DIR = path.join(__dirname, 'accounts');
 const PROFILES_DIR = path.join(__dirname, 'profiles');
 const TESTS_DIR = path.join(__dirname, 'tests');
 
+// CSRF protection setup
+app.use(cookieParser());
+const csrfProtection = csurf({ cookie: true });
+
 // Gemini AI configuration
 const GENAI_API_KEY = process.env.GOOGLE_GENAI_API_KEY;
 const genAI = new GoogleGenerativeAI({ apiKey: GENAI_API_KEY });
@@ -55,10 +62,10 @@ console.log('Hugging Face API Key loaded:', HUGGINGFACE_API_KEY ? 'Yes' : 'No');
 const hf = new HfInference(HUGGINGFACE_API_KEY);
 const HUGGINGFACE_MODEL = "mistralai/Mistral-7B-Instruct-v0.2";
 
-// Simple rate limiting disabled
-// const requestCounts = new Map();
-// const RATE_LIMIT_WINDOW = 60 * 1000; // 1 minute
-// const MAX_REQUESTS_PER_WINDOW = 10; // 10 requests per minute per IP
+// Simple rate limiting enabled
+const requestCounts = new Map();
+const RATE_LIMIT_WINDOW = 60 * 1000; // 1 minute
+const MAX_REQUESTS_PER_WINDOW = 10; // 10 requests per minute per IP
 
 // app.use(cors()); // CORS disabled
 app.use(express.json());
@@ -67,18 +74,23 @@ app.use(express.json());
 app.use((req, res, next) => {
   res.setHeader("Content-Security-Policy",
     "default-src 'self'; " +
-    "script-src 'self' 'wasm-unsafe-eval' blob:; " +
+    "script-src 'self' 'wasm-unsafe-eval' blob: https://cdn.jsdelivr.net; " +
     "style-src 'self' 'unsafe-inline' blob:; " +
-    "img-src 'self' data: blob:; " +
-    "font-src 'self' data: blob:; " +
+    "img-src 'self' data: blob: https://*.googleusercontent.com; " +
+    "font-src 'self' data: blob: https://fonts.gstatic.com; " +
     "worker-src blob: 'self'; " +
-    "connect-src 'self' http://localhost:3002; " +
+    "connect-src 'self' http://localhost:3002 https://api.google.com https://huggingface.co; " +
     "frame-src 'none'; " +
-    "object-src 'none';");
-  
+    "object-src 'none'; " +
+    "base-uri 'self'; " +
+    "form-action 'self';");
+   
   res.setHeader("X-Content-Type-Options", "nosniff");
   res.setHeader("X-Frame-Options", "DENY");
   res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
+  res.setHeader("Strict-Transport-Security", "max-age=63072000; includeSubDomains; preload");
+  res.setHeader("X-XSS-Protection", "0");
+  res.setHeader("Permissions-Policy", "geolocation=(), microphone=(), camera=()");
   next();
 });
 
@@ -335,15 +347,28 @@ app.post('/api/verify-password', async (req, res) => {
   }
 });
 
-// User registration endpoint
-app.post('/api/register', async (req, res) => {
+// User registration endpoint with CSRF protection
+app.post('/api/register', csrfProtection, async (req, res) => {
   const { username, password, email, firstName, lastName, nickname, dateOfBirth, specialization } = req.body;
 
+  // Input validation to prevent injection
   if (!username || !password || !email) {
     return res.status(400).json({
       error: 'Username, password, and email are required'
     });
   }
+
+  // Sanitize inputs to prevent injection
+  const sanitizeInput = (input) => {
+    if (typeof input !== 'string') return input;
+    return input.replace(/[<>'"&]/g, '');
+  };
+
+  const sanitizedUsername = sanitizeInput(username);
+  const sanitizedEmail = sanitizeInput(email);
+  const sanitizedFirstName = sanitizeInput(firstName);
+  const sanitizedLastName = sanitizeInput(lastName);
+  const sanitizedNickname = sanitizeInput(nickname);
 
   if (password.length < 8) {
     return res.status(400).json({
@@ -352,14 +377,14 @@ app.post('/api/register', async (req, res) => {
   }
 
   const usernameRegex = /^[a-zA-Z0-9_]+$/;
-  if (!usernameRegex.test(username)) {
+  if (!usernameRegex.test(sanitizedUsername)) {
     return res.status(400).json({
       error: 'Username can only contain letters, numbers, and underscores'
     });
   }
 
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!emailRegex.test(email)) {
+  if (!emailRegex.test(sanitizedEmail)) {
     return res.status(400).json({
       error: 'Invalid email format'
     });
@@ -443,8 +468,8 @@ app.post('/api/register', async (req, res) => {
   }
 });
 
-// User login endpoint
-app.post('/api/login', async (req, res) => {
+// User login endpoint with CSRF protection
+app.post('/api/login', csrfProtection, async (req, res) => {
   const { username, password } = req.body;
 
   if (!username || !password) {
@@ -1673,8 +1698,43 @@ app.get('/api/profile/:userId/points-history', async (req, res) => {
   }
 });
 
-app.listen(PORT, () => {
-  console.log(`Backend server running on http://localhost:${PORT}`);
-  console.log(`Using AI model: ${GEMINI_MODEL}`);
-  console.log(`Loaded site identity: ${siteInfo.name}`);
-});
+// Check if we're running in production (Render) or development
+const isProduction = process.env.NODE_ENV === 'production';
+
+if (isProduction) {
+  // In production, Render handles HTTPS termination, so we just listen on HTTP
+  app.listen(PORT, () => {
+    console.log(`Backend server running in production mode on port ${PORT}`);
+    console.log(`Using AI model: ${GEMINI_MODEL}`);
+    console.log(`Loaded site identity: ${siteInfo.name}`);
+    console.log('HTTPS is handled by Render proxy');
+  });
+} else {
+  // In development, we can optionally support HTTPS
+  const devHTTPSPort = 3443;
+  
+  try {
+    // Try to load SSL certificates for development
+    const privateKey = fs.readFileSync(path.resolve(__dirname, 'sslcert', 'key.pem'));
+    const certificate = fs.readFileSync(path.resolve(__dirname, 'sslcert', 'cert.pem'));
+    
+    const httpsServer = https.createServer({ key: privateKey, cert: certificate }, app);
+    
+    httpsServer.listen(devHTTPSPort, () => {
+      console.log(`Backend server running in development mode`);
+      console.log(`HTTP server: http://localhost:${PORT}`);
+      console.log(`HTTPS server: https://localhost:${devHTTPSPort}`);
+      console.log(`Using AI model: ${GEMINI_MODEL}`);
+      console.log(`Loaded site identity: ${siteInfo.name}`);
+    });
+  } catch (error) {
+    // If SSL certificates are not available, fall back to HTTP
+    console.warn('SSL certificates not found, running HTTP only in development');
+    app.listen(PORT, () => {
+      console.log(`Backend server running in development mode (HTTP only)`);
+      console.log(`HTTP server: http://localhost:${PORT}`);
+      console.log(`Using AI model: ${GEMINI_MODEL}`);
+      console.log(`Loaded site identity: ${siteInfo.name}`);
+    });
+  }
+}
