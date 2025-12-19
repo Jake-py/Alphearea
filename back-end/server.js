@@ -7,7 +7,7 @@ import fs from 'fs/promises';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { siteInfo } from './config/siteInfo.js';
-import { GoogleGenAI } from "@google/genai";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -41,7 +41,7 @@ const TESTS_DIR = path.join(__dirname, 'tests');
 
 // Gemini AI configuration
 const GENAI_API_KEY = process.env.GOOGLE_GENAI_API_KEY;
-const genAI = new GoogleGenAI({ apiKey: GENAI_API_KEY });
+const genAI = new GoogleGenerativeAI({ apiKey: GENAI_API_KEY });
 const GEMINI_MODEL = "gemini-3-pro-preview";
 
 // Simple rate limiting disabled

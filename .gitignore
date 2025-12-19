@@ -35,3 +35,6 @@ back-end/accounts/
 back-end/profiles/
 node_modules/
 dist/
+dist/
+.env.development
+for_ico.png
