@@ -24,7 +24,7 @@ function NeonTitle({ tag = 'h1' }) {
 
   animationFrameId = requestAnimationFrame(update);
 
-  return () => cancelAnimationFrame(animationFrameId);
+  return () => window.cancelAnimationFrame(animationFrameId);
 }, []);
 
 

@@ -6,8 +6,13 @@ import jwt from 'jsonwebtoken';
 import fs from 'fs/promises';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { config } from 'dotenv';
 import { siteInfo } from './config/siteInfo.js';
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import { HfInference } from '@huggingface/inference';
+
+// Load environment variables from .env.production file
+config({ path: path.resolve(process.cwd(), '.env.production') });
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -43,6 +48,12 @@ const TESTS_DIR = path.join(__dirname, 'tests');
 const GENAI_API_KEY = process.env.GOOGLE_GENAI_API_KEY;
 const genAI = new GoogleGenerativeAI({ apiKey: GENAI_API_KEY });
 const GEMINI_MODEL = "gemini-3-pro-preview";
+
+// Hugging Face Inference API configuration
+const HUGGINGFACE_API_KEY = process.env.HF_API_KEY;
+console.log('Hugging Face API Key loaded:', HUGGINGFACE_API_KEY ? 'Yes' : 'No');
+const hf = new HfInference(HUGGINGFACE_API_KEY);
+const HUGGINGFACE_MODEL = "mistralai/Mistral-7B-Instruct-v0.2";
 
 // Simple rate limiting disabled
 // const requestCounts = new Map();
@@ -140,37 +151,77 @@ async function checkGeminiConnection() {
   }
 }
 
+// Check if Hugging Face Inference API is available
+async function checkHuggingFaceConnection() {
+  try {
+    console.log('Testing Hugging Face connection with model:', HUGGINGFACE_MODEL);
+    console.log('Hugging Face API Key:', HUGGINGFACE_API_KEY);
+    const response = await hf.textGeneration({
+      model: HUGGINGFACE_MODEL,
+      inputs: "Test connection"
+    });
+    console.log('Hugging Face connection successful:', response);
+    return response !== undefined;
+  } catch (error) {
+    console.error('Hugging Face Inference API connection check failed:', error.message);
+    console.error('Error details:', error);
+    return false;
+  }
+}
+
 // Pre-build context prompt template for efficiency
 const contextPromptTemplate = `говори только с таким языком, как и язык в запросе, отвечай всегда с таким языком который тебе пишут или просят`;
 
 app.post('/api/chat', async (req, res) => {
-  const { message } = req.body;
+  const { message, model = 'gemini' } = req.body;
 
   if (!message || typeof message !== 'string' || message.trim().length === 0) {
     return res.status(400).json({ error: 'Message is required and must be a non-empty string' });
   }
 
-  // Check if Gemini AI is available
-  const isGeminiAvailable = await checkGeminiConnection();
-  if (!isGeminiAvailable) {
-    return res.status(503).json({ error: 'Gemini AI service is not available. Please ensure your API key is valid.' });
-  }
-
   try {
-    const model = genAI.getGenerativeModel({ model: GEMINI_MODEL });
-    const prompt = `говори только с таким языком, как и язык в запросе, отвечай всегда с таким языком который тебе пишут или просят\n\nUser: ${message.trim()}`;
+    let responseText = '';
+    
+    if (model === 'gemini') {
+      // Check if Gemini AI is available
+      const isGeminiAvailable = await checkGeminiConnection();
+      if (!isGeminiAvailable) {
+        return res.status(503).json({ error: 'Gemini AI service is not available. Please ensure your API key is valid.' });
+      }
 
-    const result = await model.generateContent({
-      contents: [{ role: "user", parts: [{ text: prompt }] }]
-    });
+      const geminiModel = genAI.getGenerativeModel({ model: GEMINI_MODEL });
+      const prompt = `говори только с таким языком, как и язык в запросе, отвечай всегда с таким языком который тебе пишут или просят\n\nUser: ${message.trim()}`;
 
-    const responseText = await result.response.text();
-    res.json({ response: responseText });
+      const result = await geminiModel.generateContent({
+        contents: [{ role: "user", parts: [{ text: prompt }] }]
+      });
+
+      responseText = await result.response.text();
+    } else if (model === 'huggingface') {
+      // Check if Hugging Face Inference API is available
+      const isHuggingFaceAvailable = await checkHuggingFaceConnection();
+      if (!isHuggingFaceAvailable) {
+        return res.status(503).json({ error: 'Hugging Face Inference API service is not available. Please ensure your API key is valid.' });
+      }
+
+      const prompt = `говори только с таким языком, как и язык в запросе, отвечай всегда с таким языком который тебе пишут или просят\n\nUser: ${message.trim()}`;
+
+      const response = await hf.textGeneration({
+        model: HUGGINGFACE_MODEL,
+        inputs: prompt
+      });
+
+      responseText = response.generated_text;
+    } else {
+      return res.status(400).json({ error: 'Invalid model specified. Use "gemini" or "huggingface".' });
+    }
+
+    res.json({ response: responseText, model });
   } catch (error) {
-    console.error('Error communicating with Gemini AI:', error.message);
+    console.error('Error communicating with AI:', error.message);
 
     if (error.message.includes('API key')) {
-      res.status(401).json({ error: 'Invalid Gemini AI API key.' });
+      res.status(401).json({ error: 'Invalid API key.' });
     } else if (error.message.includes('quota')) {
       res.status(429).json({ error: 'Rate limit exceeded. Please try again later.' });
     } else if (error.code === 'ETIMEDOUT') {
