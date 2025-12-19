@@ -30,7 +30,7 @@ app.use((req, res, next) => {
 });
 
 // Специальный маршрут для статических файлов
-app.get('/Alphearea/assets/:file', (req, res) => {
+app.get('/assets/:file', (req, res) => {
   const filePath = path.join(__dirname, 'dist', 'assets', req.params.file);
   
   // Проверяем существует ли файл
@@ -49,7 +49,7 @@ app.get('/Alphearea/assets/:file', (req, res) => {
 });
 
 // Раздаём статические файлы из dist
-app.use('/Alphearea', express.static(path.join(__dirname, 'dist'), {
+app.use(express.static(path.join(__dirname, 'dist'), {
   setHeaders: (res, filePath) => {
     const type = mime.getType(filePath);
     if (type) {
@@ -64,9 +64,13 @@ app.use('/Alphearea', express.static(path.join(__dirname, 'dist'), {
   }
 }));
 
-// SPA fallback для всех маршрутов /Alphearea
-app.get('/Alphearea/:path', (req, res) => {
-  res.sendFile(path.join(__dirname, 'dist', 'index.html'));
+// SPA fallback для всех маршрутов
+app.use((req, res, next) => {
+  if (req.path.startsWith('/assets/')) {
+    next();
+  } else {
+    res.sendFile(path.join(__dirname, 'dist', 'index.html'));
+  }
 });
 
 // Обработка 404 для API маршрутов
@@ -81,7 +85,7 @@ app.use((req, res, next) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`🚀 Production server started on http://localhost:${PORT}/Alphearea/`);
+  console.log(`🚀 Production server started on http://localhost:${PORT}/`);
   console.log(`📁 Serving files from: ${path.join(__dirname, 'dist')}`);
-  console.log(`🔍 Check MIME types: curl -I http://localhost:${PORT}/Alphearea/assets/index-XXXXX.js`);
+  console.log(`🔍 Check MIME types: curl -I http://localhost:${PORT}/assets/index-XXXXX.js`);
 });

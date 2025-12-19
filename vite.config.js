@@ -2,12 +2,12 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import viteCompression from 'vite-plugin-compression'
-
+ 
 export default defineConfig(({ mode }) => ({
   define: {
     'process.env': {}
   },
-
+  
   plugins: [
     react(),
     viteCompression({
@@ -15,8 +15,8 @@ export default defineConfig(({ mode }) => ({
       ext: '.gz'
     })
   ],
-
-  base: mode === 'production' ? '/Alphearea/' : '/',
+  
+  base: '/',
   server: {
     historyApiFallback: true,
     headers: {
