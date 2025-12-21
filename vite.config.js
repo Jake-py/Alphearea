@@ -27,6 +27,8 @@ export default defineConfig(({ mode }) => ({
   },
  
   build: {
+    outDir: 'dist',
+    emptyOutDir: true,
     sourcemap: false,
     minify: 'terser',
     terserOptions: {
@@ -34,6 +36,7 @@ export default defineConfig(({ mode }) => ({
         pure_funcs: ['console.log']
       }
     },
+    brotliSize: false,
     
     rollupOptions: {
       output: {
