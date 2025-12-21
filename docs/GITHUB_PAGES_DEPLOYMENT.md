@@ -36,7 +36,7 @@
       style-src 'self' 'unsafe-inline';
       img-src 'self' data: https:;
       font-src 'self' data:;
-      connect-src 'self' http://localhost:3002 http://localhost:5173 ws://localhost:5173 ws://localhost:3002 https://api.github.com;
+      connect-src 'self' https://alphearea-b.onrender.com https://api.github.com;
       frame-ancestors 'none';
       base-uri 'self';
       form-action 'self';

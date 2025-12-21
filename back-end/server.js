@@ -79,7 +79,7 @@ app.use((req, res, next) => {
     "img-src 'self' data: blob: https://*.googleusercontent.com; " +
     "font-src 'self' data: blob: https://fonts.gstatic.com; " +
     "worker-src blob: 'self'; " +
-    "connect-src 'self' http://localhost:3002 https://api.google.com https://huggingface.co; " +
+    "connect-src 'self' https://alphearea-b.onrender.com https://api.google.com https://huggingface.co; " +
     "frame-src 'none'; " +
     "object-src 'none'; " +
     "base-uri 'self'; " +

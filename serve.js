@@ -30,7 +30,7 @@ app.use((req, res, next) => {
 });
 
 // Специальный маршрут для статических файлов
-app.get('/assets/:file', (req, res) => {
+app.get('/Alphearea/assets/:file', (req, res) => {
   const filePath = path.join(__dirname, 'dist', 'assets', req.params.file);
   
   // Проверяем существует ли файл
@@ -66,7 +66,7 @@ app.use(express.static(path.join(__dirname, 'dist'), {
 
 // SPA fallback для всех маршрутов
 app.use((req, res, next) => {
-  if (req.path.startsWith('/assets/')) {
+  if (req.path.startsWith('/Alphearea/assets/')) {
     next();
   } else {
     res.sendFile(path.join(__dirname, 'dist', 'index.html'));

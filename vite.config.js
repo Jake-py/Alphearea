@@ -11,15 +11,15 @@ export default defineConfig(({ mode }) => ({
     react()
   ],
   
-  base: '/',
+  base: mode === 'production' ? '/Alphearea/' : '/',
   server: {
     historyApiFallback: true,
     headers: {
-      'Content-Security-Policy': "default-src 'self'; script-src 'self' 'wasm-unsafe-eval' blob:; style-src 'self' 'unsafe-inline' blob:; img-src 'self' data: blob:; font-src 'self' data: blob:; worker-src blob: 'self'; connect-src 'self' http://localhost:* ws://localhost:*; frame-src 'none'; object-src 'none'",
+      'Content-Security-Policy': "default-src 'self'; script-src 'self' 'wasm-unsafe-eval' blob:; style-src 'self' 'unsafe-inline' blob:; img-src 'self' data: blob:; font-src 'self' data: blob:; worker-src blob: 'self'; connect-src 'self' https://alphearea-b.onrender.com https://alphearea.onrender.com; frame-src 'none'; object-src 'none'",
     },
     proxy: {
       '/api': {
-        target: 'http://localhost:3002',
+        target: 'https://alphearea-b.onrender.com',
         changeOrigin: true,
         secure: false,
       },
