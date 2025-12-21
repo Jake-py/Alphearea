@@ -1,22 +1,17 @@
 // vite.config.js
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
-import viteCompression from 'vite-plugin-compression'
- 
+  
 export default defineConfig(({ mode }) => ({
   define: {
     'process.env': {}
   },
   
   plugins: [
-    react(),
-    viteCompression({
-      algorithm: 'gzip',
-      ext: '.gz'
-    })
+    react()
   ],
   
-  base: mode === 'production' ? '/Alphearea/' : '/',
+  base: '/',
   server: {
     historyApiFallback: true,
     headers: {
@@ -30,18 +25,21 @@ export default defineConfig(({ mode }) => ({
       },
     },
   },
-
+ 
   build: {
-    sourcemap: false, // снижает шанс появления eval
+    sourcemap: false,
     minify: 'terser',
     terserOptions: {
       compress: {
         pure_funcs: ['console.log']
       }
     },
-
+    
     rollupOptions: {
       output: {
+        chunkFileNames: 'assets/[name]-[hash].js',
+        entryFileNames: 'assets/[name]-[hash].js',
+        assetFileNames: 'assets/[name]-[hash].[ext]',
         manualChunks: {
           vendor: ['react', 'react-dom'],
           router: ['react-router-dom'],

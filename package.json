@@ -8,6 +8,7 @@
     "build": "vite build",
     "build:local": "NODE_ENV=development vite build",
     "serve:prod": "node serve.js",
+    "start": "node server.js",
     "lint": "eslint .",
     "preview": "vite preview",
     "scan": "node src/utils/scanMaterials.js"
@@ -22,6 +23,7 @@
     "lucide-react": "^0.556.0",
     "mammoth": "^1.11.0",
     "mime": "^4.1.0",
+    "path": "^0.12.7",
     "pdf-parse": "^2.4.5",
     "pixi.js": "^8.14.3",
     "react": "^19.1.1",
