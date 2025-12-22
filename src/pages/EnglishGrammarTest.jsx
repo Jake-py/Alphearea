@@ -190,7 +190,7 @@ function EnglishGrammarTest() {
 
     // Log test result
     try {
-      await fetch('http://localhost:3002/api/progress/test', {
+      await fetch('https://alphearea-b.onrender.com/api/progress/test', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

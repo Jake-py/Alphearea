@@ -166,7 +166,7 @@ function TestTaking() {
     try {
       const user = JSON.parse(localStorage.getItem('user'))
       if (user && user.username) {
-        await fetch('http://localhost:3002/api/progress/test', {
+        await fetch('https://alphearea-b.onrender.com/api/progress/test', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

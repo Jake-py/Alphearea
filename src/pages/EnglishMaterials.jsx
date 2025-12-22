@@ -6,7 +6,7 @@ const trackMaterialProgress = async (subject, materialId, action) => {
     const user = JSON.parse(localStorage.getItem('user'))
     if (!user || !user.username) return
 
-    await fetch('http://localhost:3002/api/progress/material', {
+    await fetch('https://alphearea-b.onrender.com/api/progress/material', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

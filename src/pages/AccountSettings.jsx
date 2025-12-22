@@ -248,7 +248,7 @@ function AccountSettings() {
 
   const loadAchievements = async (username) => {
     try {
-      const response = await fetch(`http://localhost:3002/api/achievements/${username}`)
+      const response = await fetch(`https://alphearea-b.onrender.com/api/achievements/${username}`)
       if (response.ok) {
         const data = await response.json()
         setAchievements(data.achievements)
@@ -260,7 +260,7 @@ function AccountSettings() {
 
   const loadHistory = async (username) => {
     try {
-      const response = await fetch(`http://localhost:3002/api/history/${username}`)
+      const response = await fetch(`https://alphearea-b.onrender.com/api/history/${username}`)
       if (response.ok) {
         const data = await response.json()
         setHistory(data.history)
@@ -270,6 +270,7 @@ function AccountSettings() {
     }
   }
 
+
   const handleAddSubject = async () => {
     if (!newSubjectName.trim()) {
       setError('Введите название предмета')
@@ -277,7 +278,7 @@ function AccountSettings() {
     }
 
     try {
-      const response = await fetch('http://localhost:3002/api/progress/subject', {
+      const response = await fetch('https://alphearea-b.onrender.com/api/progress/subject', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -297,7 +298,7 @@ function AccountSettings() {
       setNewSubjectName('')
       setMessage('Предмет добавлен успешно!')
       // Reload profile data
-      const profileResponse = await fetch(`http://localhost:3002/api/profile/${userData.username}`)
+      const profileResponse = await fetch(`https://alphearea-b.onrender.com/api/profile/${userData.username}`)
       if (profileResponse.ok) {
         const profileData = await profileResponse.json()
         setProfileData(profileData.profile)
@@ -310,7 +311,7 @@ function AccountSettings() {
 
   const handleRemoveSubject = async (subjectId) => {
     try {
-      const response = await fetch(`http://localhost:3002/api/progress/subject/${subjectId}?username=${userData.username}`, {
+      const response = await fetch(`https://alphearea-b.onrender.com/api/progress/subject/${subjectId}?username=${userData.username}`, {
         method: 'DELETE',
       })
 
@@ -320,7 +321,7 @@ function AccountSettings() {
 
       setMessage('Предмет удален успешно!')
       // Reload profile data
-      const profileResponse = await fetch(`http://localhost:3002/api/profile/${userData.username}`)
+      const profileResponse = await fetch(`https://alphearea-b.onrender.com/api/profile/${userData.username}`)
       if (profileResponse.ok) {
         const profileData = await profileResponse.json()
         setProfileData(profileData.profile)
@@ -363,7 +364,7 @@ function AccountSettings() {
     setError('')
 
     try {
-      const response = await fetch('http://localhost:3002/api/change-password', {
+      const response = await fetch('https://alphearea-b.onrender.com/api/change-password', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -411,7 +412,7 @@ function AccountSettings() {
         language: formData.language
       }
 
-      const profileResponse = await fetch(`http://localhost:3002/api/profile/${userData.username}`, {
+      const profileResponse = await fetch(`https://alphearea-b.onrender.com/api/profile/${userData.username}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -425,7 +426,7 @@ function AccountSettings() {
 
       // Update user data if username or email changed
       if (formData.username !== userData.username || formData.email !== userData.email) {
-        const userResponse = await fetch(`http://localhost:3002/api/user/${userData.username}`, {
+        const userResponse = await fetch(`https://alphearea-b.onrender.com/api/user/${userData.username}`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',

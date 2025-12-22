@@ -94,7 +94,7 @@ function PrivacySettings() {
         }
       }
 
-      const profileResponse = await fetch(`http://localhost:3002/api/profile/${userData.username}`, {
+      const profileResponse = await fetch(`https://alphearea-b.onrender.com/api/profile/${userData.username}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -108,7 +108,7 @@ function PrivacySettings() {
 
       // Update user data if username or email changed
       if (privacySettings.login !== userData.username || privacySettings.email !== userData.email) {
-        const userResponse = await fetch(`http://localhost:3002/api/user/${userData.username}`, {
+        const userResponse = await fetch(`https://alphearea-b.onrender.com/api/user/${userData.username}`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',

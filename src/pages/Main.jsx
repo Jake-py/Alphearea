@@ -98,7 +98,7 @@ const Main = () => {
             <div className="feature-card group">
               <div className="text-4xl mb-2">🤖</div>
               <h3 className="text-xl font-bold mb-2 text-pink-400">ИИ-ассистент</h3>
-              <p className="text-gray-300 text-sm">Помощник на основе JARVIS 2B для персонального обучения</p>
+              <p className="text-gray-300 text-sm">Помощник на основе Gemini для персонального обучения</p>
             </div>
           </div>
 
@@ -106,15 +106,15 @@ const Main = () => {
           <div className="grid grid-cols-3 gap-8 mt-16 max-w-3xl mx-auto">
             <div className="stat-item">
               <div className="text-4xl font-black text-cyan-400 glitch-number">1000+</div>
-              <div className="text-sm text-gray-400 mt-2">Активных студентов</div>
+              <div className="text-sm text-gray-400 mt-2" style ={{ animation: 'stat-idle-glitch 1.5s linear infinite' }}>Активных студентов</div>
             </div>
             <div className="stat-item">
               <div className="text-4xl font-black text-purple-400 glitch-number">50+</div>
-              <div className="text-sm text-gray-400 mt-2">Курсов</div>
+              <div className="text-sm text-gray-400 mt-2" style ={{ animation: 'stat-idle-glitch 1.5s linear infinite' }}>Курсов</div>
             </div>
             <div className="stat-item">
               <div className="text-4xl font-black text-pink-400 glitch-number">95%</div>
-              <div className="text-sm text-gray-400 mt-2">Успешность</div>
+              <div className="text-sm text-gray-400 mt-2" style ={{ animation: 'stat-idle-glitch 1.5s linear infinite' }}>Успешность</div>
             </div>
           </div>
         </div>

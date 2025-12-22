@@ -59,7 +59,7 @@ function App() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(() => {
     const saved = localStorage.getItem('sidebarOpen')
     return saved !== null ? JSON.parse(saved) : false
-  })
+  }) // Инициализация состояния боковой панели из localStorage
   const [showRegistration, setShowRegistration] = useState(false)
   const [registrationStep, setRegistrationStep] = useState(1)
   const [registrationData, setRegistrationData] = useState({
@@ -72,7 +72,7 @@ function App() {
     nickname: '',
     dateOfBirth: '',
     specialization: ''
-  })
+  })// Для хранения данных формы регистрации
   const [registrationError, setRegistrationError] = useState('')
   const [showForgotPassword, setShowForgotPassword] = useState(false)
   const [forgotPasswordStep, setForgotPasswordStep] = useState(1)
@@ -88,14 +88,14 @@ function App() {
     },
     newPassword: '',
     confirmNewPassword: ''
-  })
+  }) // Для хранения данных формы восстановления пароля
   const [forgotPasswordError, setForgotPasswordError] = useState('')
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
 
   const { isAuthenticated, user, login, logout } = useAuth()
-
+// Обработчики форм авторизации, регистрации и восстановления пароля
 
 
   const handleLogin = async (e) => {
@@ -113,21 +113,21 @@ function App() {
       if (response.ok) {
         login(data.user, data.profile)
       } else {
-        setError(data.error || 'Login failed')
+        setError(data.error || 'Неправильное имя пользователя или пароль') // Общая ошибка входа
       }
     } catch (error) {
-      setError('Network error. Please check your connection and try again.')
+      setError('Сервер временно недоступен. Пожалуйста, попробуйте позже. \n Или обратитесь в поддержку. \n Телефон +998913950001')
     }
   }
 
   const handleRegistrationStep1 = (e) => {
     e.preventDefault()
     if (registrationData.password !== registrationData.confirmPassword) {
-      setRegistrationError('Passwords do not match')
+      setRegistrationError('Пароли не совпадают') // Пароли не совпадают
       return
     }
     if (registrationData.password.length < 8) {
-      setRegistrationError('Password must be at least 8 characters long')
+      setRegistrationError('Пароль должен содержать минимум 8 символов') // Слишком короткий пароль
       return
     }
     setRegistrationError('')
@@ -135,7 +135,7 @@ function App() {
   }
 
   const handleRegistrationStep2 = async (e) => {
-    e.preventDefault()
+    e.preventDefault() // Отправка данных регистрации на сервер
     try {
       const response = await fetch(API_ENDPOINTS.register, {
         method: 'POST',
@@ -159,22 +159,22 @@ function App() {
           dateOfBirth: '',
           specialization: ''
         })
-        alert('Registration successful! You can now log in.')
+        alert('Регистрация прошла успешно! Теперь вы можете войти в систему.')
       } else {
-        setRegistrationError(data.error || 'Registration failed')
+        setRegistrationError(data.error || 'Ошибка при регистрации') // Ошибка регистрации
       }
     } catch (error) {
-      setRegistrationError('Network error. Please try again.')
+      setRegistrationError('Ошибка сети. Попробуйте еще раз.') // Ошибка сети
     }
   }
 
   const updateRegistrationData = (field, value) => {
     setRegistrationData(prev => ({ ...prev, [field]: value }))
-  }
+  } // Обновление данных регистрации
 
   const updateForgotPasswordData = (field, value) => {
     setForgotPasswordData(prev => ({ ...prev, [field]: value }))
-  }
+  } // Обновление данных восстановления пароля
 
   const handleForgotPasswordStep1 = (e) => {
     e.preventDefault()
@@ -182,8 +182,8 @@ function App() {
       setForgotPasswordError('Пожалуйста, введите логин')
       return
     }
-    setForgotPasswordError('')
-    setForgotPasswordStep(2)
+    setForgotPasswordError('') // Очистка ошибок
+    setForgotPasswordStep(2) // Переход к следующему шагу
   }
 
   const handleForgotPasswordStep2 = async (e) => {
@@ -208,7 +208,7 @@ function App() {
       setForgotPasswordError('Пожалуйста, введите все данные паспорта')
       return
     }
-
+    
     setForgotPasswordError('')
     setForgotPasswordStep(3)
   }
@@ -236,15 +236,15 @@ function App() {
         },
         body: JSON.stringify({
           identifier: forgotPasswordData.username,
-          newPassword: forgotPasswordData.newPassword
+          newPassword: forgotPasswordData.newPassword // и другие данные подтверждения по необходимости
         }),
       })
 
-      if (response.ok) {
+      if (response.ok) { // Успешное изменение пароля
         alert('Пароль успешно изменен! Теперь вы можете войти в систему.')
         setShowForgotPassword(false)
         setForgotPasswordStep(1)
-        setForgotPasswordData({
+        setForgotPasswordData({ // Сброс данных формы
           username: '',
           verificationMethod: '',
           verificationData: {
@@ -258,7 +258,7 @@ function App() {
           confirmNewPassword: ''
         })
         setForgotPasswordError('')
-        // Refresh the page to reload the application state
+        // Перезагрузка страницы для обновления состояния авторизации
         window.location.reload()
       } else {
         const errorData = await response.json()
@@ -531,7 +531,7 @@ function App() {
                   />
                   <input
                     type="text"
-                    placeholder="Специализация/Профессия"
+                    placeholder="Специализация / Профессия / Род деятельности / Интересы / Цели обучения"
                     value={registrationData.specialization}
                     onChange={(e) => updateRegistrationData('specialization', e.target.value)}
                     required
