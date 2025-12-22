@@ -54,15 +54,17 @@ import PsychologyTheoriesTest from './pages/PsychologyTheoriesTest.jsx'
 import { API_ENDPOINTS } from './config/api.js'
 import { AuthProvider, useAuth } from './components/AuthManager'
 
-function App() {
-  const [isChatOpen, setIsChatOpen] = useState(false)
-  const [isSidebarOpen, setIsSidebarOpen] = useState(() => {
-    const saved = localStorage.getItem('sidebarOpen')
+
+
+function App() { // Главный компонент приложения
+  const [isChatOpen, setIsChatOpen] = useState(false) // Состояние открытия чата
+  const [isSidebarOpen, setIsSidebarOpen] = useState(() => { // Инициализация состояния боковой панели из localStorage
+    const saved = localStorage.getItem('sidebarOpen') 
     return saved !== null ? JSON.parse(saved) : false
   }) // Инициализация состояния боковой панели из localStorage
   const [showRegistration, setShowRegistration] = useState(false)
   const [registrationStep, setRegistrationStep] = useState(1)
-  const [registrationData, setRegistrationData] = useState({
+  const [registrationData, setRegistrationData] = useState({ // Для хранения данных формы регистрации
     username: '',
     password: '',
     confirmPassword: '',
