@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom'
+import { Routes, Route, useLocation } from 'react-router-dom'
 import './styles/style.css'
 import Header from './components/Header.jsx'
 import Sidebar from './components/Sidebar.jsx'
@@ -555,7 +555,7 @@ function App() { // Главный компонент приложения
   }
 
   return (
-    <Router>
+
       <AuthProvider>
         <div id="main-container">
           <Header
@@ -618,7 +618,7 @@ function App() { // Главный компонент приложения
           {renderAuthForms()}
         </div>
       </AuthProvider>
-    </Router>
+      
   )
 }
 
