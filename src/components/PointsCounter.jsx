@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { usePoints } from '../hooks/usePoints';
+import useUser from '../hooks/useUser';
 
 /**
  * Компонент для отображения текущего баланса points в header
+ * Работает в гостевом режиме, показывая 0 очков для неавторизованных пользователей
  */
-function PointsCounter({ userId }) {
+function PointsCounter() {
+  const { userId } = useUser();
   const { points, loading, error } = usePoints(userId);
 
   if (loading) {

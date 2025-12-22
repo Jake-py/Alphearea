@@ -15,7 +15,7 @@ export default defineConfig(({ mode }) => ({
   server: {
     historyApiFallback: true,
     headers: {
-      'Content-Security-Policy': "default-src 'self'; script-src 'self' 'wasm-unsafe-eval' blob:; style-src 'self' 'unsafe-inline' blob:; img-src 'self' data: blob:; font-src 'self' data: blob:; worker-src blob: 'self'; connect-src 'self' https://alphearea-b.onrender.com https://alphearea.onrender.com; frame-src 'none'; object-src 'none'",
+      'Content-Security-Policy': "default-src 'self'; script-src 'self' 'wasm-unsafe-eval' blob: 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline' blob:; img-src 'self' data: blob:; font-src 'self' data: blob:; worker-src blob: 'self'; connect-src 'self' https://alphearea-b.onrender.com https://alphearea.onrender.com; frame-src 'none'; object-src 'none'",
     },
     proxy: {
       '/api': {

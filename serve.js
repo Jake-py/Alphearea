@@ -19,6 +19,8 @@ app.use((req, res, next) => {
     res.setHeader('Content-Type', 'text/css; charset=utf-8');
   } else if (req.url.endsWith('.wasm')) {
     res.setHeader('Content-Type', 'application/wasm');
+  } else if (req.url.endsWith('.jpg') || req.url.endsWith('.jpeg') || req.url.endsWith('.png') || req.url.endsWith('.gif')) {
+    res.setHeader('Content-Type', 'image/jpeg');
   }
   
   // Добавляем Content-Encoding для gzip
@@ -29,27 +31,13 @@ app.use((req, res, next) => {
   next();
 });
 
-// Специальный маршрут для статических файлов
-app.get('/Alphearea/assets/:file', (req, res) => {
-  const filePath = path.join(__dirname, 'dist', 'assets', req.params.file);
-  
-  // Проверяем существует ли файл
-  if (fs.existsSync(filePath)) {
-    const type = mime.getType(filePath);
-    if (type) {
-      res.setHeader('Content-Type', type);
-    }
-    if (filePath.endsWith('.gz')) {
-      res.setHeader('Content-Encoding', 'gzip');
-    }
-    res.sendFile(filePath);
-  } else {
-    res.status(404).send('File not found');
-  }
+// Обработка 404 для API маршрутов
+app.use('/api', (req, res, next) => {
+  res.status(404).json({ error: 'API endpoint not found' });
 });
 
-// Раздаём статические файлы из dist
-app.use(express.static(path.join(__dirname, 'dist'), {
+// Раздаём статические файлы из dist с префиксом /Alphearea
+app.use('/Alphearea', express.static(path.join(process.cwd(), 'dist'), {
   setHeaders: (res, filePath) => {
     const type = mime.getType(filePath);
     if (type) {
@@ -61,21 +49,19 @@ app.use(express.static(path.join(__dirname, 'dist'), {
     if (filePath.endsWith('.wasm')) {
       res.setHeader('Content-Type', 'application/wasm');
     }
+    if (filePath.endsWith('.jpg') || filePath.endsWith('.jpeg') || filePath.endsWith('.png') || filePath.endsWith('.gif')) {
+      res.setHeader('Content-Type', 'image/jpeg');
+    }
   }
 }));
 
-// SPA fallback для всех маршрутов
-app.use((req, res, next) => {
-  if (req.path.startsWith('/Alphearea/assets/')) {
-    next();
+// SPA fallback для всех маршрутов (должен быть после всех статических маршрутов)
+app.use((req, res) => {
+  if (!req.url.startsWith('/Alphearea')) {
+    res.redirect('/Alphearea/');
   } else {
-    res.sendFile(path.join(__dirname, 'dist', 'index.html'));
+    res.sendFile(path.join(process.cwd(), 'dist', 'index.html'));
   }
-});
-
-// Обработка 404 для API маршрутов
-app.use('/api', (req, res, next) => {
-  res.status(404).json({ error: 'API endpoint not found' });
 });
 
 // Для отладки - показываем все запросы
@@ -86,6 +72,6 @@ app.use((req, res, next) => {
 
 app.listen(PORT, () => {
   console.log(`🚀 Production server started on http://localhost:${PORT}/`);
-  console.log(`📁 Serving files from: ${path.join(__dirname, 'dist')}`);
-  console.log(`🔍 Check MIME types: curl -I http://localhost:${PORT}/assets/index-XXXXX.js`);
+  console.log(`📁 Serving files from: ${path.join(process.cwd(), 'dist')}`);
+  console.log(`🔍 Check MIME types: curl -I http://localhost:${PORT}/Alphearea/assets/index.css`);
 });

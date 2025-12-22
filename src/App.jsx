@@ -52,13 +52,9 @@ import RussianGrammarTest from './pages/RussianGrammarTest.jsx'
 import PhilosophyWisdomTest from './pages/PhilosophyWisdomTest.jsx'
 import PsychologyTheoriesTest from './pages/PsychologyTheoriesTest.jsx'
 import { API_ENDPOINTS } from './config/api.js'
+import { AuthProvider, useAuth } from './components/AuthManager'
 
 function App() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false)
-  const [username, setUsername] = useState('')
-  const [userId, setUserId] = useState('')
-  const [password, setPassword] = useState('')
-  const [error, setError] = useState('')
   const [isChatOpen, setIsChatOpen] = useState(false)
   const [isSidebarOpen, setIsSidebarOpen] = useState(() => {
     const saved = localStorage.getItem('sidebarOpen')
@@ -94,6 +90,11 @@ function App() {
     confirmNewPassword: ''
   })
   const [forgotPasswordError, setForgotPasswordError] = useState('')
+  const [username, setUsername] = useState('')
+  const [password, setPassword] = useState('')
+  const [error, setError] = useState('')
+
+  const { isAuthenticated, user, login, logout } = useAuth()
 
 
 
@@ -110,10 +111,7 @@ function App() {
       })
       const data = await response.json()
       if (response.ok) {
-        setIsLoggedIn(true)
-        setUserId(data.user.username)
-        localStorage.setItem('user', JSON.stringify(data.user))
-        localStorage.setItem('profile', JSON.stringify(data.profile))
+        login(data.user, data.profile)
       } else {
         setError(data.error || 'Login failed')
       }
@@ -272,339 +270,352 @@ function App() {
   }
 
   useEffect(() => {
-    const savedUser = localStorage.getItem('user')
-    const savedProfile = localStorage.getItem('profile')
-    if (savedUser && savedProfile) {
-      const userData = JSON.parse(savedUser)
-      setIsLoggedIn(true)
-      setUserId(userData.username)
-    }
-  }, [])
-
-  useEffect(() => {
     localStorage.setItem('sidebarOpen', JSON.stringify(isSidebarOpen))
   }, [isSidebarOpen])
 
-  const handleLogout = () => {
-    setIsLoggedIn(false)
-    setUserId('')
-    localStorage.removeItem('user')
-    localStorage.removeItem('profile')
-  }
-
-  if (!isLoggedIn) {
+  // Формы авторизации и регистрации теперь отображаются поверх основного контента
+  // а не блокируют его полностью
+  const renderAuthForms = () => {
     if (showForgotPassword) {
       return (
-        <div id="forgot-password-container">
-          <NeonTitle tag="h2" />
-          {forgotPasswordStep === 1 ? (
-            <div>
-              <h3>Восстановление пароля - Шаг 1: Подтверждение личности</h3>
-              <p>Пожалуйста, подтвердите, что этот аккаунт принадлежит вам.</p>
-              <form onSubmit={handleForgotPasswordStep1}>
-                <input
-                  type="text"
-                  placeholder="Логин"
-                  value={forgotPasswordData.username}
-                  onChange={(e) => updateForgotPasswordData('username', e.target.value)}
-                  required
-                />
-                <button type="submit">Далее</button>
-              </form>
-            </div>
-          ) : forgotPasswordStep === 2 ? (
-            <div>
-              <h3>Восстановление пароля - Шаг 2: Выбор метода подтверждения</h3>
-              <form onSubmit={handleForgotPasswordStep2}>
-                <div className="verification-methods">
-                  <label>
-                    <input
-                      type="radio"
-                      name="verificationMethod"
-                      value="phone"
-                      onChange={(e) => updateForgotPasswordData('verificationMethod', e.target.value)}
-                    />
-                    Подтверждение через номер телефона
-                    {forgotPasswordData.verificationMethod === 'phone' && (
+        <div id="forgot-password-container" style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.8)',
+          zIndex: 1000,
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center'
+        }}>
+          <div style={{
+            backgroundColor: 'white',
+            padding: '20px',
+            borderRadius: '8px',
+            maxWidth: '500px',
+            width: '90%',
+            maxHeight: '80vh',
+            overflowY: 'auto'
+          }}>
+            <NeonTitle tag="h2" />
+            {forgotPasswordStep === 1 ? (
+              <div>
+                <h3>Восстановление пароля - Шаг 1: Подтверждение личности</h3>
+                <p>Пожалуйста, подтвердите, что этот аккаунт принадлежит вам.</p>
+                <form onSubmit={handleForgotPasswordStep1}>
+                  <input
+                    type="text"
+                    placeholder="Логин"
+                    value={forgotPasswordData.username}
+                    onChange={(e) => updateForgotPasswordData('username', e.target.value)}
+                    required
+                    style={{ width: '100%', padding: '8px', margin: '8px 0' }}
+                  />
+                  <button type="submit" style={{ padding: '10px 20px', backgroundColor: '#4CAF50', color: 'white', border: 'none', borderRadius: '4px' }}>Далее</button>
+                </form>
+              </div>
+            ) : forgotPasswordStep === 2 ? (
+              <div>
+                <h3>Восстановление пароля - Шаг 2: Выбор метода подтверждения</h3>
+                <form onSubmit={handleForgotPasswordStep2}>
+                  <div className="verification-methods">
+                    <label style={{ display: 'block', margin: '10px 0' }}>
                       <input
-                        type="tel"
-                        placeholder="Номер телефона"
-                        value={forgotPasswordData.verificationData.phone}
-                        onChange={(e) => updateForgotPasswordData('verificationData', { ...forgotPasswordData.verificationData, phone: e.target.value })}
-                        required
+                        type="radio"
+                        name="verificationMethod"
+                        value="phone"
+                        onChange={(e) => updateForgotPasswordData('verificationMethod', e.target.value)}
                       />
-                    )}
-                  </label>
-                  <label>
-                    <input
-                      type="radio"
-                      name="verificationMethod"
-                      value="email"
-                      onChange={(e) => updateForgotPasswordData('verificationMethod', e.target.value)}
-                    />
-                    Подтверждение через почту
-                    {forgotPasswordData.verificationMethod === 'email' && (
+                      Подтверждение через номер телефона
+                      {forgotPasswordData.verificationMethod === 'phone' && (
+                        <input
+                          type="tel"
+                          placeholder="Номер телефона"
+                          value={forgotPasswordData.verificationData.phone}
+                          onChange={(e) => updateForgotPasswordData('verificationData', { ...forgotPasswordData.verificationData, phone: e.target.value })}
+                          required
+                          style={{ width: '100%', padding: '8px', margin: '8px 0' }}
+                        />
+                      )}
+                    </label>
+                    <label style={{ display: 'block', margin: '10px 0' }}>
                       <input
-                        type="email"
-                        placeholder="Email"
-                        value={forgotPasswordData.verificationData.email}
-                        onChange={(e) => updateForgotPasswordData('verificationData', { ...forgotPasswordData.verificationData, email: e.target.value })}
-                        required
+                        type="radio"
+                        name="verificationMethod"
+                        value="email"
+                        onChange={(e) => updateForgotPasswordData('verificationMethod', e.target.value)}
                       />
-                    )}
-                  </label>
-                  <label>
-                    <input
-                      type="radio"
-                      name="verificationMethod"
-                      value="passport"
-                      onChange={(e) => updateForgotPasswordData('verificationMethod', e.target.value)}
-                    />
-                    Подтверждение через паспорт
-                    {forgotPasswordData.verificationMethod === 'passport' && (
-                      <div className="passport-fields">
+                      Подтверждение через почту
+                      {forgotPasswordData.verificationMethod === 'email' && (
                         <input
-                          type="text"
-                          placeholder="ID паспорта"
-                          value={forgotPasswordData.verificationData.passportId}
-                          onChange={(e) => updateForgotPasswordData('verificationData', { ...forgotPasswordData.verificationData, passportId: e.target.value })}
+                          type="email"
+                          placeholder="Email"
+                          value={forgotPasswordData.verificationData.email}
+                          onChange={(e) => updateForgotPasswordData('verificationData', { ...forgotPasswordData.verificationData, email: e.target.value })}
                           required
+                          style={{ width: '100%', padding: '8px', margin: '8px 0' }}
                         />
-                        <input
-                          type="text"
-                          placeholder="Код паспорта"
-                          value={forgotPasswordData.verificationData.passportCode}
-                          onChange={(e) => updateForgotPasswordData('verificationData', { ...forgotPasswordData.verificationData, passportCode: e.target.value })}
-                          required
-                        />
-                        <input
-                          type="text"
-                          placeholder="Серия паспорта"
-                          value={forgotPasswordData.verificationData.passportSeries}
-                          onChange={(e) => updateForgotPasswordData('verificationData', { ...forgotPasswordData.verificationData, passportSeries: e.target.value })}
-                          required
-                        />
-                      </div>
-                    )}
-                  </label>
-                </div>
-                <button type="submit">Подтвердить</button>
-              </form>
-            </div>
-          ) : (
-            <div>
-              <h3>Восстановление пароля - Шаг 3: Новый пароль</h3>
-              <form onSubmit={handleForgotPasswordStep3}>
-                <input
-                  type="password"
-                  placeholder="Новый пароль"
-                  value={forgotPasswordData.newPassword}
-                  onChange={(e) => updateForgotPasswordData('newPassword', e.target.value)}
-                  required
-                />
-                <input
-                  type="password"
-                  placeholder="Повторите новый пароль"
-                  value={forgotPasswordData.confirmNewPassword}
-                  onChange={(e) => updateForgotPasswordData('confirmNewPassword', e.target.value)}
-                  required
-                />
-                <button type="submit">Изменить пароль</button>
-              </form>
-            </div>
-          )}
-          <button onClick={() => { setShowForgotPassword(false); setForgotPasswordStep(1); setForgotPasswordError(''); }}>Назад к входу</button>
-          <p style={{ color: 'red', display: forgotPasswordError ? 'block' : 'none' }}>
-            {forgotPasswordError}
-          </p>
+                      )}
+                    </label>
+                    <label style={{ display: 'block', margin: '10px 0' }}>
+                      <input
+                        type="radio"
+                        name="verificationMethod"
+                        value="passport"
+                        onChange={(e) => updateForgotPasswordData('verificationMethod', e.target.value)}
+                      />
+                      Подтверждение через паспорт
+                      {forgotPasswordData.verificationMethod === 'passport' && (
+                        <div className="passport-fields">
+                          <input
+                            type="text"
+                            placeholder="ID паспорта"
+                            value={forgotPasswordData.verificationData.passportId}
+                            onChange={(e) => updateForgotPasswordData('verificationData', { ...forgotPasswordData.verificationData, passportId: e.target.value })}
+                            required
+                            style={{ width: '100%', padding: '8px', margin: '8px 0' }}
+                          />
+                          <input
+                            type="text"
+                            placeholder="Код паспорта"
+                            value={forgotPasswordData.verificationData.passportCode}
+                            onChange={(e) => updateForgotPasswordData('verificationData', { ...forgotPasswordData.verificationData, passportCode: e.target.value })}
+                            required
+                            style={{ width: '100%', padding: '8px', margin: '8px 0' }}
+                          />
+                          <input
+                            type="text"
+                            placeholder="Серия паспорта"
+                            value={forgotPasswordData.verificationData.passportSeries}
+                            onChange={(e) => updateForgotPasswordData('verificationData', { ...forgotPasswordData.verificationData, passportSeries: e.target.value })}
+                            required
+                            style={{ width: '100%', padding: '8px', margin: '8px 0' }}
+                          />
+                        </div>
+                      )}
+                    </label>
+                  </div>
+                  <button type="submit" style={{ padding: '10px 20px', backgroundColor: '#4CAF50', color: 'white', border: 'none', borderRadius: '4px' }}>Подтвердить</button>
+                </form>
+              </div>
+            ) : (
+              <div>
+                <h3>Восстановление пароля - Шаг 3: Новый пароль</h3>
+                <form onSubmit={handleForgotPasswordStep3}>
+                  <input
+                    type="password"
+                    placeholder="Новый пароль"
+                    value={forgotPasswordData.newPassword}
+                    onChange={(e) => updateForgotPasswordData('newPassword', e.target.value)}
+                    required
+                    style={{ width: '100%', padding: '8px', margin: '8px 0' }}
+                  />
+                  <input
+                    type="password"
+                    placeholder="Повторите новый пароль"
+                    value={forgotPasswordData.confirmNewPassword}
+                    onChange={(e) => updateForgotPasswordData('confirmNewPassword', e.target.value)}
+                    required
+                    style={{ width: '100%', padding: '8px', margin: '8px 0' }}
+                  />
+                  <button type="submit" style={{ padding: '10px 20px', backgroundColor: '#4CAF50', color: 'white', border: 'none', borderRadius: '4px' }}>Изменить пароль</button>
+                </form>
+              </div>
+            )}
+            <button onClick={() => { setShowForgotPassword(false); setForgotPasswordStep(1); setForgotPasswordError(''); }} style={{ marginTop: '15px', padding: '8px 16px', backgroundColor: '#9E9E9E', color: 'white', border: 'none', borderRadius: '4px' }}>Назад к входу</button>
+            <p style={{ color: 'red', display: forgotPasswordError ? 'block' : 'none', marginTop: '10px' }}>
+              {forgotPasswordError}
+            </p>
+          </div>
         </div>
       )
     } else if (showRegistration) {
       return (
-        <div id="registration-container">
-          <NeonTitle tag="h2" />
-          {registrationStep === 1 ? (
-            <div>
-              <h3>Регистрация - Шаг 1: Аккаунт</h3>
-              <form onSubmit={handleRegistrationStep1}>
-                <input
-                  type="text"
-                  placeholder="Логин"
-                  value={registrationData.username}
-                  onChange={(e) => updateRegistrationData('username', e.target.value)}
-                  required
-                />
-                <input
-                  type="password"
-                  placeholder="Пароль"
-                  value={registrationData.password}
-                  onChange={(e) => updateRegistrationData('password', e.target.value)}
-                  required
-                />
-                <input
-                  type="password"
-                  placeholder="Повторите пароль"
-                  value={registrationData.confirmPassword}
-                  onChange={(e) => updateRegistrationData('confirmPassword', e.target.value)}
-                  required
-                />
-                <input
-                  type="email"
-                  placeholder="Email"
-                  value={registrationData.email}
-                  onChange={(e) => updateRegistrationData('email', e.target.value)}
-                  required
-                />
-                <button type="submit">Далее</button>
-              </form>
-            </div>
-          ) : (
-            <div>
-              <h3>Регистрация - Шаг 2: Личная информация</h3>
-              <form onSubmit={handleRegistrationStep2}>
-                <input
-                  type="text"
-                  placeholder="Имя"
-                  value={registrationData.firstName}
-                  onChange={(e) => updateRegistrationData('firstName', e.target.value)}
-                  required
-                />
-                <input
-                  type="text"
-                  placeholder="Фамилия"
-                  value={registrationData.lastName}
-                  onChange={(e) => updateRegistrationData('lastName', e.target.value)}
-                  required
-                />
-                <input
-                  type="text"
-                  placeholder="Nickname"
-                  value={registrationData.nickname}
-                  onChange={(e) => updateRegistrationData('nickname', e.target.value)}
-                />
-                <input
-                  type="date"
-                  placeholder="Дата рождения"
-                  value={registrationData.dateOfBirth}
-                  onChange={(e) => updateRegistrationData('dateOfBirth', e.target.value)}
-                  required
-                />
-                <input
-                  type="text"
-                  placeholder="Специализация/Профессия"
-                  value={registrationData.specialization}
-                  onChange={(e) => updateRegistrationData('specialization', e.target.value)}
-                  required
-                />
-                <button type="submit">Зарегистрироваться</button>
-              </form>
-            </div>
-          )}
-          <button onClick={() => { setShowRegistration(false); setRegistrationStep(1); setRegistrationError(''); }}>Назад к входу</button>
-          <p style={{ color: 'red', display: registrationError ? 'block' : 'none' }}>
-            {registrationError}
-          </p>
-        </div>
-      )
-    } else {
-      return (
-        <div id="login-container">
-          <NeonTitle tag="h2" />
-          <form id="login-form" onSubmit={handleLogin}>
-            <input
-              type="text"
-              id="username"
-              placeholder="Username"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              required
-            />
-            <input
-              type="password"
-              id="password"
-              placeholder="Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
-            <button type="submit">Login</button>
-          </form>
-          <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', marginTop: '15px' }}>
-            <button onClick={() => setShowRegistration(true)}>Регистрация</button>
-            <button onClick={() => setShowForgotPassword(true)}>Забыли пароль?</button>
+        <div id="registration-container" style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.8)',
+          zIndex: 1000,
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center'
+        }}>
+          <div style={{
+            backgroundColor: 'white',
+            padding: '20px',
+            borderRadius: '8px',
+            maxWidth: '500px',
+            width: '90%',
+            maxHeight: '80vh',
+            overflowY: 'auto'
+          }}>
+            <NeonTitle tag="h2" />
+            {registrationStep === 1 ? (
+              <div>
+                <h3>Регистрация - Шаг 1: Аккаунт</h3>
+                <form onSubmit={handleRegistrationStep1}>
+                  <input
+                    type="text"
+                    placeholder="Логин"
+                    value={registrationData.username}
+                    onChange={(e) => updateRegistrationData('username', e.target.value)}
+                    required
+                    style={{ width: '100%', padding: '8px', margin: '8px 0' }}
+                  />
+                  <input
+                    type="password"
+                    placeholder="Пароль"
+                    value={registrationData.password}
+                    onChange={(e) => updateRegistrationData('password', e.target.value)}
+                    required
+                    style={{ width: '100%', padding: '8px', margin: '8px 0' }}
+                  />
+                  <input
+                    type="password"
+                    placeholder="Повторите пароль"
+                    value={registrationData.confirmPassword}
+                    onChange={(e) => updateRegistrationData('confirmPassword', e.target.value)}
+                    required
+                    style={{ width: '100%', padding: '8px', margin: '8px 0' }}
+                  />
+                  <input
+                    type="email"
+                    placeholder="Email"
+                    value={registrationData.email}
+                    onChange={(e) => updateRegistrationData('email', e.target.value)}
+                    required
+                    style={{ width: '100%', padding: '8px', margin: '8px 0' }}
+                  />
+                  <button type="submit" style={{ padding: '10px 20px', backgroundColor: '#4CAF50', color: 'white', border: 'none', borderRadius: '4px' }}>Далее</button>
+                </form>
+              </div>
+            ) : (
+              <div>
+                <h3>Регистрация - Шаг 2: Личная информация</h3>
+                <form onSubmit={handleRegistrationStep2}>
+                  <input
+                    type="text"
+                    placeholder="Имя"
+                    value={registrationData.firstName}
+                    onChange={(e) => updateRegistrationData('firstName', e.target.value)}
+                    required
+                    style={{ width: '100%', padding: '8px', margin: '8px 0' }}
+                  />
+                  <input
+                    type="text"
+                    placeholder="Фамилия"
+                    value={registrationData.lastName}
+                    onChange={(e) => updateRegistrationData('lastName', e.target.value)}
+                    required
+                    style={{ width: '100%', padding: '8px', margin: '8px 0' }}
+                  />
+                  <input
+                    type="text"
+                    placeholder="Nickname"
+                    value={registrationData.nickname}
+                    onChange={(e) => updateRegistrationData('nickname', e.target.value)}
+                    style={{ width: '100%', padding: '8px', margin: '8px 0' }}
+                  />
+                  <input
+                    type="date"
+                    placeholder="Дата рождения"
+                    value={registrationData.dateOfBirth}
+                    onChange={(e) => updateRegistrationData('dateOfBirth', e.target.value)}
+                    required
+                    style={{ width: '100%', padding: '8px', margin: '8px 0' }}
+                  />
+                  <input
+                    type="text"
+                    placeholder="Специализация/Профессия"
+                    value={registrationData.specialization}
+                    onChange={(e) => updateRegistrationData('specialization', e.target.value)}
+                    required
+                    style={{ width: '100%', padding: '8px', margin: '8px 0' }}
+                  />
+                  <button type="submit" style={{ padding: '10px 20px', backgroundColor: '#4CAF50', color: 'white', border: 'none', borderRadius: '4px' }}>Зарегистрироваться</button>
+                </form>
+              </div>
+            )}
+            <button onClick={() => { setShowRegistration(false); setRegistrationStep(1); setRegistrationError(''); }} style={{ marginTop: '15px', padding: '8px 16px', backgroundColor: '#9E9E9E', color: 'white', border: 'none', borderRadius: '4px' }}>Назад к входу</button>
+            <p style={{ color: 'red', display: registrationError ? 'block' : 'none', marginTop: '10px' }}>
+              {registrationError}
+            </p>
           </div>
-          <p id="error-message" style={{ color: 'red', display: error ? 'block' : 'none' }}>
-            {error}
-          </p>
         </div>
       )
     }
+    return null
   }
 
   return (
     <Router>
-      <div id="main-container">
-        <Header
-          onOpenChat={() => setIsChatOpen(true)}
-          onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
-          onLogout={handleLogout}
-          username={username}
-          userId={userId}
-        />
-        <Sidebar isOpen={isSidebarOpen} />
-        <div className={`content ${isSidebarOpen ? 'sidebar-open' : ''}`}>
-          <main>
-            <Routes>
-            <Route path="/" element={<Main />} />
-            <Route path="/english" element={<English />} />
-            <Route path="/english/grammar" element={<EnglishGrammar />} />
-            <Route path="/english/courses/beginner" element={<EnglishCoursesBeginner />} />
-            <Route path="/english/courses/intermediate" element={<EnglishCoursesIntermediate />} />
-            <Route path="/english/courses/advanced" element={<EnglishCoursesAdvanced />} />
-            <Route path="/english/dictionary/basic" element={<EnglishDictionaryBasic />} />
-            <Route path="/english/dictionary/idioms" element={<EnglishDictionaryIdioms />} />
-            <Route path="/english/dictionary/phrasal-verbs" element={<EnglishDictionaryPhrasalVerbs />} />
-            <Route path="/english/dialogues" element={<EnglishDialogues />} />
-            <Route path="/english/materials" element={<EnglishMaterials />} />
-            <Route path="/korean" element={<Korean />} />
-            <Route path="/korean/grammar" element={<KoreanGrammar />} />
-            <Route path="/korean/courses" element={<KoreanCourses />} />
-            <Route path="/korean/dialogues" element={<KoreanDialogues />} />
-            <Route path="/russian" element={<Russian />} />
-            <Route path="/russian/grammar" element={<RussianGrammar />} />
-            <Route path="/russian/courses" element={<RussianCourses />} />
-            <Route path="/russian/dialogues" element={<RussianDialogues />} />
-            <Route path="/philosophy" element={<Philosophy />} />
-            <Route path="/philosophy/wisdom" element={<PhilosophyWisdom />} />
-            <Route path="/philosophy/books" element={<PhilosophyBooks />} />
-            <Route path="/psychology" element={<Psychology />} />
-            <Route path="/psychology/theories" element={<PsychologyTheories />} />
-            <Route path="/psychology/practices" element={<PsychologyPractices />} />
-            <Route path="/mathematics" element={<Mathematics />} />
-            <Route path="/mathematics/basics" element={<MathematicsBasics />} />
-            <Route path="/programming" element={<Programming />} />
-            <Route path="/electronics" element={<Electronics />} />
-            <Route path="/test-settings" element={<TestSettings />} />
-            <Route path="/settings" element={<Settings />} />
-            <Route path="/settings/account" element={<AccountSettings />} />
-            <Route path="/settings/privacy" element={<PrivacySettings />} />
-            <Route path="/settings/site" element={<SiteSettings />} />
-            <Route path="/about" element={<About />} />
-            <Route path="/achievements" element={<Achievements />} />
-            <Route path="/english/grammar/test" element={<EnglishGrammarTest />} />
-            <Route path="/korean/grammar/test" element={<KoreanGrammarTest />} />
-            <Route path="/russian/grammar/test" element={<RussianGrammarTest />} />
-            <Route path="/philosophy/wisdom/test" element={<PhilosophyWisdomTest />} />
-            <Route path="/psychology/theories/test" element={<PsychologyTheoriesTest />} />
+      <AuthProvider>
+        <div id="main-container">
+          <Header
+            onOpenChat={() => setIsChatOpen(true)}
+            onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
+          />
+          <Sidebar isOpen={isSidebarOpen} />
+          <div className={`content ${isSidebarOpen ? 'sidebar-open' : ''}`}>
+            <main>
+              <Routes>
+              <Route path="/" element={<Main />} />
+              <Route path="/english" element={<English />} />
+              <Route path="/english/grammar" element={<EnglishGrammar />} />
+              <Route path="/english/courses/beginner" element={<EnglishCoursesBeginner />} />
+              <Route path="/english/courses/intermediate" element={<EnglishCoursesIntermediate />} />
+              <Route path="/english/courses/advanced" element={<EnglishCoursesAdvanced />} />
+              <Route path="/english/dictionary/basic" element={<EnglishDictionaryBasic />} />
+              <Route path="/english/dictionary/idioms" element={<EnglishDictionaryIdioms />} />
+              <Route path="/english/dictionary/phrasal-verbs" element={<EnglishDictionaryPhrasalVerbs />} />
+              <Route path="/english/dialogues" element={<EnglishDialogues />} />
+              <Route path="/english/materials" element={<EnglishMaterials />} />
+              <Route path="/korean" element={<Korean />} />
+              <Route path="/korean/grammar" element={<KoreanGrammar />} />
+              <Route path="/korean/courses" element={<KoreanCourses />} />
+              <Route path="/korean/dialogues" element={<KoreanDialogues />} />
+              <Route path="/russian" element={<Russian />} />
+              <Route path="/russian/grammar" element={<RussianGrammar />} />
+              <Route path="/russian/courses" element={<RussianCourses />} />
+              <Route path="/russian/dialogues" element={<RussianDialogues />} />
+              <Route path="/philosophy" element={<Philosophy />} />
+              <Route path="/philosophy/wisdom" element={<PhilosophyWisdom />} />
+              <Route path="/philosophy/books" element={<PhilosophyBooks />} />
+              <Route path="/psychology" element={<Psychology />} />
+              <Route path="/psychology/theories" element={<PsychologyTheories />} />
+              <Route path="/psychology/practices" element={<PsychologyPractices />} />
+              <Route path="/mathematics" element={<Mathematics />} />
+              <Route path="/mathematics/basics" element={<MathematicsBasics />} />
+              <Route path="/programming" element={<Programming />} />
+              <Route path="/electronics" element={<Electronics />} />
+              <Route path="/test-settings" element={<TestSettings />} />
+              <Route path="/settings" element={<Settings />} />
+              <Route path="/settings/account" element={<AccountSettings />} />
+              <Route path="/settings/privacy" element={<PrivacySettings />} />
+              <Route path="/settings/site" element={<SiteSettings />} />
+              <Route path="/about" element={<About />} />
+              <Route path="/achievements" element={<Achievements />} />
+              <Route path="/english/grammar/test" element={<EnglishGrammarTest />} />
+              <Route path="/korean/grammar/test" element={<KoreanGrammarTest />} />
+              <Route path="/russian/grammar/test" element={<RussianGrammarTest />} />
+              <Route path="/philosophy/wisdom/test" element={<PhilosophyWisdomTest />} />
+              <Route path="/psychology/theories/test" element={<PsychologyTheoriesTest />} />
 
-            <Route path="/test-taking" element={<TestTaking />} />
-            <Route path="/test-creator" element={<TestCreator />} />
-            <Route path="/smart-editor" element={<SmartEditor />} />
-          </Routes>
-          </main>
+              <Route path="/test-taking" element={<TestTaking />} />
+              <Route path="/test-creator" element={<TestCreator />} />
+              <Route path="/smart-editor" element={<SmartEditor />} />
+            </Routes>
+            </main>
+          </div>
+          <ChatPanel isOpen={isChatOpen} onClose={() => setIsChatOpen(false)} />
+          {renderAuthForms()}
         </div>
-        <ChatPanel isOpen={isChatOpen} onClose={() => setIsChatOpen(false)} />
-      </div>
+      </AuthProvider>
     </Router>
   )
 }

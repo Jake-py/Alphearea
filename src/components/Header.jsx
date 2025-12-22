@@ -4,12 +4,15 @@ import '../styles/style.css'
 import '../styles/pointsHeader.css'
 import NeonTitle from './NeonTitle.jsx'
 import PointsCounter from './PointsCounter.jsx'
+import AuthButtons from './AuthButtons.jsx'
+import useUser from '../hooks/useUser'
 import gsap from 'gsap'
 
-function Header({ onOpenChat, onToggleSidebar, onLogout, userId }) {
+function Header({ onOpenChat, onToggleSidebar }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const navRef = useRef(null)
   const location = useLocation()
+  const { userId } = useUser()
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen)
@@ -59,7 +62,7 @@ function Header({ onOpenChat, onToggleSidebar, onLogout, userId }) {
 
       <NeonTitle />
 
-      {userId && <PointsCounter userId={userId} />}
+      <PointsCounter />
 
       <nav className={`main-nav ${isMenuOpen ? 'open' : ''}`}>
         <ul>
@@ -99,14 +102,7 @@ function Header({ onOpenChat, onToggleSidebar, onLogout, userId }) {
           </li>
 
           <li>
-            <button
-              onClick={onLogout}
-              className="logout-button"
-              onMouseEnter={(e) => animateButtonHover(e.currentTarget, true)}
-              onMouseLeave={(e) => animateButtonHover(e.currentTarget, false)}
-            >
-              Выйти
-            </button>
+            <AuthButtons />
           </li>
 
           <li>
