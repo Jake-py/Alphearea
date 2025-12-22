@@ -11,7 +11,7 @@ export default defineConfig(({ mode }) => ({
     react()
   ],
   
-  base: mode === 'production' ? '/Alphearea/' : '/',
+  base: mode === 'production' ? '/' : '/',
   server: {
     historyApiFallback: true,
     headers: {
