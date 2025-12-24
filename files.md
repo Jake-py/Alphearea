@@ -3,7 +3,6 @@
 ```
 Alphearea/
 ├── .env.example                     # Пример файла окружения
-├── .env.production                  # Файл окружения для продакшена
 ├── .gitignore                       # Файл для игнорирования Git
 ├── Отчеты.md                        # Отчеты по проекту
 ├── apiModule.js                     # Модуль API
@@ -15,9 +14,11 @@ Alphearea/
 ├── postcss.config.js                # Конфигурация PostCSS
 ├── README.md                        # Документация проекта
 ├── serve.js                         # Серверный скрипт
+├── server.js                        # Сервер
 ├── tailwind.config.js               # Конфигурация Tailwind CSS
 ├── testApiMocks.js                  # Моки для тестирования API
 ├── testDocumentation.js             # Документация тестов
+├── test_huggingface.js              # Тесты для Hugging Face
 ├── vite.config.js                   # Конфигурация Vite
 ├── .github/                         # Конфигурация GitHub
 │   └── workflows/
@@ -41,7 +42,7 @@ Alphearea/
 │   ├── doc-script.js                # Скрипт документации
 │   └── doc-style.css                # Стили документации
 ├── docs/                            # Документация
-│   ├── About_web.txt                # О веб-проекте
+│   ├── About_web.md                # О веб-проекте
 │   ├── COMPLETION_SUMMARY.md        # Итоговый отчет
 │   ├── DEPLOYMENT_GUIDE.md          # Руководство по деплою
 │   ├── DEPLOYMENT_SUMMARY.md        # Итоги деплоя
@@ -67,6 +68,8 @@ Alphearea/
 │   ├── main.jsx                     # Точка входа
 │   ├── components/                  # Компоненты
 │   │   ├── AdvancedGlitchText.jsx   # Текст с эффектом глитча
+│   │   ├── AuthButtons.jsx          # Кнопки аутентификации
+│   │   ├── AuthManager.jsx          # Менеджер аутентификации
 │   │   ├── CanvasGlitchText.jsx     # Текст с эффектом глитча на канвасе
 │   │   ├── ChatPanel.jsx            # Панель чата
 │   │   ├── Glitch.css               # Стили для глитча
@@ -104,7 +107,8 @@ Alphearea/
 │   │           ├── dialogKorean.txt   # Диалоги
 │   │           └── module4.pdf       # Модуль 4
 │   ├── hooks/                       # Хуки
-│   │   └── usePoints.js             # Хук для очков
+│   │   ├── usePoints.js             # Хук для очков
+│   │   └── useUser.js               # Хук для пользователя
 │   ├── pages/                       # Страницы
 │   │   ├── About.jsx                # О проекте
 │   │   ├── AccountSettings.jsx      # Настройки аккаунта
@@ -171,6 +175,7 @@ Alphearea/
 │   │   ├── test-creator.css        # Стили для создания тестов
 │   │   └── test-taking.css         # Стили для прохождения тестов
 │   └── utils/                       # Утилиты
+│       ├── geminiAI.js             # Утилита для работы с Gemini AI
 │       └── scanMaterials.js        # Сканирование материалов
 └── templates/                       # Шаблоны
     └── HEAD_TEMPLATE.html          # Шаблон заголовка
