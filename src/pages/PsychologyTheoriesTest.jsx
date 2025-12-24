@@ -200,6 +200,7 @@ function PsychologyTheoriesTest() {
           total,
           timeSpent
         }),
+        credentials: 'include',
       })
     } catch (error) {
       console.error('Failed to log test result:', error)

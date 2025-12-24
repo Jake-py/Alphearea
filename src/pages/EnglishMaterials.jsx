@@ -18,6 +18,7 @@ const trackMaterialProgress = async (subject, materialId, action) => {
         materialType: 'lesson',
         action
       }),
+      credentials: 'include',
     })
   } catch (error) {
     console.error('Failed to track material progress:', error)

@@ -148,7 +148,8 @@ export class PointsService {
           type,
           contentId,
           difficulty
-        })
+        }),
+        credentials: 'include',
       });
 
       if (response.ok) {
@@ -202,7 +203,8 @@ export class PointsService {
       const response = await fetch(`/api/profile/${userId}/points`, {
         headers: {
           'Content-Type': 'application/json',
-        }
+        },
+        credentials: 'include',
       });
 
       if (response.ok) {
@@ -270,7 +272,8 @@ export class PointsService {
           userId,
           points,
           reason
-        })
+        }),
+        credentials: 'include',
       });
 
       if (response.ok) {

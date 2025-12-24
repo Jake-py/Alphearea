@@ -147,7 +147,9 @@ function Settings() {
 
   const loadHistory = async (username) => {
     try {
-      const response = await fetch(`https://alphearea-b.onrender.com/api/history/${username}`)
+      const response = await fetch(`https://alphearea-b.onrender.com/api/history/${username}`, {
+        credentials: 'include',
+      })
       if (response.ok) {
         const data = await response.json()
         setHistory(data.history)

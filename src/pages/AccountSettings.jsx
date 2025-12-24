@@ -248,7 +248,9 @@ function AccountSettings() {
 
   const loadAchievements = async (username) => {
     try {
-      const response = await fetch(`https://alphearea-b.onrender.com/api/achievements/${username}`)
+      const response = await fetch(`https://alphearea-b.onrender.com/api/achievements/${username}`, {
+        credentials: 'include',
+      })
       if (response.ok) {
         const data = await response.json()
         setAchievements(data.achievements)
@@ -260,7 +262,9 @@ function AccountSettings() {
 
   const loadHistory = async (username) => {
     try {
-      const response = await fetch(`https://alphearea-b.onrender.com/api/history/${username}`)
+      const response = await fetch(`https://alphearea-b.onrender.com/api/history/${username}`, {
+        credentials: 'include',
+      })
       if (response.ok) {
         const data = await response.json()
         setHistory(data.history)
@@ -288,6 +292,7 @@ function AccountSettings() {
           subjectName: newSubjectName.trim(),
           subjectType: 'custom'
         }),
+        credentials: 'include',
       })
 
       if (!response.ok) {
@@ -298,7 +303,9 @@ function AccountSettings() {
       setNewSubjectName('')
       setMessage('Предмет добавлен успешно!')
       // Reload profile data
-      const profileResponse = await fetch(`https://alphearea-b.onrender.com/api/profile/${userData.username}`)
+      const profileResponse = await fetch(`https://alphearea-b.onrender.com/api/profile/${userData.username}`, {
+        credentials: 'include',
+      })
       if (profileResponse.ok) {
         const profileData = await profileResponse.json()
         setProfileData(profileData.profile)
@@ -313,6 +320,7 @@ function AccountSettings() {
     try {
       const response = await fetch(`https://alphearea-b.onrender.com/api/progress/subject/${subjectId}?username=${userData.username}`, {
         method: 'DELETE',
+        credentials: 'include',
       })
 
       if (!response.ok) {
@@ -321,7 +329,9 @@ function AccountSettings() {
 
       setMessage('Предмет удален успешно!')
       // Reload profile data
-      const profileResponse = await fetch(`https://alphearea-b.onrender.com/api/profile/${userData.username}`)
+      const profileResponse = await fetch(`https://alphearea-b.onrender.com/api/profile/${userData.username}`, {
+        credentials: 'include',
+      })
       if (profileResponse.ok) {
         const profileData = await profileResponse.json()
         setProfileData(profileData.profile)
@@ -374,6 +384,7 @@ function AccountSettings() {
           currentPassword: formData.currentPassword || '', // Allow empty current password for admin reset
           newPassword: formData.newPassword
         }),
+        credentials: 'include',
       })
 
       if (!response.ok) {
@@ -418,6 +429,7 @@ function AccountSettings() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ profile: updatedProfile }),
+        credentials: 'include',
       })
 
       if (!profileResponse.ok) {
@@ -435,6 +447,7 @@ function AccountSettings() {
             username: formData.username,
             email: formData.email
           }),
+          credentials: 'include',
         })
 
         if (!userResponse.ok) {

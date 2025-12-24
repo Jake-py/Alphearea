@@ -100,6 +100,7 @@ function PrivacySettings() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ profile: updatedProfile }),
+        credentials: 'include',
       })
 
       if (!profileResponse.ok) {
@@ -117,6 +118,7 @@ function PrivacySettings() {
             username: privacySettings.login,
             email: privacySettings.email
           }),
+          credentials: 'include',
         })
 
         if (!userResponse.ok) {

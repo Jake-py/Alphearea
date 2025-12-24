@@ -67,7 +67,11 @@ const requestCounts = new Map();
 const RATE_LIMIT_WINDOW = 60 * 1000; // 1 minute
 const MAX_REQUESTS_PER_WINDOW = 10; // 10 requests per minute per IP
 
-// app.use(cors()); // CORS disabled
+// Enable CORS for frontend
+app.use(cors({
+  origin: 'https://alphearea.onrender.com',
+  credentials: true
+}));
 app.use(express.json());
 
 // Security headers middleware
@@ -111,6 +115,24 @@ app.use((req, res, next) => {
 //     next();
 //   });
 // };
+
+// Guest token verification middleware
+const verifyGuestToken = (req, res, next) => {
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN
+
+  if (!token) {
+    return res.status(401).json({ error: 'Guest token required' });
+  }
+
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET);
+    req.userId = decoded.userId; // Assuming guest token contains userId
+    next();
+  } catch (err) {
+    return res.status(403).json({ error: 'Invalid or expired guest token' });
+  }
+};
 
 // Ensure directories exist
 async function ensureDirectories() {
@@ -1549,6 +1571,33 @@ app.get('/api/history/:username', async (req, res) => {
 });
 
 // ===== POINTS SYSTEM ENDPOINTS =====
+
+// Helper function to get guest points
+async function getGuestPoints(userId) {
+  try {
+    const profileFile = path.join(PROFILES_DIR, `${userId}.json`);
+    const profileStr = await fs.readFile(profileFile, 'utf8');
+    const profileData = JSON.parse(profileStr);
+    return profileData.profile?.points || 0;
+  } catch (error) {
+    if (error.code === 'ENOENT') {
+      return 0; // Guest profile not found, return 0 points
+    }
+    console.error('Error loading guest points:', error);
+    throw error;
+  }
+}
+
+// Get guest points
+app.get('/api/profile/guest/points', verifyGuestToken, async (req, res) => {
+  try {
+    const points = await getGuestPoints(req.userId);
+    res.json({ points });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to get guest points' });
+  }
+});
 
 // Get user points
 app.get('/api/profile/:userId/points', async (req, res) => {

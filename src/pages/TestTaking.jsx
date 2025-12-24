@@ -181,6 +181,7 @@ function TestTaking() {
             total,
             timeSpent
           }),
+          credentials: 'include',
         })
       }
     } catch (error) {

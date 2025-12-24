@@ -65,6 +65,7 @@ function TestSettings() {
             content: materialContent,
             format: 'standard'
           }),
+          credentials: 'include',
         })
 
         const data = await response.json()
@@ -162,6 +163,7 @@ function TestSettings() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(requestBody),
+        credentials: 'include',
       })
 
       const data = await response.json()
@@ -230,6 +232,7 @@ function TestSettings() {
             content: materialContent,
             format: 'standard'
           }),
+          credentials: 'include',
         })
 
         const data = await response.json()

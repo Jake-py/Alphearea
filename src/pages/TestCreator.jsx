@@ -23,7 +23,9 @@ function TestCreator() {
 
   const loadTests = useCallback(async () => {
     try {
-      const response = await fetch(API_ENDPOINTS.tests)
+      const response = await fetch(API_ENDPOINTS.tests, {
+        credentials: 'include',
+      })
       const data = await response.json()
       if (response.ok) {
         setTests(data.tests)
@@ -50,6 +52,7 @@ function TestCreator() {
           ...newTest,
           createdBy: 'admin' // In a real app, get from user context
         }),
+        credentials: 'include',
       })
 
       const data = await response.json()
@@ -73,6 +76,7 @@ function TestCreator() {
     try {
       const response = await fetch(API_ENDPOINTS.test(testId), {
         method: 'DELETE',
+        credentials: 'include',
       })
 
       if (response.ok) {
@@ -110,6 +114,7 @@ function TestCreator() {
     try {
       const response = await fetch(API_ENDPOINTS.testsCleanup, {
         method: 'POST',
+        credentials: 'include',
       })
 
       const data = await response.json()

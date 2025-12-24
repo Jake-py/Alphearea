@@ -22,6 +22,7 @@ function ChatPanel({ isOpen, onClose }) {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ message: input }),
+        credentials: 'include',
       });
 
       if (!response.ok) {

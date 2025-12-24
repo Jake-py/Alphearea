@@ -32,6 +32,7 @@ const AuthModal = ({ isOpen, onClose }) => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(loginData),
+        credentials: 'include',
       })
       const data = await response.json()
       if (response.ok) {
@@ -68,6 +69,7 @@ const AuthModal = ({ isOpen, onClose }) => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(registerData),
+        credentials: 'include',
       })
       const data = await response.json()
       if (response.ok) {

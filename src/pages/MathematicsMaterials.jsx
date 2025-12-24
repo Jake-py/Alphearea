@@ -4,7 +4,9 @@ function MathematicsMaterials() {
   const [data, setData] = useState(null);
 
   useEffect(() => {
-    fetch("/src/data/materials/materials.json")
+    fetch("/src/data/materials/materials.json", {
+      credentials: 'include',
+    })
       .then((res) => res.json())
       .then(setData);
   }, []);
