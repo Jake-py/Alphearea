@@ -29,9 +29,9 @@ const Main = () => {
     // Main Container
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-white overflow-hidden relative">
       {/* Alphearea Title */}
-      <div className="absolute top-4 left-4 z-20">
+      {/* <div className="absolute top-4 left-4 z-20">
         <AdvancedGlitchText text="Alphearea" />
-      </div>
+      </div> */}
 
       {/* Animated Background Grid */}
       <div className="absolute inset-0 opacity-20">
@@ -58,7 +58,7 @@ const Main = () => {
         <div className="text-center max-w-5xl">
           {/* Main Title with Glitch */}
           <h2 className={`text-7xl font-black mb-6 glitch-title ${isGlitching ? 'glitching' : ''}`} data-text="Добро пожаловать в Alphearea!">
-            Добро пожаловать!
+            Добро пожаловать в Alphearea!
           </h2>
           
           {/* Subtitle */}

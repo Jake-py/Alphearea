@@ -9,8 +9,9 @@ const AuthButtons = () => {
   const { isAuthenticated, logout } = useAuth()
 
   const handleLoginClick = () => {
-    // Перенаправление на страницу входа
-    window.location.href = '/login'
+    // Открытие модального окна авторизации
+    const event = new CustomEvent('openAuthModal')
+    window.dispatchEvent(event)
   }
 
   return (

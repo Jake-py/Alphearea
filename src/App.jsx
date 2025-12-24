@@ -53,6 +53,7 @@ import PhilosophyWisdomTest from './pages/PhilosophyWisdomTest.jsx'
 import PsychologyTheoriesTest from './pages/PsychologyTheoriesTest.jsx'
 import { API_ENDPOINTS } from './config/api.js'
 import { AuthProvider, useAuth } from './components/AuthManager'
+import AuthModal from './components/AuthModal'
 
 
 
@@ -62,496 +63,37 @@ function App() { // Главный компонент приложения
     const saved = localStorage.getItem('sidebarOpen') 
     return saved !== null ? JSON.parse(saved) : false
   }) // Инициализация состояния боковой панели из localStorage
-  const [showRegistration, setShowRegistration] = useState(false)
-  const [registrationStep, setRegistrationStep] = useState(1)
-  const [registrationData, setRegistrationData] = useState({ // Для хранения данных формы регистрации
-    username: '',
-    password: '',
-    confirmPassword: '',
-    email: '',
-    firstName: '',
-    lastName: '',
-    nickname: '',
-    dateOfBirth: '',
-    specialization: ''
-  })// Для хранения данных формы регистрации
-  const [registrationError, setRegistrationError] = useState('')
-  const [showForgotPassword, setShowForgotPassword] = useState(false)
-  const [forgotPasswordStep, setForgotPasswordStep] = useState(1)
-  const [forgotPasswordData, setForgotPasswordData] = useState({
-    username: '',
-    verificationMethod: '',
-    verificationData: {
-      phone: '',
-      email: '',
-      passportId: '',
-      passportCode: '',
-      passportSeries: ''
-    },
-    newPassword: '',
-    confirmNewPassword: ''
-  }) // Для хранения данных формы восстановления пароля
-  const [forgotPasswordError, setForgotPasswordError] = useState('')
-  const [username, setUsername] = useState('')
-  const [password, setPassword] = useState('')
-  const [error, setError] = useState('')
+  const [showAuthModal, setShowAuthModal] = useState(false)
 
   const { isAuthenticated, user, login, logout } = useAuth()
 // Обработчики форм авторизации, регистрации и восстановления пароля
 
 
-  const handleLogin = async (e) => {
-    e.preventDefault()
-    setError('')
-    try {
-      const response = await fetch(API_ENDPOINTS.login, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ username, password }),
-      })
-      const data = await response.json()
-      if (response.ok) {
-        login(data.user, data.profile)
-      } else {
-        setError(data.error || 'Неправильное имя пользователя или пароль') // Общая ошибка входа
-      }
-    } catch (error) {
-      setError('Сервер временно недоступен. Пожалуйста, попробуйте позже. \n Или обратитесь в поддержку. \n Телефон +998913950001')
-    }
-  }
-
-  const handleRegistrationStep1 = (e) => {
-    e.preventDefault()
-    if (registrationData.password !== registrationData.confirmPassword) {
-      setRegistrationError('Пароли не совпадают') // Пароли не совпадают
-      return
-    }
-    if (registrationData.password.length < 8) {
-      setRegistrationError('Пароль должен содержать минимум 8 символов') // Слишком короткий пароль
-      return
-    }
-    setRegistrationError('')
-    setRegistrationStep(2)
-  }
-
-  const handleRegistrationStep2 = async (e) => {
-    e.preventDefault() // Отправка данных регистрации на сервер
-    try {
-      const response = await fetch(API_ENDPOINTS.register, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(registrationData),
-      })
-      const data = await response.json()
-      if (response.ok) {
-        setShowRegistration(false)
-        setRegistrationStep(1)
-        setRegistrationData({
-          username: '',
-          password: '',
-          confirmPassword: '',
-          email: '',
-          firstName: '',
-          lastName: '',
-          nickname: '',
-          dateOfBirth: '',
-          specialization: ''
-        })
-        alert('Регистрация прошла успешно! Теперь вы можете войти в систему.')
-      } else {
-        setRegistrationError(data.error || 'Ошибка при регистрации') // Ошибка регистрации
-      }
-    } catch (error) {
-      setRegistrationError('Ошибка сети. Попробуйте еще раз.') // Ошибка сети
-    }
-  }
-
-  const updateRegistrationData = (field, value) => {
-    setRegistrationData(prev => ({ ...prev, [field]: value }))
-  } // Обновление данных регистрации
-
-  const updateForgotPasswordData = (field, value) => {
-    setForgotPasswordData(prev => ({ ...prev, [field]: value }))
-  } // Обновление данных восстановления пароля
-
-  const handleForgotPasswordStep1 = (e) => {
-    e.preventDefault()
-    if (!forgotPasswordData.username) {
-      setForgotPasswordError('Пожалуйста, введите логин')
-      return
-    }
-    setForgotPasswordError('') // Очистка ошибок
-    setForgotPasswordStep(2) // Переход к следующему шагу
-  }
-
-  const handleForgotPasswordStep2 = async (e) => {
-    e.preventDefault()
-    if (!forgotPasswordData.verificationMethod) {
-      setForgotPasswordError('Пожалуйста, выберите метод подтверждения')
-      return
-    }
-
-    // Validate verification data based on method
-    const { verificationMethod, verificationData } = forgotPasswordData
-    if (verificationMethod === 'phone' && !verificationData.phone) {
-      setForgotPasswordError('Пожалуйста, введите номер телефона')
-      return
-    }
-    if (verificationMethod === 'email' && !verificationData.email) {
-      setForgotPasswordError('Пожалуйста, введите email')
-      return
-    }
-    if (verificationMethod === 'passport' &&
-        (!verificationData.passportId || !verificationData.passportCode || !verificationData.passportSeries)) {
-      setForgotPasswordError('Пожалуйста, введите все данные паспорта')
-      return
+  // Обработчик открытия модального окна авторизации
+  useEffect(() => {
+    const handleOpenAuthModal = () => {
+      setShowAuthModal(true)
     }
     
-    setForgotPasswordError('')
-    setForgotPasswordStep(3)
-  }
-
-  const handleForgotPasswordStep3 = async (e) => {
-    e.preventDefault()
-    if (!forgotPasswordData.newPassword || !forgotPasswordData.confirmNewPassword) {
-      setForgotPasswordError('Пожалуйста, введите новый пароль и подтверждение')
-      return
+    window.addEventListener('openAuthModal', handleOpenAuthModal)
+    
+    return () => {
+      window.removeEventListener('openAuthModal', handleOpenAuthModal)
     }
-    if (forgotPasswordData.newPassword !== forgotPasswordData.confirmNewPassword) {
-      setForgotPasswordError('Пароли не совпадают')
-      return
-    }
-    if (forgotPasswordData.newPassword.length < 8) {
-      setForgotPasswordError('Пароль должен содержать минимум 8 символов')
-      return
-    }
-
-    try {
-      const response = await fetch(API_ENDPOINTS.resetPassword, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          identifier: forgotPasswordData.username,
-          newPassword: forgotPasswordData.newPassword // и другие данные подтверждения по необходимости
-        }),
-      })
-
-      if (response.ok) { // Успешное изменение пароля
-        alert('Пароль успешно изменен! Теперь вы можете войти в систему.')
-        setShowForgotPassword(false)
-        setForgotPasswordStep(1)
-        setForgotPasswordData({ // Сброс данных формы
-          username: '',
-          verificationMethod: '',
-          verificationData: {
-            phone: '',
-            email: '',
-            passportId: '',
-            passportCode: '',
-            passportSeries: ''
-          },
-          newPassword: '',
-          confirmNewPassword: ''
-        })
-        setForgotPasswordError('')
-        // Перезагрузка страницы для обновления состояния авторизации
-        window.location.reload()
-      } else {
-        const errorData = await response.json()
-        setForgotPasswordError(errorData.message || 'Ошибка при изменении пароля')
-      }
-    } catch (error) {
-      setForgotPasswordError('Ошибка сети. Попробуйте еще раз.')
-    }
-  }
+  }, [])
 
   useEffect(() => {
     localStorage.setItem('sidebarOpen', JSON.stringify(isSidebarOpen))
   }, [isSidebarOpen])
 
-  // Формы авторизации и регистрации теперь отображаются поверх основного контента
-  // а не блокируют его полностью
-  const renderAuthForms = () => {
-    if (showForgotPassword) {
-      return (
-        <div id="forgot-password-container" style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundColor: 'rgba(0, 0, 0, 0.8)',
-          zIndex: 1000,
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center'
-        }}>
-          <div style={{
-            backgroundColor: 'white',
-            padding: '20px',
-            borderRadius: '8px',
-            maxWidth: '500px',
-            width: '90%',
-            maxHeight: '80vh',
-            overflowY: 'auto'
-          }}>
-            <NeonTitle tag="h2" />
-            {forgotPasswordStep === 1 ? (
-              <div>
-                <h3>Восстановление пароля - Шаг 1: Подтверждение личности</h3>
-                <p>Пожалуйста, подтвердите, что этот аккаунт принадлежит вам.</p>
-                <form onSubmit={handleForgotPasswordStep1}>
-                  <input
-                    type="text"
-                    placeholder="Логин"
-                    value={forgotPasswordData.username}
-                    onChange={(e) => updateForgotPasswordData('username', e.target.value)}
-                    required
-                    style={{ width: '100%', padding: '8px', margin: '8px 0' }}
-                  />
-                  <button type="submit" style={{ padding: '10px 20px', backgroundColor: '#4CAF50', color: 'white', border: 'none', borderRadius: '4px' }}>Далее</button>
-                </form>
-              </div>
-            ) : forgotPasswordStep === 2 ? (
-              <div>
-                <h3>Восстановление пароля - Шаг 2: Выбор метода подтверждения</h3>
-                <form onSubmit={handleForgotPasswordStep2}>
-                  <div className="verification-methods">
-                    <label style={{ display: 'block', margin: '10px 0' }}>
-                      <input
-                        type="radio"
-                        name="verificationMethod"
-                        value="phone"
-                        onChange={(e) => updateForgotPasswordData('verificationMethod', e.target.value)}
-                      />
-                      Подтверждение через номер телефона
-                      {forgotPasswordData.verificationMethod === 'phone' && (
-                        <input
-                          type="tel"
-                          placeholder="Номер телефона"
-                          value={forgotPasswordData.verificationData.phone}
-                          onChange={(e) => updateForgotPasswordData('verificationData', { ...forgotPasswordData.verificationData, phone: e.target.value })}
-                          required
-                          style={{ width: '100%', padding: '8px', margin: '8px 0' }}
-                        />
-                      )}
-                    </label>
-                    <label style={{ display: 'block', margin: '10px 0' }}>
-                      <input
-                        type="radio"
-                        name="verificationMethod"
-                        value="email"
-                        onChange={(e) => updateForgotPasswordData('verificationMethod', e.target.value)}
-                      />
-                      Подтверждение через почту
-                      {forgotPasswordData.verificationMethod === 'email' && (
-                        <input
-                          type="email"
-                          placeholder="Email"
-                          value={forgotPasswordData.verificationData.email}
-                          onChange={(e) => updateForgotPasswordData('verificationData', { ...forgotPasswordData.verificationData, email: e.target.value })}
-                          required
-                          style={{ width: '100%', padding: '8px', margin: '8px 0' }}
-                        />
-                      )}
-                    </label>
-                    <label style={{ display: 'block', margin: '10px 0' }}>
-                      <input
-                        type="radio"
-                        name="verificationMethod"
-                        value="passport"
-                        onChange={(e) => updateForgotPasswordData('verificationMethod', e.target.value)}
-                      />
-                      Подтверждение через паспорт
-                      {forgotPasswordData.verificationMethod === 'passport' && (
-                        <div className="passport-fields">
-                          <input
-                            type="text"
-                            placeholder="ID паспорта"
-                            value={forgotPasswordData.verificationData.passportId}
-                            onChange={(e) => updateForgotPasswordData('verificationData', { ...forgotPasswordData.verificationData, passportId: e.target.value })}
-                            required
-                            style={{ width: '100%', padding: '8px', margin: '8px 0' }}
-                          />
-                          <input
-                            type="text"
-                            placeholder="Код паспорта"
-                            value={forgotPasswordData.verificationData.passportCode}
-                            onChange={(e) => updateForgotPasswordData('verificationData', { ...forgotPasswordData.verificationData, passportCode: e.target.value })}
-                            required
-                            style={{ width: '100%', padding: '8px', margin: '8px 0' }}
-                          />
-                          <input
-                            type="text"
-                            placeholder="Серия паспорта"
-                            value={forgotPasswordData.verificationData.passportSeries}
-                            onChange={(e) => updateForgotPasswordData('verificationData', { ...forgotPasswordData.verificationData, passportSeries: e.target.value })}
-                            required
-                            style={{ width: '100%', padding: '8px', margin: '8px 0' }}
-                          />
-                        </div>
-                      )}
-                    </label>
-                  </div>
-                  <button type="submit" style={{ padding: '10px 20px', backgroundColor: '#4CAF50', color: 'white', border: 'none', borderRadius: '4px' }}>Подтвердить</button>
-                </form>
-              </div>
-            ) : (
-              <div>
-                <h3>Восстановление пароля - Шаг 3: Новый пароль</h3>
-                <form onSubmit={handleForgotPasswordStep3}>
-                  <input
-                    type="password"
-                    placeholder="Новый пароль"
-                    value={forgotPasswordData.newPassword}
-                    onChange={(e) => updateForgotPasswordData('newPassword', e.target.value)}
-                    required
-                    style={{ width: '100%', padding: '8px', margin: '8px 0' }}
-                  />
-                  <input
-                    type="password"
-                    placeholder="Повторите новый пароль"
-                    value={forgotPasswordData.confirmNewPassword}
-                    onChange={(e) => updateForgotPasswordData('confirmNewPassword', e.target.value)}
-                    required
-                    style={{ width: '100%', padding: '8px', margin: '8px 0' }}
-                  />
-                  <button type="submit" style={{ padding: '10px 20px', backgroundColor: '#4CAF50', color: 'white', border: 'none', borderRadius: '4px' }}>Изменить пароль</button>
-                </form>
-              </div>
-            )}
-            <button onClick={() => { setShowForgotPassword(false); setForgotPasswordStep(1); setForgotPasswordError(''); }} style={{ marginTop: '15px', padding: '8px 16px', backgroundColor: '#9E9E9E', color: 'white', border: 'none', borderRadius: '4px' }}>Назад к входу</button>
-            <p style={{ color: 'red', display: forgotPasswordError ? 'block' : 'none', marginTop: '10px' }}>
-              {forgotPasswordError}
-            </p>
-          </div>
-        </div>
-      )
-    } else if (showRegistration) {
-      return (
-        <div id="registration-container" style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundColor: 'rgba(0, 0, 0, 0.8)',
-          zIndex: 1000,
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center'
-        }}>
-          <div style={{
-            backgroundColor: 'white',
-            padding: '20px',
-            borderRadius: '8px',
-            maxWidth: '500px',
-            width: '90%',
-            maxHeight: '80vh',
-            overflowY: 'auto'
-          }}>
-            <NeonTitle tag="h2" />
-            {registrationStep === 1 ? (
-              <div>
-                <h3>Регистрация - Шаг 1: Аккаунт</h3>
-                <form onSubmit={handleRegistrationStep1}>
-                  <input
-                    type="text"
-                    placeholder="Логин"
-                    value={registrationData.username}
-                    onChange={(e) => updateRegistrationData('username', e.target.value)}
-                    required
-                    style={{ width: '100%', padding: '8px', margin: '8px 0' }}
-                  />
-                  <input
-                    type="password"
-                    placeholder="Пароль"
-                    value={registrationData.password}
-                    onChange={(e) => updateRegistrationData('password', e.target.value)}
-                    required
-                    style={{ width: '100%', padding: '8px', margin: '8px 0' }}
-                  />
-                  <input
-                    type="password"
-                    placeholder="Повторите пароль"
-                    value={registrationData.confirmPassword}
-                    onChange={(e) => updateRegistrationData('confirmPassword', e.target.value)}
-                    required
-                    style={{ width: '100%', padding: '8px', margin: '8px 0' }}
-                  />
-                  <input
-                    type="email"
-                    placeholder="Email"
-                    value={registrationData.email}
-                    onChange={(e) => updateRegistrationData('email', e.target.value)}
-                    required
-                    style={{ width: '100%', padding: '8px', margin: '8px 0' }}
-                  />
-                  <button type="submit" style={{ padding: '10px 20px', backgroundColor: '#4CAF50', color: 'white', border: 'none', borderRadius: '4px' }}>Далее</button>
-                </form>
-              </div>
-            ) : (
-              <div>
-                <h3>Регистрация - Шаг 2: Личная информация</h3>
-                <form onSubmit={handleRegistrationStep2}>
-                  <input
-                    type="text"
-                    placeholder="Имя"
-                    value={registrationData.firstName}
-                    onChange={(e) => updateRegistrationData('firstName', e.target.value)}
-                    required
-                    style={{ width: '100%', padding: '8px', margin: '8px 0' }}
-                  />
-                  <input
-                    type="text"
-                    placeholder="Фамилия"
-                    value={registrationData.lastName}
-                    onChange={(e) => updateRegistrationData('lastName', e.target.value)}
-                    required
-                    style={{ width: '100%', padding: '8px', margin: '8px 0' }}
-                  />
-                  <input
-                    type="text"
-                    placeholder="Nickname"
-                    value={registrationData.nickname}
-                    onChange={(e) => updateRegistrationData('nickname', e.target.value)}
-                    style={{ width: '100%', padding: '8px', margin: '8px 0' }}
-                  />
-                  <input
-                    type="date"
-                    placeholder="Дата рождения"
-                    value={registrationData.dateOfBirth}
-                    onChange={(e) => updateRegistrationData('dateOfBirth', e.target.value)}
-                    required
-                    style={{ width: '100%', padding: '8px', margin: '8px 0' }}
-                  />
-                  <input
-                    type="text"
-                    placeholder="Специализация / Профессия / Род деятельности / Интересы / Цели обучения"
-                    value={registrationData.specialization}
-                    onChange={(e) => updateRegistrationData('specialization', e.target.value)}
-                    required
-                    style={{ width: '100%', padding: '8px', margin: '8px 0' }}
-                  />
-                  <button type="submit" style={{ padding: '10px 20px', backgroundColor: '#4CAF50', color: 'white', border: 'none', borderRadius: '4px' }}>Зарегистрироваться</button>
-                </form>
-              </div>
-            )}
-            <button onClick={() => { setShowRegistration(false); setRegistrationStep(1); setRegistrationError(''); }} style={{ marginTop: '15px', padding: '8px 16px', backgroundColor: '#9E9E9E', color: 'white', border: 'none', borderRadius: '4px' }}>Назад к входу</button>
-            <p style={{ color: 'red', display: registrationError ? 'block' : 'none', marginTop: '10px' }}>
-              {registrationError}
-            </p>
-          </div>
-        </div>
-      )
-    }
-    return null
+  // Новое модальное окно авторизации
+  const renderAuthModal = () => {
+    return (
+      <AuthModal
+        isOpen={showAuthModal}
+        onClose={() => setShowAuthModal(false)}
+      />
+    )
   }
 
   return (
@@ -615,7 +157,7 @@ function App() { // Главный компонент приложения
             </main>
           </div>
           <ChatPanel isOpen={isChatOpen} onClose={() => setIsChatOpen(false)} />
-          {renderAuthForms()}
+          {renderAuthModal()}
         </div>
       </AuthProvider>
       
