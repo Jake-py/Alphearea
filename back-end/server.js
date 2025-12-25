@@ -369,13 +369,8 @@ app.post('/api/verify-password', async (req, res) => {
   }
 });
 
-// Get CSRF token
-app.get('/api/csrf-token', csrfProtection, (req, res) => {
-  res.json({ csrfToken: req.csrfToken() });
-});
-
-// User registration endpoint with CSRF protection
-app.post('/api/register', csrfProtection, async (req, res) => {
+// User registration endpoint - БЕЗ CSRF (это API, не HTML форма)
+app.post('/api/register', async (req, res) => {
   const { username, password, email, firstName, lastName, nickname, dateOfBirth, specialization } = req.body;
 
   // Input validation to prevent injection
@@ -495,8 +490,8 @@ app.post('/api/register', csrfProtection, async (req, res) => {
   }
 });
 
-// User login endpoint with CSRF protection
-app.post('/api/login', csrfProtection, async (req, res) => {
+// User login endpoint - БЕЗ CSRF (это API, не HTML форма)
+app.post('/api/login', async (req, res) => {
   const { username, password } = req.body;
 
   if (!username || !password) {

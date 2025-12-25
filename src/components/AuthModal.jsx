@@ -19,47 +19,13 @@ const AuthModal = ({ isOpen, onClose }) => {
   })
   const [error, setError] = useState('')
   const [registrationStep, setRegistrationStep] = useState(1)
-  const [csrfToken, setCsrfToken] = useState('')
   const [isLoading, setIsLoading] = useState(false)
-   
+    
   const { login } = useAuth()
-
-  // Получить CSRF токен при открытии модального окна
-  useEffect(() => {
-    if (isOpen) {
-      fetchCsrfToken()
-    }
-  }, [isOpen])
-
-  const fetchCsrfToken = async () => {
-    try {
-      const response = await fetch('https://alphearea-b.onrender.com/api/csrf-token', {
-        credentials: 'include',
-      })
-      
-      if (!response.ok) {
-        console.error('Ошибка при получении CSRF токена:', response.status)
-        setError('Ошибка при загрузке формы. Обновите страницу.')
-        return
-      }
-      
-      const data = await response.json()
-      setCsrfToken(data.csrfToken)
-    } catch (error) {
-      console.error('Ошибка при получении CSRF токена:', error)
-      setError('Ошибка сети. Обновите страницу.')
-    }
-  }
 
   const handleLogin = async (e) => {
     e.preventDefault()
     setError('')
-    
-    // 1️⃣ Проверка наличия CSRF токена ДО отправки
-    if (!csrfToken) {
-      setError('Форма еще не готова. Подождите...')
-      return
-    }
 
     setIsLoading(true)
     
@@ -68,22 +34,12 @@ const AuthModal = ({ isOpen, onClose }) => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'X-CSRF-Token': csrfToken,
         },
         body: JSON.stringify(loginData),
         credentials: 'include',
       })
       
-      // 2️⃣ Безопасное получение JSON из ответа
-      let data = {}
-      if (response.headers.get('content-type')?.includes('application/json')) {
-        try {
-          data = await response.json()
-        } catch (e) {
-          console.error('Ошибка парсинга JSON:', e)
-          data = { error: 'Ошибка сервера' }
-        }
-      }
+      const data = await response.json()
 
       if (response.ok) {
         login(data.user, data.profile)
@@ -116,12 +72,6 @@ const AuthModal = ({ isOpen, onClose }) => {
   const handleRegisterStep2 = async (e) => {
     e.preventDefault()
     setError('')
-    
-    // 1️⃣ Проверка наличия CSRF токена ДО отправки
-    if (!csrfToken) {
-      setError('Форма еще не готова. Подождите...')
-      return
-    }
 
     setIsLoading(true)
     
@@ -130,22 +80,12 @@ const AuthModal = ({ isOpen, onClose }) => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'X-CSRF-Token': csrfToken,
         },
         body: JSON.stringify(registerData),
         credentials: 'include',
       })
       
-      // 2️⃣ Безопасное получение JSON из ответа
-      let data = {}
-      if (response.headers.get('content-type')?.includes('application/json')) {
-        try {
-          data = await response.json()
-        } catch (e) {
-          console.error('Ошибка парсинга JSON:', e)
-          data = { error: 'Ошибка сервера' }
-        }
-      }
+      const data = await response.json()
 
       if (response.ok) {
         setActiveTab('login')
@@ -259,7 +199,7 @@ const AuthModal = ({ isOpen, onClose }) => {
                   <button
                     type="submit"
                     className="auth-submit-button"
-                    disabled={isLoading || !csrfToken}
+                    disabled={isLoading}
                   >
                     {isLoading ? 'Загрузка...' : 'Войти'}
                   </button>
@@ -369,7 +309,7 @@ const AuthModal = ({ isOpen, onClose }) => {
                       <button
                         type="submit"
                         className="auth-submit-button"
-                        disabled={isLoading || !csrfToken}
+                        disabled={isLoading}
                       >
                         {isLoading ? 'Загрузка...' : 'Зарегистрироваться'}
                       </button>
