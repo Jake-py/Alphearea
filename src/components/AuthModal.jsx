@@ -19,22 +19,72 @@ const AuthModal = ({ isOpen, onClose }) => {
   })
   const [error, setError] = useState('')
   const [registrationStep, setRegistrationStep] = useState(1)
-  
+  const [csrfToken, setCsrfToken] = useState('')
+  const [isLoading, setIsLoading] = useState(false)
+   
   const { login } = useAuth()
+
+  // Получить CSRF токен при открытии модального окна
+  useEffect(() => {
+    if (isOpen) {
+      fetchCsrfToken()
+    }
+  }, [isOpen])
+
+  const fetchCsrfToken = async () => {
+    try {
+      const response = await fetch('https://alphearea-b.onrender.com/api/csrf-token', {
+        credentials: 'include',
+      })
+      
+      if (!response.ok) {
+        console.error('Ошибка при получении CSRF токена:', response.status)
+        setError('Ошибка при загрузке формы. Обновите страницу.')
+        return
+      }
+      
+      const data = await response.json()
+      setCsrfToken(data.csrfToken)
+    } catch (error) {
+      console.error('Ошибка при получении CSRF токена:', error)
+      setError('Ошибка сети. Обновите страницу.')
+    }
+  }
 
   const handleLogin = async (e) => {
     e.preventDefault()
     setError('')
+    
+    // 1️⃣ Проверка наличия CSRF токена ДО отправки
+    if (!csrfToken) {
+      setError('Форма еще не готова. Подождите...')
+      return
+    }
+
+    setIsLoading(true)
+    
     try {
       const response = await fetch(API_ENDPOINTS.login, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'X-CSRF-Token': csrfToken,
         },
         body: JSON.stringify(loginData),
         credentials: 'include',
       })
-      const data = await response.json()
+      
+      // 2️⃣ Безопасное получение JSON из ответа
+      let data = {}
+      if (response.headers.get('content-type')?.includes('application/json')) {
+        try {
+          data = await response.json()
+        } catch (e) {
+          console.error('Ошибка парсинга JSON:', e)
+          data = { error: 'Ошибка сервера' }
+        }
+      }
+
       if (response.ok) {
         login(data.user, data.profile)
         onClose()
@@ -42,7 +92,10 @@ const AuthModal = ({ isOpen, onClose }) => {
         setError(data.error || 'Неправильное имя пользователя или пароль')
       }
     } catch (error) {
-      setError('Сервер временно недоступен. Пожалуйста, попробуйте позже.')
+      console.error('Ошибка при входе:', error)
+      setError('Ошибка сети. Попробуйте позже.')
+    } finally {
+      setIsLoading(false)
     }
   }
 
@@ -62,16 +115,38 @@ const AuthModal = ({ isOpen, onClose }) => {
 
   const handleRegisterStep2 = async (e) => {
     e.preventDefault()
+    setError('')
+    
+    // 1️⃣ Проверка наличия CSRF токена ДО отправки
+    if (!csrfToken) {
+      setError('Форма еще не готова. Подождите...')
+      return
+    }
+
+    setIsLoading(true)
+    
     try {
       const response = await fetch(API_ENDPOINTS.register, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'X-CSRF-Token': csrfToken,
         },
         body: JSON.stringify(registerData),
         credentials: 'include',
       })
-      const data = await response.json()
+      
+      // 2️⃣ Безопасное получение JSON из ответа
+      let data = {}
+      if (response.headers.get('content-type')?.includes('application/json')) {
+        try {
+          data = await response.json()
+        } catch (e) {
+          console.error('Ошибка парсинга JSON:', e)
+          data = { error: 'Ошибка сервера' }
+        }
+      }
+
       if (response.ok) {
         setActiveTab('login')
         setRegistrationStep(1)
@@ -81,7 +156,10 @@ const AuthModal = ({ isOpen, onClose }) => {
         setError(data.error || 'Ошибка при регистрации')
       }
     } catch (error) {
+      console.error('Ошибка при регистрации:', error)
       setError('Ошибка сети. Попробуйте еще раз.')
+    } finally {
+      setIsLoading(false)
     }
   }
 
@@ -96,7 +174,7 @@ const AuthModal = ({ isOpen, onClose }) => {
   // Закрытие модального окна при нажатии на Escape
   useEffect(() => {
     const handleKeyDown = (e) => {
-      if (e.key === 'Escape') {
+      if (e.key === 'Escape' && !isLoading) {
         onClose()
       }
     }
@@ -108,7 +186,7 @@ const AuthModal = ({ isOpen, onClose }) => {
     return () => {
       document.removeEventListener('keydown', handleKeyDown)
     }
-  }, [isOpen, onClose])
+  }, [isOpen, onClose, isLoading])
 
   if (!isOpen) return null
 
@@ -121,25 +199,35 @@ const AuthModal = ({ isOpen, onClose }) => {
               <button
                 className={`tab-button ${activeTab === 'login' ? 'active' : ''}`}
                 onClick={() => {
-                  setActiveTab('login')
-                  setError('')
-                  setRegistrationStep(1)
+                  if (!isLoading) {
+                    setActiveTab('login')
+                    setError('')
+                    setRegistrationStep(1)
+                  }
                 }}
+                disabled={isLoading}
               >
                 Вход
               </button>
               <button
                 className={`tab-button ${activeTab === 'register' ? 'active' : ''}`}
                 onClick={() => {
-                  setActiveTab('register')
-                  setError('')
-                  setRegistrationStep(1)
+                  if (!isLoading) {
+                    setActiveTab('register')
+                    setError('')
+                    setRegistrationStep(1)
+                  }
                 }}
+                disabled={isLoading}
               >
                 Регистрация
               </button>
             </div>
-            <button className="close-button" onClick={onClose}>
+            <button
+              className="close-button"
+              onClick={onClose}
+              disabled={isLoading}
+            >
               ×
             </button>
           </div>
@@ -155,6 +243,7 @@ const AuthModal = ({ isOpen, onClose }) => {
                     value={loginData.username}
                     onChange={(e) => updateLoginData('username', e.target.value)}
                     required
+                    disabled={isLoading}
                     className="auth-input"
                   />
                   <input
@@ -163,11 +252,16 @@ const AuthModal = ({ isOpen, onClose }) => {
                     value={loginData.password}
                     onChange={(e) => updateLoginData('password', e.target.value)}
                     required
+                    disabled={isLoading}
                     className="auth-input"
                   />
                   {error && <p className="error-message">{error}</p>}
-                  <button type="submit" className="auth-submit-button">
-                    Войти
+                  <button
+                    type="submit"
+                    className="auth-submit-button"
+                    disabled={isLoading || !csrfToken}
+                  >
+                    {isLoading ? 'Загрузка...' : 'Войти'}
                   </button>
                 </form>
               </div>
@@ -183,6 +277,7 @@ const AuthModal = ({ isOpen, onClose }) => {
                         value={registerData.username}
                         onChange={(e) => updateRegisterData('username', e.target.value)}
                         required
+                        disabled={isLoading}
                         className="auth-input"
                       />
                       <input
@@ -191,6 +286,7 @@ const AuthModal = ({ isOpen, onClose }) => {
                         value={registerData.password}
                         onChange={(e) => updateRegisterData('password', e.target.value)}
                         required
+                        disabled={isLoading}
                         className="auth-input"
                       />
                       <input
@@ -199,6 +295,7 @@ const AuthModal = ({ isOpen, onClose }) => {
                         value={registerData.confirmPassword}
                         onChange={(e) => updateRegisterData('confirmPassword', e.target.value)}
                         required
+                        disabled={isLoading}
                         className="auth-input"
                       />
                       <input
@@ -207,11 +304,16 @@ const AuthModal = ({ isOpen, onClose }) => {
                         value={registerData.email}
                         onChange={(e) => updateRegisterData('email', e.target.value)}
                         required
+                        disabled={isLoading}
                         className="auth-input"
                       />
                       {error && <p className="error-message">{error}</p>}
-                      <button type="submit" className="auth-submit-button">
-                        Далее
+                      <button
+                        type="submit"
+                        className="auth-submit-button"
+                        disabled={isLoading}
+                      >
+                        {isLoading ? 'Загрузка...' : 'Далее'}
                       </button>
                     </form>
                   </div>
@@ -225,6 +327,7 @@ const AuthModal = ({ isOpen, onClose }) => {
                         value={registerData.firstName}
                         onChange={(e) => updateRegisterData('firstName', e.target.value)}
                         required
+                        disabled={isLoading}
                         className="auth-input"
                       />
                       <input
@@ -233,6 +336,7 @@ const AuthModal = ({ isOpen, onClose }) => {
                         value={registerData.lastName}
                         onChange={(e) => updateRegisterData('lastName', e.target.value)}
                         required
+                        disabled={isLoading}
                         className="auth-input"
                       />
                       <input
@@ -240,6 +344,7 @@ const AuthModal = ({ isOpen, onClose }) => {
                         placeholder="Nickname"
                         value={registerData.nickname}
                         onChange={(e) => updateRegisterData('nickname', e.target.value)}
+                        disabled={isLoading}
                         className="auth-input"
                       />
                       <input
@@ -248,6 +353,7 @@ const AuthModal = ({ isOpen, onClose }) => {
                         value={registerData.dateOfBirth}
                         onChange={(e) => updateRegisterData('dateOfBirth', e.target.value)}
                         required
+                        disabled={isLoading}
                         className="auth-input"
                       />
                       <input
@@ -256,11 +362,16 @@ const AuthModal = ({ isOpen, onClose }) => {
                         value={registerData.specialization}
                         onChange={(e) => updateRegisterData('specialization', e.target.value)}
                         required
+                        disabled={isLoading}
                         className="auth-input"
                       />
                       {error && <p className="error-message">{error}</p>}
-                      <button type="submit" className="auth-submit-button">
-                        Зарегистрироваться
+                      <button
+                        type="submit"
+                        className="auth-submit-button"
+                        disabled={isLoading || !csrfToken}
+                      >
+                        {isLoading ? 'Загрузка...' : 'Зарегистрироваться'}
                       </button>
                     </form>
                   </div>

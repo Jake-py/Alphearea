@@ -369,6 +369,11 @@ app.post('/api/verify-password', async (req, res) => {
   }
 });
 
+// Get CSRF token
+app.get('/api/csrf-token', csrfProtection, (req, res) => {
+  res.json({ csrfToken: req.csrfToken() });
+});
+
 // User registration endpoint with CSRF protection
 app.post('/api/register', csrfProtection, async (req, res) => {
   const { username, password, email, firstName, lastName, nickname, dateOfBirth, specialization } = req.body;
