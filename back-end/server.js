@@ -1747,6 +1747,161 @@ app.get('/api/profile/:userId/points-history', async (req, res) => {
   }
 });
 
+// Export user data endpoint
+app.get('/api/export/:username', async (req, res) => {
+  const { username } = req.params;
+
+  try {
+    // Get user account data
+    const userFile = path.join(ACCOUNTS_DIR, `${username}.txt`);
+    const userDataStr = await fs.readFile(userFile, 'utf8');
+    const userData = JSON.parse(userDataStr);
+    
+    // Remove sensitive data
+    const { passwordHash, ...userInfo } = userData;
+    
+    // Get user profile data
+    const profileFile = path.join(PROFILES_DIR, `${username}.json`);
+    const profileStr = await fs.readFile(profileFile, 'utf8');
+    const profileData = JSON.parse(profileStr);
+    
+    // Combine data for export
+    const exportData = {
+      user: userInfo,
+      profile: profileData.profile,
+      exportDate: new Date().toISOString()
+    };
+    
+    // Set response headers for file download
+    res.setHeader('Content-Type', 'application/json');
+    res.setHeader('Content-Disposition', `attachment; filename="${username}_export_${new Date().toISOString().split('T')[0]}.json"`);
+    
+    res.json(exportData);
+  } catch (error) {
+    if (error.code === 'ENOENT') {
+      return res.status(404).json({ error: 'User not found' });
+    }
+    console.error('Error exporting user data:', error);
+    res.status(500).json({ error: 'Failed to export user data' });
+  }
+});
+
+// Delete user account endpoint
+app.delete('/api/account/:username', async (req, res) => {
+  const { username } = req.params;
+  const { confirmPassword } = req.body;
+
+  if (!confirmPassword) {
+    return res.status(400).json({ error: 'Password confirmation is required' });
+  }
+
+  try {
+    // Read user file
+    const userFile = path.join(ACCOUNTS_DIR, `${username}.txt`);
+    const userDataStr = await fs.readFile(userFile, 'utf8');
+    const userData = JSON.parse(userDataStr);
+    
+    // Verify password
+    const isValid = await argon2.verify(userData.passwordHash, confirmPassword);
+    if (!isValid) {
+      return res.status(401).json({ error: 'Invalid password' });
+    }
+    
+    // Delete user account file
+    await fs.unlink(userFile);
+    
+    // Delete user profile file
+    const profileFile = path.join(PROFILES_DIR, `${username}.json`);
+    try {
+      await fs.unlink(profileFile);
+    } catch (error) {
+      // Profile file might not exist, that's ok
+    }
+    
+    res.json({ message: 'Account deleted successfully' });
+  } catch (error) {
+    if (error.code === 'ENOENT') {
+      return res.status(404).json({ error: 'User not found' });
+    }
+    console.error('Error deleting account:', error);
+    res.status(500).json({ error: 'Failed to delete account' });
+  }
+});
+
+// Upload avatar endpoint
+app.post('/api/avatar/upload', async (req, res) => {
+  const { username, avatarData } = req.body;
+
+  if (!username || !avatarData) {
+    return res.status(400).json({ error: 'Username and avatar data are required' });
+  }
+
+  try {
+    // Create avatars directory if it doesn't exist
+    const AVATARS_DIR = path.join(__dirname, 'avatars');
+    await fs.mkdir(AVATARS_DIR, { recursive: true });
+    
+    // Remove old avatar if exists
+    const oldAvatarPath = path.join(AVATARS_DIR, `${username}.jpg`);
+    try {
+      await fs.unlink(oldAvatarPath);
+    } catch (error) {
+      // Old avatar doesn't exist, that's ok
+    }
+    
+    // Remove data URL prefix if present
+    const base64Data = avatarData.replace(/^data:image\/\w+;base64,/, '');
+    const buffer = Buffer.from(base64Data, 'base64');
+    
+    // Save new avatar
+    await fs.writeFile(oldAvatarPath, buffer);
+    
+    // Update profile with new avatar path
+    const profileFile = path.join(PROFILES_DIR, `${username}.json`);
+    const profileStr = await fs.readFile(profileFile, 'utf8');
+    const profileData = JSON.parse(profileStr);
+    
+    profileData.profile.avatar = `/api/avatar/${username}`;
+    
+    await fs.writeFile(profileFile, JSON.stringify(profileData, null, 2));
+    
+    res.json({
+      message: 'Avatar uploaded successfully',
+      avatarUrl: `/api/avatar/${username}`
+    });
+  } catch (error) {
+    if (error.code === 'ENOENT') {
+      return res.status(404).json({ error: 'User profile not found' });
+    }
+    console.error('Error uploading avatar:', error);
+    res.status(500).json({ error: 'Failed to upload avatar' });
+  }
+});
+
+// Serve avatar endpoint
+app.get('/api/avatar/:username', async (req, res) => {
+  const { username } = req.params;
+  
+  try {
+    const AVATARS_DIR = path.join(__dirname, 'avatars');
+    const avatarPath = path.join(AVATARS_DIR, `${username}.jpg`);
+    
+    // Check if avatar exists
+    await fs.access(avatarPath);
+    
+    // Send avatar file
+    res.sendFile(avatarPath);
+  } catch (error) {
+    if (error.code === 'ENOENT') {
+      // Return default avatar if custom doesn't exist
+      res.sendFile(path.join(__dirname, '..', 'public', 'avatar_red.jpg'));
+    } else {
+      console.error('Error serving avatar:', error);
+      res.status(500).json({ error: 'Failed to load avatar' });
+    }
+  }
+});
+
 // Check if we're running in production (Render) or development
 const isProduction = process.env.NODE_ENV === 'production';
 

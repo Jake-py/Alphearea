@@ -213,6 +213,8 @@ function AccountSettings() {
   const [history, setHistory] = useState([])
   const [newSubjectName, setNewSubjectName] = useState('')
   const [activeTab, setActiveTab] = useState('profile')
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [deletePassword, setDeletePassword] = useState('')
 
   useEffect(() => {
     const savedUser = localStorage.getItem('user')
@@ -468,6 +470,79 @@ function AccountSettings() {
     } catch (error) {
       setError('Ошибка при обновлении настроек: ' + error.message)
     }
+
+  const handleExportData = async () => {
+    try {
+      const response = await fetch(`https://alphearea-b.onrender.com/api/export/${userData.username}`, {
+        credentials: 'include',
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to export data');
+      }
+
+      const data = await response.json();
+      
+      // Create download link
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${userData.username}_export_${new Date().toISOString().split('T')[0]}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      setMessage('Данные успешно экспортированы!');
+    } catch (error) {
+      setError('Ошибка при экспорте данных: ' + error.message);
+    }
+  }
+
+  const handleDeleteAccount = async () => {
+    if (!deletePassword) {
+      setError('Введите пароль для подтверждения');
+      return;
+    }
+
+    try {
+      const response = await fetch(`https://alphearea-b.onrender.com/api/account/${userData.username}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          confirmPassword: deletePassword
+        }),
+        credentials: 'include',
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to delete account');
+      }
+
+      // Clear local storage and redirect
+      localStorage.removeItem('user');
+      localStorage.removeItem('profile');
+      localStorage.removeItem('token');
+      
+      setMessage('Аккаунт успешно удален. Вы будете перенаправлены...');
+      
+      setTimeout(() => {
+        window.location.href = '/';
+      }, 2000);
+    } catch (error) {
+      setError('Ошибка при удалении аккаунта: ' + error.message);
+    }
+  }
+
+  const handleCancelDelete = () => {
+    setShowDeleteConfirm(false);
+    setDeletePassword('');
+    setError('');
+  }
   }
 
   return (
@@ -718,10 +793,10 @@ function AccountSettings() {
           <div className="form-section">
             <h3>Управление аккаунтом</h3>
             <div className="account-actions">
-              <button type="button" className="secondary-button">
+              <button type="button" className="secondary-button" onClick={handleExportData}>
                 Экспортировать данные
               </button>
-              <button type="button" className="danger-button">
+              <button type="button" className="danger-button" onClick={() => setShowDeleteConfirm(true)}>
                 Удалить аккаунт
               </button>
             </div>
@@ -771,6 +846,34 @@ function AccountSettings() {
           <History history={history} />
         )}
       </div>
+
+      {/* Delete Account Confirmation Modal */}
+      {showDeleteConfirm && (
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <h3>Подтверждение удаления аккаунта</h3>
+            <p>Вы уверены, что хотите удалить свой аккаунт? Это действие необратимо.</p>
+            <div className="form-group">
+              <label htmlFor="deletePassword">Введите пароль для подтверждения</label>
+              <input
+                type="password"
+                id="deletePassword"
+                value={deletePassword}
+                onChange={(e) => setDeletePassword(e.target.value)}
+                className="form-input"
+              />
+            </div>
+            <div className="modal-actions">
+              <button type="button" className="secondary-button" onClick={handleCancelDelete}>
+                Отмена
+              </button>
+              <button type="button" className="danger-button" onClick={handleDeleteAccount}>
+                Удалить аккаунт
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   )
 }

@@ -12,7 +12,11 @@ export const API_ENDPOINTS = {
   testsParse: `${API_BASE_URL}/api/tests/parse`,
   testsGenerate: `${API_BASE_URL}/api/tests/generate`,
   testsCleanup: `${API_BASE_URL}/api/tests/cleanup`,
-  test: (testId) => `${API_BASE_URL}/api/tests/${testId}`
+  test: (testId) => `${API_BASE_URL}/api/tests/${testId}`,
+  export: (username) => `${API_BASE_URL}/api/export/${username}`,
+  account: (username) => `${API_BASE_URL}/api/account/${username}`,
+  avatarUpload: `${API_BASE_URL}/api/avatar/upload`,
+  avatar: (username) => `${API_BASE_URL}/api/avatar/${username}`
 };
 
 export default API_BASE_URL;
