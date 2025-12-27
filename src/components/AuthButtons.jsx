@@ -1,4 +1,5 @@
 import React from 'react'
+import { useTranslation } from 'react-i18next'
 import { useAuth } from './AuthManager'
 
 /**
@@ -6,6 +7,7 @@ import { useAuth } from './AuthManager'
  * Автоматически адаптируется к текущему состоянию пользователя
  */
 const AuthButtons = () => {
+  const { t } = useTranslation();
   const { isAuthenticated, logout } = useAuth()
 
   const handleLoginClick = () => {
@@ -39,7 +41,7 @@ const AuthButtons = () => {
             e.currentTarget.style.transform = 'translateY(0)'
           }}
         >
-          Выйти
+          {t('auth.logout')}
         </button>
       ) : (
         <button
@@ -64,7 +66,7 @@ const AuthButtons = () => {
             e.currentTarget.style.transform = 'translateY(0)'
           }}
         >
-          Войти / Регистрация
+          {t('auth.loginRegister')}
         </button>
       )}
     </div>

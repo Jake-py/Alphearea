@@ -64,7 +64,7 @@ function History({ history }) {
 
   return (
     <div className="activity-section">
-      <h3>Недавняя активность</h3>
+      <h3>{t('history.recentActivity')}</h3>
       {history && history.length > 0 ? (
         <div className="activity-list">
           {history.slice(0, 10).map((item, index) => (
@@ -83,16 +83,16 @@ function History({ history }) {
                   {item.type === 'test' && (
                     <>
                       <span className="subject-tag">{item.subject}</span>
-                      <span className="score-display">Результат: {item.score}%</span>
+                      <span className="score-display">{t('history.result')}: {item.score}%</span>
                       <span className="time-display">
-                        Время: {Math.floor(item.timeSpent / 60)}:{(item.timeSpent % 60).toString().padStart(2, '0')}
+                        {t('history.time')}: {Math.floor(item.timeSpent / 60)}:{(item.timeSpent % 60).toString().padStart(2, '0')}
                       </span>
                     </>
                   )}
                   {item.type === 'material' && (
                     <>
                       <span className="subject-tag">{item.subject}</span>
-                      <span className="action-display">{item.action === 'view' ? 'Просмотрено' : 'Завершено'}</span>
+                      <span className="action-display">{item.action === 'view' ? t('history.viewed') : t('history.completed')}</span>
                     </>
                   )}
                 </div>
@@ -101,7 +101,7 @@ function History({ history }) {
           ))}
         </div>
       ) : (
-        <p className="no-activity">Активность отсутствует.</p>
+        <p className="no-activity">{t('history.noActivity')}</p>
       )}
     </div>
   )

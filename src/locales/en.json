@@ -50,5 +50,40 @@
     "home": "Home",
     "about": "About",
     "contact": "Contact"
+  },
+  "main": {
+    "welcome": "Welcome to Alphearea!",
+    "description": "Modern educational platform for effective learning",
+    "learn": "Learn English, Korean and Russian languages, mathematics, programming and more. Earn points for learning, track your progress and achieve achievements!",
+    "startLearning": "Start Learning",
+    "languagesTitle": "3 Languages",
+    "languagesDescription": "English, Korean and Russian with interactive tests",
+    "mathTitle": "Mathematics & Science",
+    "mathDescription": "From basic calculations to advanced programming",
+    "aiTitle": "AI Assistant",
+    "aiDescription": "Gemini-based assistant for personalized learning",
+    "stats": {
+      "students": "Active Students",
+      "courses": "Courses",
+      "success": "Success Rate"
+    }
+  },
+  "history": {
+    "recentActivity": "Recent Activity",
+    "noActivity": "No activity yet.",
+    "viewed": "Viewed",
+    "completed": "Completed",
+    "result": "Result",
+    "time": "Time"
+  },
+  "header": {
+    "home": "Home",
+    "settings": "Settings",
+    "about": "About",
+    "aiAssistant": "AI Assistant"
+  },
+  "auth": {
+    "logout": "Logout",
+    "loginRegister": "Login / Register"
   }
 }

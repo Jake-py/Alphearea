@@ -1,5 +1,6 @@
 import React, { useState, useRef } from 'react'
 import { Link, useLocation } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import '../styles/style.css'
 import '../styles/pointsHeader.css'
 import NeonTitle from './NeonTitle.jsx'
@@ -9,6 +10,7 @@ import useUser from '../hooks/useUser'
 import gsap from 'gsap'
 
 function Header({ onOpenChat, onToggleSidebar }) {
+  const { t } = useTranslation();
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const navRef = useRef(null)
   const location = useLocation()
@@ -69,13 +71,13 @@ function Header({ onOpenChat, onToggleSidebar }) {
           <li>
             <Link
               style = {{ position: 'relative', left: '4%'}}
-                  
+                 
               to="/"
               onClick={() => setIsMenuOpen(false)}
               onMouseEnter={(e) => handleNavHover(e, true)}
               onMouseLeave={(e) => handleNavHover(e, false)}
             >
-              Главная
+              {t('header.home')}
             </Link>
           </li>
 
@@ -86,7 +88,7 @@ function Header({ onOpenChat, onToggleSidebar }) {
               onMouseEnter={(e) => handleNavHover(e, true)}
               onMouseLeave={(e) => handleNavHover(e, false)}
             >
-              Настройки
+              {t('header.settings')}
             </Link>
           </li>
 
@@ -97,7 +99,7 @@ function Header({ onOpenChat, onToggleSidebar }) {
               onMouseEnter={(e) => handleNavHover(e, true)}
               onMouseLeave={(e) => handleNavHover(e, false)}
             >
-              О сайте
+              {t('header.about')}
             </Link>
           </li>
 
@@ -126,7 +128,7 @@ function Header({ onOpenChat, onToggleSidebar }) {
                 })
               }}
             >
-              Ассистент ИИ
+              {t('header.aiAssistant')}
             </button>
           </li>
         </ul>
