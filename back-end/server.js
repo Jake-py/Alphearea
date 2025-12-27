@@ -280,15 +280,27 @@ app.get('/api/profile/:username', async (req, res) => {
 
   try {
     const profileFile = path.join(PROFILES_DIR, `${username}.json`);
+    
+    console.log(`Attempting to load profile: ${profileFile}`);
+    
+    // Check if file exists
+    try {
+      await fs.access(profileFile);
+    } catch (error) {
+      console.error(`Profile file not found: ${profileFile}`);
+      return res.status(404).json({ error: 'Profile not found' });
+    }
+
     const profileStr = await fs.readFile(profileFile, 'utf8');
     const profileData = JSON.parse(profileStr);
 
+    console.log(`Profile loaded successfully for ${username}`);
     res.json({ profile: profileData.profile });
   } catch (error) {
+    console.error('Error loading profile:', error);
     if (error.code === 'ENOENT') {
       return res.status(404).json({ error: 'Profile not found' });
     }
-    console.error('Error loading profile:', error);
     res.status(500).json({ error: 'Failed to load profile' });
   }
 });
@@ -304,21 +316,38 @@ app.put('/api/profile/:username', async (req, res) => {
 
   try {
     const profileFile = path.join(PROFILES_DIR, `${username}.json`);
+    
+    console.log(`Attempting to update profile: ${profileFile}`);
+    
+    // Check if file exists first
+    try {
+      await fs.access(profileFile);
+    } catch (error) {
+      console.error(`Profile file not found: ${profileFile}`);
+      return res.status(404).json({ error: 'Profile not found' });
+    }
+
     const profileStr = await fs.readFile(profileFile, 'utf8');
     const profileData = JSON.parse(profileStr);
 
-    // Update profile
-    profileData.profile = { ...profileData.profile, ...profile };
+    // Update profile - merge with existing data
+    profileData.profile = {
+      ...profileData.profile,
+      ...profile,
+      // Ensure avatar is never empty
+      avatar: (profile.avatar && profile.avatar.trim() !== '') ? profile.avatar : (profileData.profile.avatar || '/def_ava.jpg')
+    };
 
     // Save updated profile
-    await fs.writeFile(profileFile, JSON.stringify(profileData, null, 2));
+    await fs.writeFile(profileFile, JSON.stringify(profileData, null, 2), 'utf8');
 
+    console.log(`Profile updated successfully for ${username}`);
     res.json({ message: 'Profile updated successfully', profile: profileData.profile });
   } catch (error) {
+    console.error('Error updating profile:', error);
     if (error.code === 'ENOENT') {
       return res.status(404).json({ error: 'Profile not found' });
     }
-    console.error('Error updating profile:', error);
     res.status(500).json({ error: 'Failed to update profile' });
   }
 });
@@ -414,7 +443,7 @@ app.post('/api/register', async (req, res) => {
 
   try {
     // Check if user already exists
-    const userFile = path.join(ACCOUNTS_DIR, `${username}.txt`);
+    const userFile = path.join(ACCOUNTS_DIR, `${sanitizedUsername}.txt`);
     try {
       await fs.access(userFile);
       return res.status(409).json({ error: 'Username already exists' });
@@ -431,44 +460,54 @@ app.post('/api/register', async (req, res) => {
       hashLength: 32 // 32 bytes
     });
 
+    const createdAt = new Date().toISOString();
+
     // Create user data
     const userData = {
-      username,
+      username: sanitizedUsername,
       passwordHash,
-      email,
-      firstName,
-      lastName,
-      nickname,
+      email: sanitizedEmail,
+      firstName: sanitizedFirstName,
+      lastName: sanitizedLastName,
+      nickname: sanitizedNickname,
       dateOfBirth,
       specialization,
-      createdAt: new Date().toISOString()
+      createdAt
     };
 
     // Create user profile data
     const profileData = {
-      username,
-      email,
-      createdAt: new Date().toISOString(),
+      username: sanitizedUsername,
+      email: sanitizedEmail,
+      createdAt,
       profile: {
-        displayName: nickname || username,
-        firstName,
-        lastName,
-        nickname,
+        displayName: sanitizedNickname || sanitizedUsername,
+        firstName: sanitizedFirstName,
+        lastName: sanitizedLastName,
+        nickname: sanitizedNickname,
         dateOfBirth,
         specialization,
         bio: '',
-        avatar: '',
+        avatar: '/def_ava.jpg', // Default avatar
+        phone: '',
+        twoFactorEnabled: false,
+        language: 'ru',
         preferences: {
           theme: 'dark',
-          language: 'en'
+          language: 'ru'
         },
         progress: {
-          english: { level: 'beginner', completed: [] },
-          korean: { level: 'beginner', completed: [] },
-          philosophy: { level: 'beginner', completed: [] },
-          psychology: { level: 'beginner', completed: [] },
-          russian: { level: 'beginner', completed: [] }
+          english: { level: 'beginner', completed: [], xp: 0 },
+          korean: { level: 'beginner', completed: [], xp: 0 },
+          philosophy: { level: 'beginner', completed: [], xp: 0 },
+          psychology: { level: 'beginner', completed: [], xp: 0 },
+          russian: { level: 'beginner', completed: [], xp: 0 }
         },
+        customSubjects: [],
+        achievements: [],
+        history: [],
+        points: 0,
+        pointsHistory: [],
         settings: {
           notifications: true,
           privacy: 'public'
@@ -476,17 +515,36 @@ app.post('/api/register', async (req, res) => {
       }
     };
 
+    // Ensure directories exist
+    await fs.mkdir(ACCOUNTS_DIR, { recursive: true });
+    await fs.mkdir(PROFILES_DIR, { recursive: true });
+
     // Write account data
-    await fs.writeFile(userFile, JSON.stringify(userData, null, 2));
+    await fs.writeFile(userFile, JSON.stringify(userData, null, 2), 'utf8');
+    console.log(`Created user account file: ${userFile}`);
 
     // Write profile data
-    const profileFile = path.join(PROFILES_DIR, `${username}.json`);
-    await fs.writeFile(profileFile, JSON.stringify(profileData, null, 2));
+    const profileFile = path.join(PROFILES_DIR, `${sanitizedUsername}.json`);
+    await fs.writeFile(profileFile, JSON.stringify(profileData, null, 2), 'utf8');
+    console.log(`Created user profile file: ${profileFile}`);
 
-    res.json({ message: 'User registered successfully' });
+    // Verify files were created
+    try {
+      await fs.access(userFile);
+      await fs.access(profileFile);
+      console.log('Both files verified successfully');
+    } catch (verifyError) {
+      console.error('File verification failed:', verifyError);
+      throw new Error('Failed to verify created files');
+    }
+
+    res.json({
+      message: 'User registered successfully',
+      username: sanitizedUsername
+    });
   } catch (error) {
     console.error('Error registering user:', error);
-    res.status(500).json({ error: 'Failed to register user' });
+    res.status(500).json({ error: 'Failed to register user: ' + error.message });
   }
 });
 
@@ -1519,17 +1577,23 @@ app.get('/api/achievements/:username', async (req, res) => {
 
   try {
     const profileFile = path.join(PROFILES_DIR, `${username}.json`);
+    
+    // Check if file exists
+    try {
+      await fs.access(profileFile);
+    } catch (error) {
+      console.error(`Profile not found for achievements: ${username}`);
+      return res.status(404).json({ error: 'Profile not found', achievements: [] });
+    }
+
     const profileStr = await fs.readFile(profileFile, 'utf8');
     const profileData = JSON.parse(profileStr);
 
     const achievements = profileData.profile.achievements || [];
     res.json({ achievements });
   } catch (error) {
-    if (error.code === 'ENOENT') {
-      return res.status(404).json({ error: 'Profile not found' });
-    }
     console.error('Error loading achievements:', error);
-    res.status(500).json({ error: 'Failed to load achievements' });
+    res.status(500).json({ error: 'Failed to load achievements', achievements: [] });
   }
 });
 
@@ -1540,6 +1604,15 @@ app.get('/api/history/:username', async (req, res) => {
 
   try {
     const profileFile = path.join(PROFILES_DIR, `${username}.json`);
+    
+    // Check if file exists
+    try {
+      await fs.access(profileFile);
+    } catch (error) {
+      console.error(`Profile not found for history: ${username}`);
+      return res.status(404).json({ error: 'Profile not found', history: [] });
+    }
+
     const profileStr = await fs.readFile(profileFile, 'utf8');
     const profileData = JSON.parse(profileStr);
 
@@ -1562,11 +1635,8 @@ app.get('/api/history/:username', async (req, res) => {
 
     res.json({ history });
   } catch (error) {
-    if (error.code === 'ENOENT') {
-      return res.status(404).json({ error: 'Profile not found' });
-    }
     console.error('Error loading history:', error);
-    res.status(500).json({ error: 'Failed to load history' });
+    res.status(500).json({ error: 'Failed to load history', history: [] });
   }
 });
 
@@ -1600,20 +1670,26 @@ app.get('/api/profile/guest/points', verifyGuestToken, async (req, res) => {
 });
 
 // Get user points
-app.get('/api/profile/:userId/points', async (req, res) => {
-  const { userId } = req.params;
+app.get('/api/profile/:username/points', async (req, res) => {
+  const { username } = req.params;
 
   try {
-    const profileFile = path.join(PROFILES_DIR, `${userId}.json`);
+    const profileFile = path.join(PROFILES_DIR, `${username}.json`);
+    
+    // Check if file exists
+    try {
+      await fs.access(profileFile);
+    } catch (error) {
+      console.error(`Profile not found for points: ${username}`);
+      return res.status(404).json({ error: 'User profile not found' });
+    }
+
     const profileStr = await fs.readFile(profileFile, 'utf8');
     const profileData = JSON.parse(profileStr);
 
     const points = profileData.profile?.points || 0;
     res.json({ points });
   } catch (error) {
-    if (error.code === 'ENOENT') {
-      return res.status(404).json({ error: 'User not found' });
-    }
     console.error('Error loading points:', error);
     res.status(500).json({ error: 'Failed to load points' });
   }
@@ -1932,18 +2008,24 @@ if (isProduction) {
   // Get user points endpoint
   app.get('/api/profile/:username/points', async (req, res) => {
     const { username } = req.params;
-  
+   
     try {
       const profileFile = path.join(PROFILES_DIR, `${username}.json`);
+      
+      // Check if file exists
+      try {
+        await fs.access(profileFile);
+      } catch (error) {
+        console.error(`Profile not found for points: ${username}`);
+        return res.status(404).json({ error: 'User profile not found' });
+      }
+   
       const profileStr = await fs.readFile(profileFile, 'utf8');
       const profileData = JSON.parse(profileStr);
-  
+   
       const points = profileData.profile?.points || 0;
       res.json({ points });
     } catch (error) {
-      if (error.code === 'ENOENT') {
-        return res.status(404).json({ error: 'User profile not found' });
-      }
       console.error('Error loading points:', error);
       res.status(500).json({ error: 'Failed to load points' });
     }
