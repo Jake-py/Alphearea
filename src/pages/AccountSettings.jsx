@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import '../styles/settings.css'
 import { API_ENDPOINTS } from '../config/api.js'
 
@@ -189,6 +190,7 @@ function History({ history }) {
 }
 
 function AccountSettings() {
+  const { t } = useTranslation();
   const [formData, setFormData] = useState({
     username: '',
     email: '',
@@ -549,8 +551,8 @@ function AccountSettings() {
   return (
     <main>
       <div className="account-settings">
-        <h2>Настройка аккаунта</h2>
-        <p className="page-description">Информация и почта</p>
+        <h2>{t('accountSettings.title')}</h2>
+        <p className="page-description">{t('accountSettings.basicInfo')}</p>
 
         {/* Tab Navigation */}
         <div className="settings-tabs">
@@ -558,25 +560,25 @@ function AccountSettings() {
             className={`tab-button ${activeTab === 'profile' ? 'active' : ''}`}
             onClick={() => setActiveTab('profile')}
           >
-            Профиль
+            {t('accountSettings.profile')}
           </button>
           <button
             className={`tab-button ${activeTab === 'progress' ? 'active' : ''}`}
             onClick={() => setActiveTab('progress')}
           >
-            Прогресс
+            {t('accountSettings.progress')}
           </button>
           <button
             className={`tab-button ${activeTab === 'achievements' ? 'active' : ''}`}
             onClick={() => setActiveTab('achievements')}
           >
-            Достижения
+            {t('accountSettings.achievements')}
           </button>
           <button
             className={`tab-button ${activeTab === 'history' ? 'active' : ''}`}
             onClick={() => setActiveTab('history')}
           >
-            История
+            {t('accountSettings.history')}
           </button>
         </div>
 
@@ -584,12 +586,12 @@ function AccountSettings() {
           <form onSubmit={handleSubmit} className="settings-form">
           {/* Avatar Section */}
           <div className="form-section">
-            <h3>Аватар</h3>
+            <h3>{t('accountSettings.avatar')}</h3>
             <div className="avatar-section">
               <div className="avatar-container">
-                <img 
-                  src={formData.avatar && formData.avatar.trim() !== '' ? formData.avatar : '/def_ava.jpg'} 
-                  alt="Current avatar" 
+                <img
+                  src={formData.avatar && formData.avatar.trim() !== '' ? formData.avatar : '/def_ava.jpg'}
+                  alt="Current avatar"
                   className="current-avatar"
                   onError={(e) => { e.target.src = '/def_ava.jpg' }}
                 />
@@ -631,9 +633,9 @@ function AccountSettings() {
 
           {/* Basic Info */}
           <div className="form-section">
-            <h3>Основная информация</h3>
+            <h3>{t('accountSettings.basicInfo')}</h3>
             <div className="form-group">
-              <label htmlFor="username">Имя пользователя</label>
+              <label htmlFor="username">{t('accountSettings.username')}</label>
               <input
                 type="text"
                 id="username"
@@ -645,7 +647,7 @@ function AccountSettings() {
             </div>
 
             <div className="form-group">
-              <label htmlFor="email">Email</label>
+              <label htmlFor="email">{t('accountSettings.email')}</label>
               <input
                 type="email"
                 id="email"
@@ -657,7 +659,7 @@ function AccountSettings() {
             </div>
 
             <div className="form-group">
-              <label htmlFor="phone">Номер телефона</label>
+              <label htmlFor="phone">{t('accountSettings.phone')}</label>
               <input
                 type="tel"
                 id="phone"
@@ -670,7 +672,7 @@ function AccountSettings() {
             </div>
 
             <div className="form-group">
-              <label htmlFor="firstName">Имя</label>
+              <label htmlFor="firstName">{t('accountSettings.firstName')}</label>
               <input
                 type="text"
                 id="firstName"
@@ -682,7 +684,7 @@ function AccountSettings() {
             </div>
 
             <div className="form-group">
-              <label htmlFor="lastName">Фамилия</label>
+              <label htmlFor="lastName">{t('accountSettings.lastName')}</label>
               <input
                 type="text"
                 id="lastName"
@@ -694,7 +696,7 @@ function AccountSettings() {
             </div>
 
             <div className="form-group">
-              <label htmlFor="nickname">Nickname</label>
+              <label htmlFor="nickname">{t('accountSettings.nickname')}</label>
               <input
                 type="text"
                 id="nickname"
@@ -707,7 +709,7 @@ function AccountSettings() {
             </div>
 
             <div className="form-group">
-              <label htmlFor="dateOfBirth">Дата рождения</label>
+              <label htmlFor="dateOfBirth">{t('accountSettings.dateOfBirth')}</label>
               <input
                 type="date"
                 id="dateOfBirth"
@@ -721,9 +723,9 @@ function AccountSettings() {
 
           {/* Password Change */}
           <div className="form-section">
-            <h3>Изменить пароль</h3>
+            <h3>{t('accountSettings.changePassword')}</h3>
             <div className="form-group">
-              <label htmlFor="currentPassword">Текущий пароль</label>
+              <label htmlFor="currentPassword">{t('accountSettings.currentPassword')}</label>
               <input
                 type="password"
                 id="currentPassword"
@@ -736,7 +738,7 @@ function AccountSettings() {
             </div>
 
             <div className="form-group">
-              <label htmlFor="newPassword">Новый пароль</label>
+              <label htmlFor="newPassword">{t('accountSettings.newPassword')}</label>
               <input
                 type="password"
                 id="newPassword"
@@ -749,7 +751,7 @@ function AccountSettings() {
             </div>
 
             <div className="form-group">
-              <label htmlFor="confirmPassword">Подтвердите новый пароль</label>
+              <label htmlFor="confirmPassword">{t('accountSettings.confirmPassword')}</label>
               <input
                 type="password"
                 id="confirmPassword"
@@ -762,13 +764,13 @@ function AccountSettings() {
             </div>
 
             <button type="button" onClick={handleChangePassword} className="secondary-button" style={{ marginTop: '10px' }}>
-              Изменить пароль
+              {t('accountSettings.changePassword')}
             </button>
           </div>
 
           {/* Security Settings */}
           <div className="form-section">
-            <h3>Безопасность</h3>
+            <h3>{t('accountSettings.security')}</h3>
             <div className="checkbox-group">
               <label className="checkbox-label">
                 <input
@@ -777,16 +779,16 @@ function AccountSettings() {
                   checked={formData.twoFactorEnabled}
                   onChange={(e) => setFormData({...formData, twoFactorEnabled: e.target.checked})}
                 />
-                Включить двухфакторную аутентификацию
+                {t('accountSettings.twoFactorAuth')}
               </label>
             </div>
           </div>
 
           {/* Language */}
           <div className="form-section">
-            <h3>Язык интерфейса</h3>
+            <h3>{t('accountSettings.language')}</h3>
             <div className="form-group">
-              <label htmlFor="language">Язык</label>
+              <label htmlFor="language">{t('accountSettings.language')}</label>
               <select
                 id="language"
                 name="language"
@@ -796,26 +798,24 @@ function AccountSettings() {
               >
                 <option value="ru">Русский</option>
                 <option value="en">English</option>
-                <option value="ko">한국어</option>
-                <option value="uz">O'zbek</option>
               </select>
             </div>
           </div>
 
           {/* Account Management */}
           <div className="form-section">
-            <h3>Управление аккаунтом</h3>
+            <h3>{t('accountSettings.accountManagement')}</h3>
             <div className="account-actions">
               <button type="button" className="secondary-button" onClick={handleExportData}>
-                Экспортировать данные
+                {t('accountSettings.exportData')}
               </button>
               <button type="button" className="danger-button" onClick={() => setShowDeleteConfirm(true)}>
-                Удалить аккаунт
+                {t('accountSettings.deleteAccount')}
               </button>
             </div>
           </div>
 
-          <button type="submit" className="save-button">Сохранить изменения</button>
+          <button type="submit" className="save-button">{t('accountSettings.saveChanges')}</button>
           {message && <p style={{ color: 'green', marginTop: '10px' }}>{message}</p>}
           {error && <p style={{ color: 'red', marginTop: '10px' }}>{error}</p>}
         </form>
@@ -864,10 +864,10 @@ function AccountSettings() {
       {showDeleteConfirm && (
         <div className="modal-overlay">
           <div className="modal-content">
-            <h3>Подтверждение удаления аккаунта</h3>
+            <h3>{t('accountSettings.deleteAccount')}</h3>
             <p>Вы уверены, что хотите удалить свой аккаунт? Это действие необратимо.</p>
             <div className="form-group">
-              <label htmlFor="deletePassword">Введите пароль для подтверждения</label>
+              <label htmlFor="deletePassword">{t('accountSettings.currentPassword')}</label>
               <input
                 type="password"
                 id="deletePassword"
@@ -878,10 +878,10 @@ function AccountSettings() {
             </div>
             <div className="modal-actions">
               <button type="button" className="secondary-button" onClick={handleCancelDelete}>
-                Отмена
+                {t('accountSettings.cancel')}
               </button>
               <button type="button" className="danger-button" onClick={handleDeleteAccount}>
-                Удалить аккаунт
+                {t('accountSettings.deleteAccount')}
               </button>
             </div>
           </div>

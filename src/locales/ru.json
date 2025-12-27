@@ -1,0 +1,54 @@
+{
+  "settings": {
+    "title": "Настройки",
+    "accountSettings": "Настройка аккаунта",
+    "privacySettings": "Конфиденциальность",
+    "siteSettings": "Настройка сайта",
+    "language": "Язык интерфейса",
+    "achievements": "Достижения",
+    "progress": "Прогресс обучения",
+    "activity": "Недавняя активность",
+    "level": "Уровень",
+    "xp": "XP",
+    "joined": "Присоединился"
+  },
+  "accountSettings": {
+    "title": "Настройка аккаунта",
+    "profile": "Профиль",
+    "progress": "Прогресс",
+    "achievements": "Достижения",
+    "history": "История",
+    "avatar": "Аватар",
+    "basicInfo": "Основная информация",
+    "username": "Имя пользователя",
+    "email": "Email",
+    "phone": "Номер телефона",
+    "firstName": "Имя",
+    "lastName": "Фамилия",
+    "nickname": "Nickname",
+    "dateOfBirth": "Дата рождения",
+    "changePassword": "Изменить пароль",
+    "currentPassword": "Текущий пароль",
+    "newPassword": "Новый пароль",
+    "confirmPassword": "Подтвердите новый пароль",
+    "security": "Безопасность",
+    "twoFactorAuth": "Включить двухфакторную аутентификацию",
+    "language": "Язык интерфейса",
+    "accountManagement": "Управление аккаунтом",
+    "exportData": "Экспортировать данные",
+    "deleteAccount": "Удалить аккаунт",
+    "saveChanges": "Сохранить изменения",
+    "cancel": "Отмена"
+  },
+  "siteSettings": {
+    "title": "Настройка сайта",
+    "language": "Язык интерфейса",
+    "selectLanguage": "Выберите язык"
+  },
+  "common": {
+    "welcome": "Добро пожаловать",
+    "home": "Главная",
+    "about": "О нас",
+    "contact": "Контакты"
+  }
+}

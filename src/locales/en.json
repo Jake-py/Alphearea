@@ -1,0 +1,54 @@
+{
+  "settings": {
+    "title": "Settings",
+    "accountSettings": "Account Settings",
+    "privacySettings": "Privacy Settings",
+    "siteSettings": "Site Settings",
+    "language": "Interface Language",
+    "achievements": "Achievements",
+    "progress": "Learning Progress",
+    "activity": "Recent Activity",
+    "level": "Level",
+    "xp": "XP",
+    "joined": "Joined"
+  },
+  "accountSettings": {
+    "title": "Account Settings",
+    "profile": "Profile",
+    "progress": "Progress",
+    "achievements": "Achievements",
+    "history": "History",
+    "avatar": "Avatar",
+    "basicInfo": "Basic Information",
+    "username": "Username",
+    "email": "Email",
+    "phone": "Phone Number",
+    "firstName": "First Name",
+    "lastName": "Last Name",
+    "nickname": "Nickname",
+    "dateOfBirth": "Date of Birth",
+    "changePassword": "Change Password",
+    "currentPassword": "Current Password",
+    "newPassword": "New Password",
+    "confirmPassword": "Confirm New Password",
+    "security": "Security",
+    "twoFactorAuth": "Enable Two-Factor Authentication",
+    "language": "Interface Language",
+    "accountManagement": "Account Management",
+    "exportData": "Export Data",
+    "deleteAccount": "Delete Account",
+    "saveChanges": "Save Changes",
+    "cancel": "Cancel"
+  },
+  "siteSettings": {
+    "title": "Site Settings",
+    "language": "Interface Language",
+    "selectLanguage": "Select Language"
+  },
+  "common": {
+    "welcome": "Welcome",
+    "home": "Home",
+    "about": "About",
+    "contact": "Contact"
+  }
+}
