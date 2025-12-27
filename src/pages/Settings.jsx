@@ -110,7 +110,7 @@ function Settings() {
   const [user, setUser] = useState({
     username: '',
     email: '',
-    avatar: '',
+    avatar: '/def_ava.jpg', // Default avatar
     joinDate: '',
     level: 1,
     xp: 0,
@@ -131,7 +131,7 @@ function Settings() {
       setUser({
         username: userData.username,
         email: userData.email,
-        avatar: profileData.avatar || '/default-avatar.png',
+        avatar: (profileData.avatar && profileData.avatar.trim() !== '') ? profileData.avatar : '/def_ava.jpg',
         joinDate: userData.createdAt ? new Date(userData.createdAt).toISOString().split('T')[0] : '',
         level: profileData.level || 1,
         xp: profileData.xp || 0,
@@ -165,7 +165,12 @@ function Settings() {
         {/* User Profile Section */}
         <div className="profile-section">
           <div className="profile-header">
-            <img src={user.avatar} alt="Avatar" className="profile-avatar" />
+            <img 
+              src={user.avatar} 
+              alt="Avatar" 
+              className="profile-avatar"
+              onError={(e) => { e.target.src = '/def_ava.jpg' }}
+            />
             <div className="profile-info">
               <h2>{user.username}</h2>
               <p>{user.email}</p>

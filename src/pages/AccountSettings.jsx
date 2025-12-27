@@ -20,7 +20,7 @@ function ProgressChart({ subjects, customSubjects }) {
 
   if (!allSubjects || allSubjects.length === 0) {
     return (
-      <div className="progress-chart no-data" style={h}>
+      <div className="progress-chart no-data">
         <h3>Прогресс по предметам</h3>
         <div className="no-subjects">
           <p>Нет данных прогресса. Добавьте предмет или проверьте профиль.</p>
@@ -200,7 +200,7 @@ function AccountSettings() {
     currentPassword: '',
     newPassword: '',
     confirmPassword: '',
-    avatar: '',
+    avatar: '/def_ava.jpg', // Default avatar to prevent empty string
     twoFactorEnabled: false,
     language: 'ru'
   })
@@ -237,7 +237,7 @@ function AccountSettings() {
         currentPassword: '',
         newPassword: '',
         confirmPassword: '',
-        avatar: profile.avatar || '/avatar_red.jpg',
+        avatar: (profile.avatar && profile.avatar.trim() !== '') ? profile.avatar : '/def_ava.jpg',
         twoFactorEnabled: profile.twoFactorEnabled || false,
         language: profile.language || 'ru'
       })
@@ -275,7 +275,7 @@ function AccountSettings() {
       console.error('Failed to load history:', error)
     }
   }
-
+  
 
   const handleAddSubject = async () => {
     if (!newSubjectName.trim()) {
@@ -470,6 +470,7 @@ function AccountSettings() {
     } catch (error) {
       setError('Ошибка при обновлении настроек: ' + error.message)
     }
+  }
 
   const handleExportData = async () => {
     try {
@@ -543,7 +544,7 @@ function AccountSettings() {
     setDeletePassword('');
     setError('');
   }
-  }
+
 
   return (
     <main>
@@ -586,7 +587,12 @@ function AccountSettings() {
             <h3>Аватар</h3>
             <div className="avatar-section">
               <div className="avatar-container">
-                <img src={formData.avatar} alt="Current avatar" className="current-avatar" />
+                <img 
+                  src={formData.avatar && formData.avatar.trim() !== '' ? formData.avatar : '/def_ava.jpg'} 
+                  alt="Current avatar" 
+                  className="current-avatar"
+                  onError={(e) => { e.target.src = '/def_ava.jpg' }}
+                />
                 <div className="avatar-overlay">
                   <button
                     type="button"
@@ -605,6 +611,13 @@ function AccountSettings() {
                   // Handle file upload
                   const file = e.target.files[0]
                   if (file) {
+                    // Check file size (max 5MB)
+                    const maxSize = 5 * 1024 * 1024; // 5MB
+                    if (file.size > maxSize) {
+                      setError('Размер файла не должен превышать 5MB');
+                      return;
+                    }
+
                     const reader = new FileReader()
                     reader.onload = (e) => setFormData({...formData, avatar: e.target.result})
                     reader.readAsDataURL(file)

@@ -1836,6 +1836,14 @@ app.post('/api/avatar/upload', async (req, res) => {
     return res.status(400).json({ error: 'Username and avatar data are required' });
   }
 
+  // Check file size (max 5MB)
+  const base64Data = avatarData.replace(/^data:image\/\w+;base64,/, '');
+  const buffer = Buffer.from(base64Data, 'base64');
+  const maxSize = 5 * 1024 * 1024; // 5MB
+  if (buffer.length > maxSize) {
+    return res.status(400).json({ error: 'File size exceeds 5MB limit' });
+  }
+
   try {
     // Create avatars directory if it doesn't exist
     const AVATARS_DIR = path.join(__dirname, 'avatars');
@@ -1894,7 +1902,14 @@ app.get('/api/avatar/:username', async (req, res) => {
   } catch (error) {
     if (error.code === 'ENOENT') {
       // Return default avatar if custom doesn't exist
-      res.sendFile(path.join(__dirname, '..', 'public', 'avatar_red.jpg'));
+      const defaultAvatarPath = path.join(__dirname, '..', 'public', 'def_ava.jpg');
+      try {
+        await fs.access(defaultAvatarPath);
+        res.sendFile(defaultAvatarPath);
+      } catch (defaultError) {
+        // If default avatar also doesn't exist, return 404
+        res.status(404).json({ error: 'Avatar not found' });
+      }
     } else {
       console.error('Error serving avatar:', error);
       res.status(500).json({ error: 'Failed to load avatar' });
@@ -1912,6 +1927,31 @@ if (isProduction) {
     console.log(`Using AI model: ${GEMINI_MODEL}`);
     console.log(`Loaded site identity: ${siteInfo.name}`);
     console.log('HTTPS is handled by Render proxy');
+  });
+  
+  // Get user points endpoint
+  app.get('/api/profile/:username/points', async (req, res) => {
+    const { username } = req.params;
+  
+    try {
+      const profileFile = path.join(PROFILES_DIR, `${username}.json`);
+      const profileStr = await fs.readFile(profileFile, 'utf8');
+      const profileData = JSON.parse(profileStr);
+  
+      const points = profileData.profile?.points || 0;
+      res.json({ points });
+    } catch (error) {
+      if (error.code === 'ENOENT') {
+        return res.status(404).json({ error: 'User profile not found' });
+      }
+      console.error('Error loading points:', error);
+      res.status(500).json({ error: 'Failed to load points' });
+    }
+  });
+  
+  // Get guest points endpoint
+  app.get('/api/profile/guest/points', (req, res) => {
+    res.json({ points: 0 }); // Guests have 0 points
   });
 } else {
   // In development, we can optionally support HTTPS
