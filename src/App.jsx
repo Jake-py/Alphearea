@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Routes, Route, useLocation } from 'react-router-dom'
+import { Routes, Route, useLocation, Navigate } from 'react-router-dom'
 import './styles/style.css'
 import Header from './components/Header.jsx'
 import Sidebar from './components/Sidebar.jsx'
@@ -65,7 +65,7 @@ function App() { // Главный компонент приложения
   }) // Инициализация состояния боковой панели из localStorage
   const [showAuthModal, setShowAuthModal] = useState(false)
 
-  const { isAuthenticated, user, login, logout } = useAuth()
+  const { isAuthenticated, user, login, logout, requireAuth } = useAuth()
 // Обработчики форм авторизации, регистрации и восстановления пароля
 
 
@@ -139,7 +139,7 @@ function App() { // Главный компонент приложения
               <Route path="/electronics" element={<Electronics />} />
               <Route path="/test-settings" element={<TestSettings />} />
               <Route path="/settings" element={<Settings />} />
-              <Route path="/settings/account" element={<AccountSettings />} />
+              <Route path="/settings/account" element={isAuthenticated ? <AccountSettings /> : <Navigate to="/" replace />} />
               <Route path="/settings/privacy" element={<PrivacySettings />} />
               <Route path="/settings/site" element={<SiteSettings />} />
               <Route path="/about" element={<About />} />
@@ -147,7 +147,7 @@ function App() { // Главный компонент приложения
               <Route path="/english/grammar/test" element={<EnglishGrammarTest />} />
               <Route path="/korean/grammar/test" element={<KoreanGrammarTest />} />
               <Route path="/russian/grammar/test" element={<RussianGrammarTest />} />
-              <Route path="/philosophy/wisdom/test" element={<PhilosophyWisdomTest />} />
+              <Route path="/philosophy/wisdom/test" element={requireAuth() ? <PhilosophyWisdomTest /> : <Navigate to="/" replace />} />
               <Route path="/psychology/theories/test" element={<PsychologyTheoriesTest />} />
 
               <Route path="/test-taking" element={<TestTaking />} />

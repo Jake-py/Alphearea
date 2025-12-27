@@ -83,6 +83,15 @@ export const AuthProvider = ({ children }) => {
     }
   }, [])
 
+  const requireAuth = () => {
+    if (!isAuthenticated) {
+      const event = new CustomEvent('openAuthModal')
+      window.dispatchEvent(event)
+      return false
+    }
+    return true
+  }
+
   return (
     <AuthContext.Provider value={{
       isAuthenticated,
@@ -90,7 +99,8 @@ export const AuthProvider = ({ children }) => {
       loading,
       login,
       logout,
-      checkAuthStatus
+      checkAuthStatus,
+      requireAuth
     }}>
       {children}
     </AuthContext.Provider>
