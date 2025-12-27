@@ -4,6 +4,7 @@ export const API_ENDPOINTS = {
   login: `${API_BASE_URL}/api/login`,
   register: `${API_BASE_URL}/api/register`,
   resetPassword: `${API_BASE_URL}/api/reset-password`,
+  forgotPassword: `${API_BASE_URL}/api/forgot-password`,
   changePassword: `${API_BASE_URL}/api/change-password`,
   chat: `${API_BASE_URL}/api/chat`,
   profile: (username) => `${API_BASE_URL}/api/profile/${username}`,

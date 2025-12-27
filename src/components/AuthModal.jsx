@@ -20,15 +20,15 @@ const AuthModal = ({ isOpen, onClose }) => {
   const [error, setError] = useState('')
   const [registrationStep, setRegistrationStep] = useState(1)
   const [isLoading, setIsLoading] = useState(false)
-    
+     
   const { login } = useAuth()
 
   const handleLogin = async (e) => {
     e.preventDefault()
     setError('')
-
-    setIsLoading(true)
     
+    setIsLoading(true)
+     
     try {
       const response = await fetch(API_ENDPOINTS.login, {
         method: 'POST',
@@ -38,9 +38,9 @@ const AuthModal = ({ isOpen, onClose }) => {
         body: JSON.stringify(loginData),
         credentials: 'include',
       })
-      
+       
       const data = await response.json()
-
+      
       if (response.ok) {
         login(data.user, data.profile)
         onClose()
@@ -72,9 +72,9 @@ const AuthModal = ({ isOpen, onClose }) => {
   const handleRegisterStep2 = async (e) => {
     e.preventDefault()
     setError('')
-
-    setIsLoading(true)
     
+    setIsLoading(true)
+     
     try {
       const response = await fetch(API_ENDPOINTS.register, {
         method: 'POST',
@@ -84,9 +84,9 @@ const AuthModal = ({ isOpen, onClose }) => {
         body: JSON.stringify(registerData),
         credentials: 'include',
       })
-      
+       
       const data = await response.json()
-
+      
       if (response.ok) {
         setActiveTab('login')
         setRegistrationStep(1)
@@ -118,7 +118,7 @@ const AuthModal = ({ isOpen, onClose }) => {
         onClose()
       }
     }
-    
+     
     if (isOpen) {
       document.addEventListener('keydown', handleKeyDown)
     }
@@ -202,6 +202,17 @@ const AuthModal = ({ isOpen, onClose }) => {
                     disabled={isLoading}
                   >
                     {isLoading ? 'Загрузка...' : 'Войти'}
+                  </button>
+                  <button
+                    type="button"
+                    className="forgot-password-button"
+                    onClick={() => {
+                      const event = new CustomEvent('openForgotPasswordModal')
+                      window.dispatchEvent(event)
+                    }}
+                    disabled={isLoading}
+                  >
+                    Забыл пароль
                   </button>
                 </form>
               </div>

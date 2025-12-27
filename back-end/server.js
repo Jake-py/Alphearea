@@ -13,6 +13,7 @@ import { HfInference } from '@huggingface/inference';
 import https from 'https';
 import cookieParser from 'cookie-parser';
 import csurf from 'csurf';
+import crypto from 'crypto';
 
 
 // Load environment variables from .env.production file
@@ -89,7 +90,7 @@ app.use((req, res, next) => {
     "object-src 'none'; " +
     "base-uri 'self'; " +
     "form-action 'self';");
-   
+    
   res.setHeader("X-Content-Type-Options", "nosniff");
   res.setHeader("X-Frame-Options", "DENY");
   res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
@@ -225,7 +226,9 @@ app.post('/api/chat', async (req, res) => {
       }
 
       const geminiModel = genAI.getGenerativeModel({ model: GEMINI_MODEL });
-      const prompt = `говори только с таким языком, как и язык в запросе, отвечай всегда с таким языком который тебе пишут или просят\n\nUser: ${message.trim()}`;
+      const prompt = `говори только с таким языком, как и язык в запросе, отвечай всегда с таким языком который тебе пишут или просят
+
+User: ${message.trim()}`;
 
       const result = await geminiModel.generateContent({
         contents: [{ role: "user", parts: [{ text: prompt }] }]
@@ -239,7 +242,9 @@ app.post('/api/chat', async (req, res) => {
         return res.status(503).json({ error: 'Hugging Face Inference API service is not available. Please ensure your API key is valid.' });
       }
 
-      const prompt = `говори только с таким языком, как и язык в запросе, отвечай всегда с таким языком который тебе пишут или просят\n\nUser: ${message.trim()}`;
+      const prompt = `говори только с таким языком, как и язык в запросе, отвечай всегда с таким языком который тебе пишут или просят
+
+User: ${message.trim()}`;
 
       const response = await hf.textGeneration({
         model: HUGGINGFACE_MODEL,
@@ -413,7 +418,7 @@ app.post('/api/register', async (req, res) => {
   // Sanitize inputs to prevent injection
   const sanitizeInput = (input) => {
     if (typeof input !== 'string') return input;
-    return input.replace(/[<>'"&]/g, '');
+    return input.replace(/[<>"&]/g, '');
   };
 
   const sanitizedUsername = sanitizeInput(username);
@@ -1994,6 +1999,229 @@ app.get('/api/avatar/:username', async (req, res) => {
   }
 });
 
+// Password reset token storage
+const RESET_TOKENS_DIR = path.join(__dirname, 'reset-tokens');
+
+// Ensure reset tokens directory exists
+async function ensureResetTokensDirectory() {
+  try {
+    await fs.mkdir(RESET_TOKENS_DIR, { recursive: true });
+  } catch (error) {
+    console.error('Failed to create reset tokens directory:', error);
+  }
+}
+
+ensureResetTokensDirectory();
+
+// Rate limiting for password reset attempts
+const resetAttempts = new Map();
+const RESET_RATE_LIMIT_WINDOW = 60 * 60 * 1000; // 1 hour
+const MAX_RESET_ATTEMPTS = 5; // 5 attempts per hour per IP
+
+// Forgot password endpoint
+app.post('/api/forgot-password', async (req, res) => {
+  const { email } = req.body;
+  const clientIP = req.ip || req.connection.remoteAddress;
+
+  if (!email) {
+    return res.status(400).json({ error: 'Email is required' });
+  }
+
+  // Rate limiting check
+  const now = Date.now();
+  const windowStart = now - RESET_RATE_LIMIT_WINDOW;
+
+  if (!resetAttempts.has(clientIP)) {
+    resetAttempts.set(clientIP, []);
+  }
+
+  const attempts = resetAttempts.get(clientIP);
+  const validAttempts = attempts.filter(time => time > windowStart);
+  resetAttempts.set(clientIP, validAttempts);
+
+  if (validAttempts.length >= MAX_RESET_ATTEMPTS) {
+    return res.status(429).json({ error: 'Too many reset attempts. Please try again later.' });
+  }
+
+  // Add current attempt
+  validAttempts.push(now);
+
+  try {
+    // Find user by email
+    const files = await fs.readdir(ACCOUNTS_DIR);
+    let userFile = null;
+    let username = null;
+    let userData = null;
+
+    for (const file of files) {
+      if (file.endsWith('.txt')) {
+        const filePath = path.join(ACCOUNTS_DIR, file);
+        const userDataStr = await fs.readFile(filePath, 'utf8');
+        const currentUserData = JSON.parse(userDataStr);
+        if (currentUserData.email === email) {
+          userFile = filePath;
+          username = currentUserData.username;
+          userData = currentUserData;
+          break;
+        }
+      }
+    }
+
+    if (!userFile) {
+      // Don't reveal if user exists or not for security
+      return res.json({ message: 'If the email exists, a reset link has been sent' });
+    }
+
+    // Generate crypto-strong token
+    const token = crypto.randomBytes(32).toString('hex');
+    const tokenHash = await argon2.hash(token, {
+      type: argon2.argon2id,
+      memoryCost: 2 ** 16, // 64 MB
+      timeCost: 3, // 3 iterations
+      parallelism: 1, // 1 thread
+      hashLength: 32 // 32 bytes
+    });
+
+    // Create reset token data
+    const resetTokenData = {
+      tokenHash,
+      email,
+      username,
+      createdAt: new Date().toISOString(),
+      expiresAt: new Date(Date.now() + 60 * 60 * 1000).toISOString() // 1 hour from now
+    };
+
+    // Save reset token
+    const tokenFile = path.join(RESET_TOKENS_DIR, `${tokenHash}.json`);
+    await fs.writeFile(tokenFile, JSON.stringify(resetTokenData, null, 2));
+
+    // Log the attempt
+    console.log(`Password reset requested for ${email} from IP ${clientIP}`);
+
+    // In a real implementation, you would send an email here
+    // For now, we'll return the token in the response for testing
+    // In production, you would use SendGrid/Mailgun to send the email
+
+    res.json({
+      message: 'Password reset link has been sent to your email',
+      token, // In production, remove this and send via email
+      tokenExpiry: '1 hour'
+    });
+
+  } catch (error) {
+    console.error('Error processing forgot password request:', error);
+    res.status(500).json({ error: 'Failed to process password reset request' });
+  }
+});
+
+// Reset password endpoint
+app.post('/api/reset-password', async (req, res) => {
+  const { token, newPassword } = req.body;
+  const clientIP = req.ip || req.connection.remoteAddress;
+
+  if (!token || !newPassword) {
+    return res.status(400).json({ error: 'Token and new password are required' });
+  }
+
+  if (newPassword.length < 8) {
+    return res.status(400).json({ error: 'New password must be at least 8 characters long' });
+  }
+
+  try {
+    // Find the token file
+    const files = await fs.readdir(RESET_TOKENS_DIR);
+    let tokenData = null;
+    let tokenFile = null;
+
+    for (const file of files) {
+      if (file.endsWith('.json')) {
+        const filePath = path.join(RESET_TOKENS_DIR, file);
+        const fileData = await fs.readFile(filePath, 'utf8');
+        const currentTokenData = JSON.parse(fileData);
+        
+        // Verify token
+        const isValid = await argon2.verify(currentTokenData.tokenHash, token);
+        if (isValid) {
+          tokenData = currentTokenData;
+          tokenFile = filePath;
+          break;
+        }
+      }
+    }
+
+    if (!tokenData) {
+      return res.status(400).json({ error: 'Invalid or expired token' });
+    }
+
+    // Check if token has expired
+    if (new Date(tokenData.expiresAt) < new Date()) {
+      return res.status(400).json({ error: 'Token has expired' });
+    }
+
+    // Find user file
+    const userFile = path.join(ACCOUNTS_DIR, `${tokenData.username}.txt`);
+    const userDataStr = await fs.readFile(userFile, 'utf8');
+    const userData = JSON.parse(userDataStr);
+
+    // Hash new password
+    const newPasswordHash = await argon2.hash(newPassword, {
+      type: argon2.argon2id,
+      memoryCost: 2 ** 16, // 64 MB
+      timeCost: 3, // 3 iterations
+      parallelism: 1, // 1 thread
+      hashLength: 32 // 32 bytes
+    });
+
+    // Update password
+    userData.passwordHash = newPasswordHash;
+    await fs.writeFile(userFile, JSON.stringify(userData, null, 2));
+
+    // Delete the used token
+    await fs.unlink(tokenFile);
+
+    // Log the successful reset
+    console.log(`Password reset successfully for ${tokenData.username} from IP ${clientIP}`);
+
+    res.json({ message: 'Password has been reset successfully' });
+
+  } catch (error) {
+    console.error('Error resetting password:', error);
+    if (error.code === 'ENOENT') {
+      return res.status(400).json({ error: 'Invalid or expired token' });
+    }
+    res.status(500).json({ error: 'Failed to reset password' });
+  }
+});
+
+// Cleanup expired tokens periodically
+async function cleanupExpiredTokens() {
+  try {
+    const files = await fs.readdir(RESET_TOKENS_DIR);
+    const now = new Date();
+    let deletedCount = 0;
+
+    for (const file of files) {
+      if (file.endsWith('.json')) {
+        const tokenPath = path.join(RESET_TOKENS_DIR, file);
+        const tokenDataStr = await fs.readFile(tokenPath, 'utf8');
+        const tokenData = JSON.parse(tokenDataStr);
+
+        if (new Date(tokenData.expiresAt) < now) {
+          await fs.unlink(tokenPath);
+          deletedCount++;
+        }
+      }
+    }
+
+    console.log(`Cleaned up ${deletedCount} expired reset tokens`);
+  } catch (error) {
+    console.error('Error cleaning up expired tokens:', error);
+  }
+}
+
+// Run cleanup every hour
+setInterval(cleanupExpiredTokens, 60 * 60 * 1000);
+
 // Check if we're running in production (Render) or development
 const isProduction = process.env.NODE_ENV === 'production';
 
@@ -2009,7 +2237,7 @@ if (isProduction) {
   // Get user points endpoint
   app.get('/api/profile/:username/points', async (req, res) => {
     const { username } = req.params;
-   
+    
     try {
       const profileFile = path.join(PROFILES_DIR, `${username}.json`);
       
@@ -2020,10 +2248,10 @@ if (isProduction) {
         console.error(`Profile not found for points: ${username}`);
         return res.status(404).json({ error: 'User profile not found' });
       }
-   
+    
       const profileStr = await fs.readFile(profileFile, 'utf8');
       const profileData = JSON.parse(profileStr);
-   
+    
       const points = profileData.profile?.points || 0;
       res.json({ points });
     } catch (error) {
