@@ -47,3 +47,24 @@
 .read-the-docs {
   color: #888;
 }
+
+@media (prefers-reduced-motion: reduce) {
+  .neon-title, .load-glitch, .points-reward-overlay, .points-toast, .logo {
+    animation: none !important;
+    transition: none !important;
+    will-change: auto !important;
+  }
+  .reward-particles .particle {
+    display: none !important;
+  }
+}
+
+/* Заменяем анимированные эффекты статическими неоновыми стилями по умолчанию */
+.neon-title {
+  color: #7ef9ff;
+  text-shadow: 0 0 8px rgba(126,249,255,0.6), 0 0 16px rgba(126,249,255,0.2);
+  transition: none !important;
+}
+.glitch-title::after, .glitch-title::before {
+  display: none !important;
+}
