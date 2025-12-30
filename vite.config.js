@@ -43,20 +43,44 @@ export default defineConfig(({ mode }) => ({
         chunkFileNames: 'assets/[name]-[hash].js',
         entryFileNames: 'assets/[name]-[hash].js',
         assetFileNames: 'assets/[name]-[hash].[ext]',
-        manualChunks: {
-          vendor: ['react', 'react-dom'],
-          router: ['react-router-dom'],
-          transformers: ['@xenova/transformers'],
-          // Разбиение основных модулей
-          pages: [
-            './src/pages/EnglishGrammar.jsx',
-            './src/pages/EnglishCoursesBeginner.jsx',
-            './src/pages/EnglishCoursesIntermediate.jsx',
-            './src/pages/EnglishCoursesAdvanced.jsx',
-            './src/pages/EnglishGrammarTest.jsx',
-            './src/pages/TestTaking.jsx',
-            './src/pages/TestCreator.jsx'
-          ]
+        manualChunks: (id) => {
+          // ОПТИМИЗАЦИЯ: более granular разбиение для лучшего code splitting
+          
+          // Выделяем vendor в отдельный чанк
+          if (id.includes('node_modules/react') && !id.includes('react-router')) {
+            return 'vendor-react';
+          }
+          if (id.includes('node_modules/react-router')) {
+            return 'vendor-router';
+          }
+          
+          // @xenova/transformers - отдельный lazy chunk
+          // Это 8+ МБ и должен загружаться только по необходимости
+          if (id.includes('@xenova/transformers')) {
+            return 'transformers';
+          }
+          
+          // Все страницы в отдельные chunks (уже используется lazy)
+          if (id.includes('/pages/')) {
+            const match = id.match(/\/pages\/([^\/]+)\.jsx?$/);
+            if (match) {
+              return `page-${match[1]}`;
+            }
+          }
+          
+          // Компоненты в отдельный чанк если тяжелые
+          if (id.includes('/components/') && (
+            id.includes('SmartMaterialViewer') ||
+            id.includes('ChatPanel') ||
+            id.includes('GraphExamples')
+          )) {
+            const match = id.match(/\/components\/([^\/]+)\.jsx?$/);
+            if (match) {
+              return `component-${match[1]}`;
+            }
+          }
+          
+          // Остальной код в main
         }
       }
     }

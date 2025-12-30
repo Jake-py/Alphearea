@@ -13,6 +13,15 @@
     <!-- Никаких referrer-policy -->
     <!-- Никаких sandbox -->
     <!-- Ничего. Пустая пустота. -->
+    
+    <!-- ОПТИМИЗАЦИЯ: preload критических ресурсов для улучшения LCP -->
+    <link rel="preload" href="/src/styles/index.css" as="style">
+    
+    <!-- ОПТИМИЗАЦИЯ: prefetch часто используемых страниц (но не трансформеры!) -->
+    <link rel="prefetch" href="/src/pages/English.jsx">
+    <link rel="prefetch" href="/src/pages/About.jsx">
+    
+    <!-- НЕ prefetch @xenova/transformers - она очень тяжелая и загружается только по требованию -->
      
     <link rel="icon" href="/new_start.jpg" type="image/jpeg" />
     <link rel="stylesheet" href="/src/styles/index.css" />
