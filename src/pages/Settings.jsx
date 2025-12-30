@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import '../styles/settings.css'
 
 // Progress Chart Component
@@ -63,7 +64,7 @@ function History({ history }) {
 
   return (
     <div className="activity-section">
-      <h3>Недавняя активность</h3>
+      <h3>{t('history.recentActivity')}</h3>
       {history && history.length > 0 ? (
         <div className="activity-list">
           {history.slice(0, 10).map((item, index) => (
@@ -82,16 +83,16 @@ function History({ history }) {
                   {item.type === 'test' && (
                     <>
                       <span className="subject-tag">{item.subject}</span>
-                      <span className="score-display">Результат: {item.score}%</span>
+                      <span className="score-display">{t('history.result')}: {item.score}%</span>
                       <span className="time-display">
-                        Время: {Math.floor(item.timeSpent / 60)}:{(item.timeSpent % 60).toString().padStart(2, '0')}
+                        {t('history.time')}: {Math.floor(item.timeSpent / 60)}:{(item.timeSpent % 60).toString().padStart(2, '0')}
                       </span>
                     </>
                   )}
                   {item.type === 'material' && (
                     <>
                       <span className="subject-tag">{item.subject}</span>
-                      <span className="action-display">{item.action === 'view' ? 'Просмотрено' : 'Завершено'}</span>
+                      <span className="action-display">{item.action === 'view' ? t('history.viewed') : t('history.completed')}</span>
                     </>
                   )}
                 </div>
@@ -100,13 +101,14 @@ function History({ history }) {
           ))}
         </div>
       ) : (
-        <p className="no-activity">Активность отсутствует.</p>
+        <p className="no-activity">{t('history.noActivity')}</p>
       )}
     </div>
   )
 }
 
 function Settings() {
+  const { t } = useTranslation();
   const [user, setUser] = useState({
     username: '',
     email: '',
@@ -165,23 +167,23 @@ function Settings() {
         {/* User Profile Section */}
         <div className="profile-section">
           <div className="profile-header">
-            <img 
-              src={user.avatar} 
-              alt="Avatar" 
+            <img
+              src={user.avatar}
+              alt="Avatar"
               className="profile-avatar"
               onError={(e) => { e.target.src = '/def_ava.jpg' }}
             />
             <div className="profile-info">
               <h2>{user.username}</h2>
               <p>{user.email}</p>
-              <p>Уровень: {user.level} | XP: {user.xp}</p>
-              <p>Присоединился: {new Date(user.joinDate).toLocaleDateString('ru-RU')}</p>
+              <p>{t('settings.level')}: {user.level} | {t('settings.xp')}: {user.xp}</p>
+              <p>{t('settings.joined')}: {new Date(user.joinDate).toLocaleDateString('ru-RU')}</p>
             </div>
           </div>
 
           {/* Achievements */}
           <div className="achievements-section">
-            <h3>Достижения</h3>
+            <h3>{t('settings.achievements')}</h3>
             <div className="achievements-list">
               {user.achievements.map((achievement, index) => (
                 <span key={index} className="achievement-badge">{achievement}</span>
@@ -194,15 +196,15 @@ function Settings() {
         <div className="settings-buttons">
           <Link to="/settings/account" className="settings-button">
             <span className="button-icon">👤</span>
-            Настройка аккаунта
+            {t('settings.accountSettings')}
           </Link>
           <Link to="/settings/privacy" className="settings-button">
             <span className="button-icon">🔒</span>
-            Конфиденциальность
+            {t('settings.privacySettings')}
           </Link>
           <Link to="/settings/site" className="settings-button">
             <span className="button-icon">⚙️</span>
-            Настройка сайта
+            {t('settings.siteSettings')}
           </Link>
         </div>
 
@@ -211,7 +213,7 @@ function Settings() {
           <div
           style={{ marginTop: '20px' }}
           className="progress-section">
-            <h3>Прогресс обучения</h3>
+            <h3>{t('settings.progress')}</h3>
             <ProgressChart
               subjects={profileData.progress || {}}
               customSubjects={profileData.customSubjects || []}
@@ -224,7 +226,10 @@ function Settings() {
         )}
 
         {/* Recent Activity */}
-        <History history={history} />
+        <div className="activity-section">
+          <h3>{t('settings.activity')}</h3>
+          <History history={history} />
+        </div>
       </div>
     </main>
   )

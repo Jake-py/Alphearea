@@ -1,0 +1,89 @@
+{
+  "settings": {
+    "title": "Settings",
+    "accountSettings": "Account Settings",
+    "privacySettings": "Privacy Settings",
+    "siteSettings": "Site Settings",
+    "language": "Interface Language",
+    "achievements": "Achievements",
+    "progress": "Learning Progress",
+    "activity": "Recent Activity",
+    "level": "Level",
+    "xp": "XP",
+    "joined": "Joined"
+  },
+  "accountSettings": {
+    "title": "Account Settings",
+    "profile": "Profile",
+    "progress": "Progress",
+    "achievements": "Achievements",
+    "history": "History",
+    "avatar": "Avatar",
+    "basicInfo": "Basic Information",
+    "username": "Username",
+    "email": "Email",
+    "phone": "Phone Number",
+    "firstName": "First Name",
+    "lastName": "Last Name",
+    "nickname": "Nickname",
+    "dateOfBirth": "Date of Birth",
+    "changePassword": "Change Password",
+    "currentPassword": "Current Password",
+    "newPassword": "New Password",
+    "confirmPassword": "Confirm New Password",
+    "security": "Security",
+    "twoFactorAuth": "Enable Two-Factor Authentication",
+    "language": "Interface Language",
+    "accountManagement": "Account Management",
+    "exportData": "Export Data",
+    "deleteAccount": "Delete Account",
+    "saveChanges": "Save Changes",
+    "cancel": "Cancel"
+  },
+  "siteSettings": {
+    "title": "Site Settings",
+    "language": "Interface Language",
+    "selectLanguage": "Select Language"
+  },
+  "common": {
+    "welcome": "Welcome",
+    "home": "Home",
+    "about": "About",
+    "contact": "Contact"
+  },
+  "main": {
+    "welcome": "Welcome to Alphearea!",
+    "description": "Modern educational platform for effective learning",
+    "learn": "Learn English, Korean and Russian languages, mathematics, programming and more. Earn points for learning, track your progress and achieve achievements!",
+    "startLearning": "Start Learning",
+    "languagesTitle": "3 Languages",
+    "languagesDescription": "English, Korean and Russian with interactive tests",
+    "mathTitle": "Mathematics & Science",
+    "mathDescription": "From basic calculations to advanced programming",
+    "aiTitle": "AI Assistant",
+    "aiDescription": "Gemini-based assistant for personalized learning",
+    "stats": {
+      "students": "Active Students",
+      "courses": "Courses",
+      "success": "Success Rate"
+    }
+  },
+  "history": {
+    "recentActivity": "Recent Activity",
+    "noActivity": "No activity yet.",
+    "viewed": "Viewed",
+    "completed": "Completed",
+    "result": "Result",
+    "time": "Time"
+  },
+  "header": {
+    "home": "Home",
+    "settings": "Settings",
+    "about": "About",
+    "aiAssistant": "AI Assistant"
+  },
+  "auth": {
+    "logout": "Logout",
+    "loginRegister": "Login / Register"
+  }
+}

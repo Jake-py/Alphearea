@@ -1,0 +1,89 @@
+{
+  "settings": {
+    "title": "Настройки",
+    "accountSettings": "Настройка аккаунта",
+    "privacySettings": "Конфиденциальность",
+    "siteSettings": "Настройка сайта",
+    "language": "Язык интерфейса",
+    "achievements": "Достижения",
+    "progress": "Прогресс обучения",
+    "activity": "Недавняя активность",
+    "level": "Уровень",
+    "xp": "XP",
+    "joined": "Присоединился"
+  },
+  "accountSettings": {
+    "title": "Настройка аккаунта",
+    "profile": "Профиль",
+    "progress": "Прогресс",
+    "achievements": "Достижения",
+    "history": "История",
+    "avatar": "Аватар",
+    "basicInfo": "Основная информация",
+    "username": "Имя пользователя",
+    "email": "Email",
+    "phone": "Номер телефона",
+    "firstName": "Имя",
+    "lastName": "Фамилия",
+    "nickname": "Nickname",
+    "dateOfBirth": "Дата рождения",
+    "changePassword": "Изменить пароль",
+    "currentPassword": "Текущий пароль",
+    "newPassword": "Новый пароль",
+    "confirmPassword": "Подтвердите новый пароль",
+    "security": "Безопасность",
+    "twoFactorAuth": "Включить двухфакторную аутентификацию",
+    "language": "Язык интерфейса",
+    "accountManagement": "Управление аккаунтом",
+    "exportData": "Экспортировать данные",
+    "deleteAccount": "Удалить аккаунт",
+    "saveChanges": "Сохранить изменения",
+    "cancel": "Отмена"
+  },
+  "siteSettings": {
+    "title": "Настройка сайта",
+    "language": "Язык интерфейса",
+    "selectLanguage": "Выберите язык"
+  },
+  "common": {
+    "welcome": "Добро пожаловать",
+    "home": "Главная",
+    "about": "О нас",
+    "contact": "Контакты"
+  },
+  "main": {
+    "welcome": "Добро пожаловать в Alphearea!",
+    "description": "Современная образовательная платформа для эффективного обучения",
+    "learn": "Изучайте английский, корейский и русский языки, математику, программирование и многое другое. Зарабатывайте points за обучение, отслеживайте свой прогресс и получайте достижения!",
+    "startLearning": "Начать обучение",
+    "languagesTitle": "3 языка",
+    "languagesDescription": "Английский, корейский и русский с интерактивными тестами",
+    "mathTitle": "Математика & Наука",
+    "mathDescription": "От базовых вычислений до продвинутого программирования",
+    "aiTitle": "ИИ-ассистент",
+    "aiDescription": "Помощник на основе Gemini для персонального обучения",
+    "stats": {
+      "students": "Активных студентов",
+      "courses": "Курсов",
+      "success": "Успешность"
+    }
+  },
+  "history": {
+    "recentActivity": "Недавняя активность",
+    "noActivity": "Активность отсутствует.",
+    "viewed": "Просмотрено",
+    "completed": "Завершено",
+    "result": "Результат",
+    "time": "Время"
+  },
+  "header": {
+    "home": "Главная",
+    "settings": "Настройки",
+    "about": "О сайте",
+    "aiAssistant": "Ассистент ИИ"
+  },
+  "auth": {
+    "logout": "Выйти",
+    "loginRegister": "Войти / Регистрация"
+  }
+}

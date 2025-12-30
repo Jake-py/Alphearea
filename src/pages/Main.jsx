@@ -1,9 +1,11 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { usePoints } from '../hooks/usePoints';
 import { heavyAnimationsEnabled } from '../config/animations';
 
 const Main = () => {
-  const [points, setPoints] = useState(30);
+  const { t } = useTranslation();
+  const [points, setPoints] = useState(0);
 
   useEffect(() => {
     // Просто показываем статичное значение
@@ -37,8 +39,7 @@ const Main = () => {
           </p>
 
           <p className="text-lg text-gray-300 mb-12 max-w-3xl mx-auto leading-relaxed">
-            Изучайте английский, корейский и русский языки, математику, программирование и многое другое.
-            Зарабатывайте points за обучение, отслеживайте свой прогресс и получайте достижения!
+            {t('main.learn')}
           </p>
 
           {/* CTA Button */}
@@ -52,22 +53,22 @@ const Main = () => {
             {/* Card 1 */}
             <div className="feature-card group">
               <div className="text-4xl mb-2">🌍</div>
-              <h3 className="text-xl font-bold mb-2 text-cyan-400">3 языка</h3>
-              <p className="text-gray-300 text-sm">Английский, корейский и русский с интерактивными тестами</p>
+              <h3 className="text-xl font-bold mb-2 text-cyan-400">{t('main.languagesTitle')}</h3>
+              <p className="text-gray-300 text-sm">{t('main.languagesDescription')}</p>
             </div>
 
             {/* Card 2 */}
             <div className="feature-card group">
               <div className="text-4xl mb-2">🧮</div>
-              <h3 className="text-xl font-bold mb-2 text-purple-400">Математика & Наука</h3>
-              <p className="text-gray-300 text-sm">От базовых вычислений до продвинутого программирования</p>
+              <h3 className="text-xl font-bold mb-2 text-purple-400">{t('main.mathTitle')}</h3>
+              <p className="text-gray-300 text-sm">{t('main.mathDescription')}</p>
             </div>
 
             {/* Card 3 */}
             <div className="feature-card group">
               <div className="text-4xl mb-2">🤖</div>
-              <h3 className="text-xl font-bold mb-2 text-pink-400">ИИ-ассистент</h3>
-              <p className="text-gray-300 text-sm">Помощник на основе Gemini для персонального обучения</p>
+              <h3 className="text-xl font-bold mb-2 text-pink-400">{t('main.aiTitle')}</h3>
+              <p className="text-gray-300 text-sm">{t('main.aiDescription')}</p>
             </div>
           </div>
 
