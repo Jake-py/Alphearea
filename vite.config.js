@@ -46,7 +46,17 @@ export default defineConfig(({ mode }) => ({
         manualChunks: {
           vendor: ['react', 'react-dom'],
           router: ['react-router-dom'],
-          transformers: ['@xenova/transformers']
+          transformers: ['@xenova/transformers'],
+          // Разбиение основных модулей
+          pages: [
+            './src/pages/EnglishGrammar.jsx',
+            './src/pages/EnglishCoursesBeginner.jsx',
+            './src/pages/EnglishCoursesIntermediate.jsx',
+            './src/pages/EnglishCoursesAdvanced.jsx',
+            './src/pages/EnglishGrammarTest.jsx',
+            './src/pages/TestTaking.jsx',
+            './src/pages/TestCreator.jsx'
+          ]
         }
       }
     }

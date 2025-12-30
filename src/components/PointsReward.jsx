@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import '../styles/pointsReward.css';
 import { heavyAnimationsEnabled } from '../config/animations';
 
@@ -94,4 +94,9 @@ export function PointsToast({ message, points, isVisible, type = 'success' }) {
   );
 }
 
-export default PointsReward;
+// Оптимизация: мемоизируем компоненты для предотвращения ненужных ре-рендеров
+const MemoizedPointsReward = React.memo(PointsReward);
+const MemoizedPointsToast = React.memo(PointsToast);
+
+export default MemoizedPointsReward;
+export { MemoizedPointsToast };

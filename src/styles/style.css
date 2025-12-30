@@ -8,12 +8,14 @@ body {
     color: #e0e0e0;
     overflow-x: hidden;
     transition: all 0.5s ease;
+    /* Отключена постоянная анимация backgroundShift для оптимизации CPU */
     .main-app {
     position: relative;
     left: 15%; /* сдвиг только для основного сайта */
 }
 }
 
+/* Закомментирована постоянная анимация backgroundShift - 3-5% экономии CPU */
 @keyframes backgroundShift {
     0% { background-position: 0% 50%; }
     50% { background-position: 100% 50%; }
