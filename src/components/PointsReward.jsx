@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import '../styles/pointsReward.css';
+import { heavyAnimationsEnabled } from '../config/animations';
 
 /**
  * Компонент анимированной награды за points
@@ -17,7 +18,6 @@ export function PointsReward({
   useEffect(() => {
     if (isVisible) {
       setIsAnimating(true);
-      
       // Автоматически скрываем через 3 секунды
       const timer = setTimeout(() => {
         setIsAnimating(false);
@@ -32,14 +32,17 @@ export function PointsReward({
 
   if (!isVisible && !isAnimating) return null;
 
+  const enabled = heavyAnimationsEnabled();
+  const particleCount = enabled ? 12 : 4;
+
   return (
     <div className={`points-reward-overlay ${isAnimating ? 'show' : 'hide'}`}>
       <div className={`points-reward-modal ${animationType}`}>
         <div className="reward-particles">
-          {[...Array(12)].map((_, i) => (
+          {[...Array(particleCount)].map((_, i) => (
             <div key={i} className="particle" style={{
               '--delay': `${i * 0.1}s`,
-              '--duration': `${2 + Math.random() * 1}s`
+              '--duration': `${1 + Math.random() * 1}s`
             }}></div>
           ))}
         </div>

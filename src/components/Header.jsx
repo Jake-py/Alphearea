@@ -6,7 +6,7 @@ import NeonTitle from './NeonTitle.jsx'
 import PointsCounter from './PointsCounter.jsx'
 import AuthButtons from './AuthButtons.jsx'
 import useUser from '../hooks/useUser'
-import gsap from 'gsap'
+import { heavyAnimationsEnabled } from '../config/animations'
 
 function Header({ onOpenChat, onToggleSidebar }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
@@ -20,13 +20,15 @@ function Header({ onOpenChat, onToggleSidebar }) {
 
   // Простая анимация при наведении для кнопок
   const animateButtonHover = (button, isHover) => {
-    if (button) {
-      gsap.to(button, {
-        scale: isHover ? 1.05 : 1,
-        duration: 0.2,
-        ease: 'power2.out'
-      })
+    if (!button) return;
+    const enabled = heavyAnimationsEnabled();
+    if (enabled) {
+      // лёгкая трансформация
+      button.style.transform = isHover ? 'scale(1.05)' : 'scale(1)'
+    } else {
+      button.style.transform = isHover ? 'scale(1.02)' : 'scale(1)'
     }
+    button.style.transition = 'transform 0.2s ease';
   }
 
   // Простая подсветка навигационных ссылок при наведении
@@ -110,20 +112,13 @@ function Header({ onOpenChat, onToggleSidebar }) {
               onClick={onOpenChat}
               className="ai-button"
               onMouseEnter={(e) => {
-                animateButtonHover(e.currentTarget, true)
-                gsap.to(e.currentTarget, {
-                  boxShadow: '0 0 15px rgba(79, 195, 247, 0.6)',
-                  duration: 0.3,
-                  ease: 'power2.out'
-                })
+                        animateButtonHover(e.currentTarget, true)
+                        const enabled = heavyAnimationsEnabled();
+                        e.currentTarget.style.boxShadow = enabled ? '0 0 10px rgba(79,195,247,0.6)' : 'none'
               }}
               onMouseLeave={(e) => {
-                animateButtonHover(e.currentTarget, false)
-                gsap.to(e.currentTarget, {
-                  boxShadow: '0 0 5px rgba(79, 195, 247, 0.3)',
-                  duration: 0.3,
-                  ease: 'power2.out'
-                })
+                        animateButtonHover(e.currentTarget, false)
+                        e.currentTarget.style.boxShadow = 'none'
               }}
             >
               Ассистент ИИ

@@ -1,8 +1,11 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
+import { heavyAnimationsEnabled } from '../config/animations'
 
 function NeonTitle({ tag = 'h1' }) {
   const [animationState, setAnimationState] = useState(0)
   const [loadGlitch, setLoadGlitch] = useState(true)
+  const ref = useRef(null)
+  const enabled = heavyAnimationsEnabled();
 
   useEffect(() => {
     // Load glitch effect
@@ -11,25 +14,32 @@ function NeonTitle({ tag = 'h1' }) {
   }, [])
 
   useEffect(() => {
-  let animationFrameId;
-  let lastTime = performance.now();
+    if (!enabled) return; // respects prefers-reduced-motion and flag
 
-  const update = (now) => {
-    if (now - lastTime >= 800) { // интервал 800ms
-      setAnimationState(prev => (prev + 1) % 4);
-      lastTime = now;
-    }
+    let animationFrameId;
+    let lastTime = performance.now();
+    let paused = false;
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(e => { paused = !e.isIntersecting; });
+    }, { threshold: 0.1 });
+    if (ref.current) observer.observe(ref.current);
+
+    const update = (now) => {
+      if (!paused && now - lastTime >= 800) {
+        setAnimationState(prev => (prev + 1) % 4);
+        lastTime = now;
+      }
+      animationFrameId = requestAnimationFrame(update);
+    };
+
     animationFrameId = requestAnimationFrame(update);
-  };
 
-  animationFrameId = requestAnimationFrame(update);
-
-  return () => {
-    if (animationFrameId) {
-      window.cancelAnimationFrame(animationFrameId);
-    }
-  };
-}, []);
+    return () => {
+      if (animationFrameId) cancelAnimationFrame(animationFrameId);
+      if (ref.current) observer.disconnect();
+    };
+  }, [enabled]);
 
 
   const Tag = tag
