@@ -6,27 +6,30 @@ import translationEN from './locales/en.json';
 import translationRU from './locales/ru.json';
 
 const resources = {
-  en: {
-    translation: translationEN
-  },
-  ru: {
-    translation: translationRU
-  }
+  en: { translation: translationEN },
+  ru: { translation: translationRU }
 };
 
-i18n
-  .use(LanguageDetector)
-  .use(initReactI18next)
-  .init({
-    resources,
-    fallbackLng: 'ru',
-    detection: {
-      order: ['localStorage', 'navigator'],
-      caches: ['localStorage']
-    },
-    interpolation: {
-      escapeValue: false
-    }
-  });
+export function initI18n() {
+  // Check if already initialized to prevent double-initialization
+  if (i18n.isInitialized) return i18n;
+
+  i18n
+    .use(LanguageDetector)
+    .use(initReactI18next)
+    .init({
+      resources,
+      fallbackLng: 'ru',
+      detection: {
+        order: ['localStorage', 'navigator'],
+        caches: ['localStorage']
+      },
+      interpolation: {
+        escapeValue: false
+      }
+    });
+
+  return i18n;
+}
 
 export default i18n;

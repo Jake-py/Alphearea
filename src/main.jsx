@@ -4,6 +4,10 @@ import App from "./App.jsx";
 import AuthProvider from "./components/AuthManager";
 import "./styles/style.css";
 import { heavyAnimationsEnabled } from './config/animations';
+import { initI18n } from './i18n.js';
+
+// Initialize i18n BEFORE rendering to avoid circular dependency issues
+initI18n();
 
 // По умолчанию отключаем тяжёлые анимации. Включить можно через localStorage.setItem('enableHeavyAnimations','1')
 try {

@@ -623,7 +623,7 @@ function AccountSettings() {
                     }
 
                     const reader = new FileReader()
-                    reader.onload = (e) => setFormData({...formData, avatar: e.target.result})
+                    reader.onload = (event) => setFormData({...formData, avatar: event.target.result})
                     reader.readAsDataURL(file)
                   }
                 }}
