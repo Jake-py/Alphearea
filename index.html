@@ -14,8 +14,16 @@
     <!-- Никаких sandbox -->
     <!-- Ничего. Пустая пустота. -->
     
-    <!-- ОПТИМИЗАЦИЯ: preload критических ресурсов для улучшения LCP -->
+    <!-- ОПТИМИЗАЦИЯ: preconnect к бэкенд домену -->
+    <link rel="preconnect" href="https://alphearea-b.onrender.com">
+    <link rel="dns-prefetch" href="https://alphearea-b.onrender.com">
+    
+    <!-- ОПТИМИЗАЦИЯ: preload критических стилей для LCP -->
     <link rel="preload" href="/src/styles/index.css" as="style">
+    
+    <!-- ОПТИМИЗАЦИЯ: async загрузка некритических CSS через onload -->
+    <link rel="preload" href="/src/styles/settings.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="/src/styles/settings.css"></noscript>
     
     <!-- ОПТИМИЗАЦИЯ: prefetch часто используемых страниц (но не трансформеры!) -->
     <link rel="prefetch" href="/src/pages/English.jsx">
