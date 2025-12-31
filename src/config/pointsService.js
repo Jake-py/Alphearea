@@ -121,6 +121,15 @@ export class PointsService {
    * @returns {object} {success: boolean, points: number, message: string}
    */
   async awardPoints(userId, type, contentId, difficulty = 'beginner') {
+    // Не допускаем points для гостей
+    if (!userId || userId === 'guest') {
+      return {
+        success: false,
+        points: 0,
+        message: 'Необходимо авторизоваться для получения points'
+      };
+    }
+
     // Проверка на повторное прохождение
     if (this.tracker.isActivityCompleted(type, contentId, userId)) {
       return {
@@ -195,7 +204,7 @@ export class PointsService {
    * Получает текущий баланс points пользователя
    */
   async getUserPoints(userId) {
-    if (!userId) {
+    if (!userId || userId === 'guest') {
       return 0;
     }
 

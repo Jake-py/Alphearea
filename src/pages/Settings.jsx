@@ -57,6 +57,7 @@ function ProgressChart({ subjects, customSubjects }) {
 
 // History Component
 function History({ history }) {
+  const { t } = useTranslation();
   const historyIcons = {
     test: '📝',
     material: '📖'
