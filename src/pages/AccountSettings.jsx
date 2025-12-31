@@ -799,7 +799,6 @@ function AccountSettings() {
                 className="form-select"
               >
                 <option value="ru">Русский</option>
-                <option value="en">English</option>
               </select>
             </div>
           </div>
