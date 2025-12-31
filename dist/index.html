@@ -13,14 +13,42 @@
     <!-- Никаких referrer-policy -->
     <!-- Никаких sandbox -->
     <!-- Ничего. Пустая пустота. -->
+    
+    <!-- ОПТИМИЗАЦИЯ: preload критических ресурсов для улучшения LCP -->
+    
+    <!-- ОПТИМИЗАЦИЯ: prefetch часто используемых страниц (но не трансформеры!) -->
+    <link rel="prefetch" href="data:text/jsx;base64,aW1wb3J0IHsgTGluayB9IGZyb20gJ3JlYWN0LXJvdXRlci1kb20nCmltcG9ydCB7IFBvaW50c0luZm8gfSBmcm9tICcuLi9jb21wb25lbnRzL1BvaW50c05vdGlmaWNhdGlvbicKaW1wb3J0IHVzZVBvaW50cyBmcm9tICcuLi9ob29rcy91c2VQb2ludHMnCgpmdW5jdGlvbiBFbmdsaXNoKCkgewogIGNvbnN0IHVzZXJuYW1lID0gSlNPTi5wYXJzZShsb2NhbFN0b3JhZ2UuZ2V0SXRlbSgndXNlcicpIHx8ICd7fScpLnVzZXJuYW1lIHx8ICd1c2VyJwogIGNvbnN0IHsgcG9pbnRzIH0gPSB1c2VQb2ludHModXNlcm5hbWUpCgogIHJldHVybiAoCiAgICA8bWFpbj4KICAgICAgPGgyPtCQ0L3Qs9C70LjQudGB0LrQuNC5INGP0LfRi9C6PC9oMj4KICAgICAgCiAgICAgIDxQb2ludHNJbmZvIAogICAgICAgIGN1cnJlbnRQb2ludHM9e3BvaW50c30KICAgICAgICBwb2ludHNGb3JDb21wbGV0aW9uPXsxMH0KICAgICAgICBkZXNjcmlwdGlvbj0i0J/QvtC70YPRh9Cw0LnRgtC1IHBvaW50cyDQv9GA0Lgg0L/RgNC+0YXQvtC20LTQtdC90LjQuCDRg9GA0L7QutC+0LIsINCy0YvQv9C+0LvQvdC10L3QuNC4INGC0LXRgdGC0L7QsiDQuCDQt9Cw0LLQtdGA0YjQtdC90LjQuCDQutGD0YDRgdC+0LIiCiAgICAgIC8+CgogICAgICA8ZGl2IGNsYXNzTmFtZT0ic3ViamVjdC1ibG9ja3MiPgogICAgICAgIDxkaXYgY2xhc3NOYW1lPSJibG9jayI+CiAgICAgICAgICA8aDM+0JPRgNCw0LzQvNCw0YLQuNC60LA8L2gzPgogICAgICAgICAgPHA+0JjQt9GD0YfQuNGC0LUg0L/RgNCw0LLQuNC70LAg0LDQvdCz0LvQuNC50YHQutC+0Lkg0LPRgNCw0LzQvNCw0YLQuNC60Lg8L3A+CiAgICAgICAgICA8TGluayB0bz0iL2VuZ2xpc2gvZ3JhbW1hciIgY2xhc3NOYW1lPSJibG9jay1saW5rIj7Qn9C10YDQtdC50YLQuDwvTGluaz4KICAgICAgICA8L2Rpdj4KICAgICAgICA8ZGl2IGNsYXNzTmFtZT0iYmxvY2siPgogICAgICAgICAgPGgzPtCU0LjQsNC70L7Qs9C4PC9oMz4KICAgICAgICAgIDxwPtCf0YDQsNC60YLQuNC60LAg0YDQsNC30LPQvtCy0L7RgNC90L7Qs9C+INCw0L3Qs9C70LjQudGB0LrQvtCz0L48L3A+CiAgICAgICAgICA8TGluayB0bz0iL2VuZ2xpc2gvZGlhbG9ndWVzIiBjbGFzc05hbWU9ImJsb2NrLWxpbmsiPtCf0LXRgNC10LnRgtC4PC9MaW5rPgogICAgICAgIDwvZGl2PgogICAgICAgIDxkaXYgY2xhc3NOYW1lPSJibG9jayI+CiAgICAgICAgICA8aDM+0KHQu9C+0LLQsNGA0Yw8L2gzPgogICAgICAgICAgPHA+0KDQsNGB0YjQuNGA0YzRgtC1INGB0LLQvtC5INGB0LvQvtCy0LDRgNC90YvQuSDQt9Cw0L/QsNGBPC9wPgogICAgICAgICAgPGRpdiBjbGFzc05hbWU9InN1Yi1ibG9ja3MiPgogICAgICAgICAgICA8TGluayB0bz0iL2VuZ2xpc2gvZGljdGlvbmFyeS9iYXNpYyIgY2xhc3NOYW1lPSJzdWItYmxvY2siPtCR0LDQt9C+0LLRi9C5PC9MaW5rPgogICAgICAgICAgICA8TGluayB0bz0iL2VuZ2xpc2gvZGljdGlvbmFyeS9pZGlvbXMiIGNsYXNzTmFtZT0ic3ViLWJsb2NrIj7QmNC00LjQvtC80Ys8L0xpbms+CiAgICAgICAgICAgIDxMaW5rIHRvPSIvZW5nbGlzaC9kaWN0aW9uYXJ5L3BocmFzYWwtdmVyYnMiIGNsYXNzTmFtZT0ic3ViLWJsb2NrIj7QpNGA0LDQt9C+0LLRi9C1INCz0LvQsNCz0L7Qu9GLPC9MaW5rPgogICAgICAgICAgPC9kaXY+CiAgICAgICAgPC9kaXY+CiAgICAgICAgPGRpdiBjbGFzc05hbWU9ImJsb2NrIj4KICAgICAgICAgIDxoMz7QmtGD0YDRgdGLPC9oMz4KICAgICAgICAgIDxwPtCh0YLRgNGD0LrRgtGD0YDQuNGA0L7QstCw0L3QvdC+0LUg0L7QsdGD0YfQtdC90LjQtTwvcD4KICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPSJzdWItYmxvY2tzIj4KICAgICAgICAgICAgPExpbmsgdG89Ii9lbmdsaXNoL2NvdXJzZXMvYmVnaW5uZXIiIGNsYXNzTmFtZT0ic3ViLWJsb2NrIj7QndCw0YfQuNC90LDRjtGJ0LjQuTwvTGluaz4KICAgICAgICAgICAgPExpbmsgdG89Ii9lbmdsaXNoL2NvdXJzZXMvaW50ZXJtZWRpYXRlIiBjbGFzc05hbWU9InN1Yi1ibG9jayI+0KHRgNC10LTQvdC40Lk8L0xpbms+CiAgICAgICAgICAgIDxMaW5rIHRvPSIvZW5nbGlzaC9jb3Vyc2VzL2FkdmFuY2VkIiBjbGFzc05hbWU9InN1Yi1ibG9jayI+0J/RgNC+0LTQstC40L3Rg9GC0YvQuTwvTGluaz4KICAgICAgICAgIDwvZGl2PgogICAgICAgIDwvZGl2PgogICAgICAgIDxkaXYgY2xhc3NOYW1lPSJibG9jayI+CiAgICAgICAgICA8aDM+0JzQsNGC0LXRgNC40LDQu9GLPC9oMz4KICAgICAgICAgIDxwPtCk0LDQudC70Ysg0Lgg0LTQvtC60YPQvNC10L3RgtGLINC00LvRjyDQuNC30YPRh9C10L3QuNGPPC9wPgogICAgICAgICAgPExpbmsgdG89Ii9lbmdsaXNoL21hdGVyaWFscyIgY2xhc3NOYW1lPSJibG9jay1saW5rIj7Qn9C10YDQtdC50YLQuDwvTGluaz4KICAgICAgICA8L2Rpdj4KICAgICAgPC9kaXY+CiAgICA8L21haW4+CiAgKQp9CgpleHBvcnQgZGVmYXVsdCBFbmdsaXNoCg==">
+    <link rel="prefetch" href="/assets/About-CTqSpofZ.jsx">
+    
+    <!-- НЕ prefetch @xenova/transformers - она очень тяжелая и загружается только по требованию -->
      
     <link rel="icon" href="/assets/new_start-DtangQLH.jpg" type="image/jpeg" />
-    <script type="module" crossorigin src="/assets/index-nRUUbHJU.js"></script>
-    <link rel="modulepreload" crossorigin href="/assets/vendor-_g6xLlVr.js">
-    <link rel="modulepreload" crossorigin href="/assets/router-BWKqhXYQ.js">
-    <link rel="modulepreload" crossorigin href="/assets/pages-Cq9sKfXq.js">
-    <link rel="stylesheet" crossorigin href="/assets/pages-C9BtWoL-.css">
-    <link rel="stylesheet" crossorigin href="/assets/index-M2nYtz0a.css">
+    <script type="module" crossorigin src="/assets/index-D7NKSy8k.js"></script>
+    <link rel="modulepreload" crossorigin href="/assets/page-AccountSettings-6HEqmLA-.js">
+    <link rel="modulepreload" crossorigin href="/assets/vendor-react-DsU51KQz.js">
+    <link rel="modulepreload" crossorigin href="/assets/vendor-router-D5120pCp.js">
+    <link rel="modulepreload" crossorigin href="/assets/page-Achievements-DYGS-PvY.js">
+    <link rel="modulepreload" crossorigin href="/assets/page-Electronics-54sCRsx1.js">
+    <link rel="modulepreload" crossorigin href="/assets/page-EnglishGrammar-DigHGR6v.js">
+    <link rel="modulepreload" crossorigin href="/assets/page-EnglishGrammarTest-DQGpVEr7.js">
+    <link rel="modulepreload" crossorigin href="/assets/page-Main-CuBfma3X.js">
+    <link rel="modulepreload" crossorigin href="/assets/page-English-KfYMqkEo.js">
+    <link rel="modulepreload" crossorigin href="/assets/page-Korean-DQ12NSJT.js">
+    <link rel="modulepreload" crossorigin href="/assets/page-Russian-Co4QEmAF.js">
+    <link rel="modulepreload" crossorigin href="/assets/page-Philosophy-1MZFcOgF.js">
+    <link rel="modulepreload" crossorigin href="/assets/page-Psychology-BWIVFgeq.js">
+    <link rel="modulepreload" crossorigin href="/assets/page-Settings-BneIxWwa.js">
+    <link rel="modulepreload" crossorigin href="/assets/page-About-Xph-XDwJ.js">
+    <link rel="modulepreload" crossorigin href="/assets/component-ChatPanel-CghNN7NX.js">
+    <link rel="modulepreload" crossorigin href="/assets/page-Mathematics-BkKmVOaC.js">
+    <link rel="stylesheet" crossorigin href="/assets/page-AccountSettings-Ch4EHWo2.css">
+    <link rel="stylesheet" crossorigin href="/assets/page-Achievements-koYXvfOH.css">
+    <link rel="stylesheet" crossorigin href="/assets/page-Electronics-B2gLIKFw.css">
+    <link rel="stylesheet" crossorigin href="/assets/page-EnglishGrammar-C3w-wzAZ.css">
+    <link rel="stylesheet" crossorigin href="/assets/page-EnglishGrammarTest-DpFgl_7s.css">
+    <link rel="stylesheet" crossorigin href="/assets/component-ChatPanel-Bc9l26y0.css">
+    <link rel="stylesheet" crossorigin href="/assets/page-Mathematics-CI93WXgC.css">
+    <link rel="stylesheet" crossorigin href="/assets/index-jsXeqG4n.css">
   </head>
   <body>
     <div id="root"></div>
